@@ -1,0 +1,95 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="/css/bootstrap.min.css">
+        <title>Mastodon instances</title>
+    </head>
+    <body>
+        <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+            <div class="container">
+                <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <a class="navbar-brand" href="/">Mastodon instances</a>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Instances</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <p>Here is a list of Mastodon instances. You can add other instances using the form at the bottom of the page.<br />
+            Notice that instances may take up to a minute to be shown in the list.</p>
+            <p><i>Contact <a href="https://mastodon.xyz/@TheKinrar">@TheKinrar@mastodon.xyz</a> if needed.</i></p>
+
+            <h3>Instances list</h3>
+            <p>
+              Instances are sorted by an internal score based on the uptime, the current state, the HTTPS rank and the IPv6 support. Instances with closed registrations are at the bottom of the list.
+            </p>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Instance</th>
+                  <th>Users</th>
+                  <th>Registrations</th>
+                  <th>Uptime</th>
+                  <th>HTTPS</th>
+                  <th>IPv6</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for instance in instances %}
+                    <tr>
+                      {% if instance.up %}<td class="table-success">UP{% else %}<td class="table-danger">DOWN{% endif %}</td>
+                      <th scope="row"><a href="https://{{instance.name}}">{{ instance.name }}</a></th>
+                      <td>{{ instance.users }}</td>
+                      {% if not instance.openRegistrations %}<td class="table-danger">No{% else %}<td class="table-success">Yes{% endif %}</td>
+                      {% if instance.uptime >= 99 %}
+                        <td class="table-success">
+                      {% elif instance.uptime >= 97 %}
+                        <td class="table-warning">
+                      {% else %}
+                        <td class="table-danger">
+                      {% endif %}
+                      {{ instance.uptime_str }}%</td>
+                      {% if instance.https_score %}
+                        {% if instance.https_score >= 80 %}
+                        <td class="table-success">
+                        {% elif instance.https_score >= 60 %}
+                        <td class="table-warning">
+                        {% else %}
+                        <td class="table-danger">
+                        {% endif %}
+
+                        <a href="https://tls.imirhil.fr/https/{{ instance.name }}">{{ instance.https_rank }}</a>
+                      {% else %}
+                        <td>
+                      {% endif %}</td>
+                      {% if instance.ipv6 %}<td class="table-success">Yes{% else %}<td class="table-danger">No{% endif %}</td>
+                    </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+            <h3>Add an instance</h3>
+            <form action="/add" method="post">
+              <div class="form-group">
+                <label for="inputName">Name</label>
+                <input type="text" class="form-control" name="name" id="inputName" placeholder="mastodon.social">
+              </div>
+              <button type="submit" class="btn btn-primary">Add instance</button>
+            </form>
+        </div>
+
+        {% block scripts %}
+            <script type="text/javascript" src="/js/jquery.min.js"></script>
+            <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+        {% endblock %}
+    </body>
+</html>
