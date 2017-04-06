@@ -1,7 +1,6 @@
-const cache = require('apicache').middleware;
 const router = require('express').Router();
 
-router.get('/', cache('30 seconds'), (req, res) => {
+router.get('/', (req, res) => {
 	DB.get('instances').find({
 		"upchecks": {
 			"$gt": 0
@@ -36,7 +35,7 @@ router.get('/', cache('30 seconds'), (req, res) => {
 	});
 });
 
-router.get('/instances.json', cache('30 seconds'), (req, res) => {
+router.get('/instances.json', (req, res) => {
 	DB.get('instances').find({
 		"upchecks": {
 			"$gt": 0
