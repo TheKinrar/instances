@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
 			instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
 			instance.uptime_str = instance.uptime.toFixed(3);
 
-			instance.score = instance.uptime;
+			instance.score = Math.min(1, instance.uptime / 1440);
 
 			if(instance.up)
 				instance.score += 5;
