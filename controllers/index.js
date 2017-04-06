@@ -6,6 +6,8 @@ router.get('/', (req, res) => {
 			"$gt": 0
 		}
 	}).then((instances) => {
+		var totalUsers = 0;
+
 		instances.forEach((instance) => {
 			instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
 			instance.uptime_str = instance.uptime.toFixed(3);
@@ -23,6 +25,8 @@ router.get('/', (req, res) => {
 
 			if(!instance.openRegistrations)
 				instance.score -= 1000;
+
+			totalUsers += instance.users;
 		});
 
 		instances.sort((b, a) => {
@@ -30,7 +34,8 @@ router.get('/', (req, res) => {
 		});
 
 		res.render('index', {
-			instances
+			instances: instances,
+			totalUsers: totalUsers
 		});
 	});
 });
