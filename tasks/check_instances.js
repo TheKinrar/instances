@@ -99,6 +99,8 @@ function getHttpsRank(name, cb) {
 	  		cb(ex);
 	  	}
 	  });
+	}).on('error', (e) => {
+		cb(e);
 	});
 }
 
