@@ -1,0 +1,47 @@
+body {
+    background-color: #191b22;
+    color: white;
+}
+
+nav.navbar {
+    background-color: rgb(40, 44, 55);
+}
+
+.navbar-light .navbar-nav .nav-link, .navbar-light .navbar-brand, .navbar-light .navbar-toggler {
+    color: white;
+}
+
+div.main {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background-color: #282c37;
+}
+
+.table th, .table td {
+    border: 1px solid #393f4f;
+}
+
+.table thead th {
+    border-bottom: 2px solid #393f4f;
+}
+
+.table-success, .table-success>td, .table-success>th {
+    background-color: #396039;
+}
+
+.table-danger, .table-danger>td, .table-danger>th {
+    background-color: #693232;
+}
+
+.table-warning, .table-warning>td, .table-warning>th {
+    background-color: #938b4f;
+}
+
+a {
+    color: #64b7ff;
+}
+
+a:hover {
+    color: #1a75c4;
+}
