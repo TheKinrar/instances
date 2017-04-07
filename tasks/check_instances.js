@@ -114,6 +114,10 @@ function getHttpsRank(name, cb) {
 	  		cb(ex);
 	  	}
 	  });
+
+	  res.on('error', (e) => {
+  		cb(e);
+	  });
 	}).on('error', (e) => {
 		cb(e);
 	});
@@ -162,6 +166,10 @@ function getStats(base_url, cb) {
 		    	}
 		    }
 		  });
+
+		  res.on('error', (e) => {
+	  		cb(e);
+		  });
 		}).on('error', (e) => {
 			cb(e);
 		});
@@ -182,6 +190,12 @@ function areRegistrationsOpened(url, cb) {
 			}
 
 	    	res.resume();
+
+		    res.on('error', (e) => {
+	  		  cb(e);
+		    });
+		}).on('error', (e) => {
+			cb(e);
 		});
 	} catch(e) {
 		ch(false);
