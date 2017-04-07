@@ -34,8 +34,8 @@ router.get('/', (req, res) => {
 		});
 
 		res.render('index', {
-			instances: instances,
-			totalUsers: totalUsers
+			instances,
+			totalUsers
 		});
 	});
 });
