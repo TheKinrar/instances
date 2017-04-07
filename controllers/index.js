@@ -4,6 +4,9 @@ router.get('/', (req, res) => {
 	DB.get('instances').find({
 		"upchecks": {
 			"$gt": 0
+		},
+		"blacklisted": {
+			"$ne": true
 		}
 	}).then((instances) => {
 		instances.forEach((instance) => {

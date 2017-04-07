@@ -1,12 +1,27 @@
 const https = require('https');
 const dns = require('dns');
 
+const instances_seconds = {};
+
 module.exports = () => {
 	const db_instances = DB.get('instances');
+	const second = new Date().getSeconds();
 
 	db_instances.find().then((instances) => {
 		instances.forEach((instance) => {
 			let url = 'https://' + instance.name;
+
+			if(instance.blacklisted)
+				return;
+
+			if(!instances_seconds[instance._id]) {
+				instances_seconds[instance._id] = Math.floor(Math.random() * 60);
+			}
+
+			if(instances_seconds[instance._id] != second)
+				return;
+
+			console.log(second + ': Processing ' + instance.name);
 
 			getHttpsRank(instance.name, (err, rank) => {
 				if(err) return;
