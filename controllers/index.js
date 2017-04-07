@@ -47,6 +47,9 @@ router.get('/instances.json', (req, res) => {
 	DB.get('instances').find({
 		"upchecks": {
 			"$gt": 0
+		},
+		"blacklisted": {
+			"$ne": true
 		}
 	}).then((instances) => {
 		let jsons = [];
