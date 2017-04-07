@@ -30,7 +30,7 @@
 
             <h3>Instances list</h3>
             <p>
-              Instances are sorted by an internal score based on the uptime, the current state, the HTTPS rank and the IPv6 support. Instances with closed registrations are at the bottom of the list.
+              By default, instances are sorted by an internal score based on the uptime, the current state, the HTTPS rank and the IPv6 support. Instances with closed registrations are at the bottom of the list.
             </p>
             
             <p>
@@ -57,20 +57,20 @@
                       <td>{{ instance.users }}</td>
                       {% if not instance.openRegistrations %}<td class="table-danger">No{% else %}<td class="table-success">Yes{% endif %}</td>
                       {% if instance.uptime >= 99 %}
-                        <td class="table-success">
+                        <td class="table-success" data-value="{{ instance.uptime}}">
                       {% elif instance.uptime >= 97 %}
-                        <td class="table-warning">
+                        <td class="table-warning" data-value="{{ instance.uptime}}">
                       {% else %}
-                        <td class="table-danger">
+                        <td class="table-danger" data-value="{{ instance.uptime}}">
                       {% endif %}
                       {{ instance.uptime_str }}%</td>
                       {% if instance.https_score %}
                         {% if instance.https_score >= 80 %}
-                        <td class="table-success">
+                        <td class="table-success" data-value="{{ instance.https_score }}">
                         {% elif instance.https_score >= 60 %}
-                        <td class="table-warning">
+                        <td class="table-warning" data-value="{{ instance.https_score }}">
                         {% else %}
-                        <td class="table-danger">
+                        <td class="table-danger" data-value="{{ instance.https_score }}">
                         {% endif %}
 
                         <a href="https://tls.imirhil.fr/https/{{ instance.name }}">{{ instance.https_rank }}</a>
