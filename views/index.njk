@@ -2,6 +2,7 @@
     <head>
         <meta charset="utf-8">
         <link rel="stylesheet" href="/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/css/bootstrap-sortable.css">
         <title>Mastodon instances</title>
     </head>
     <body>
@@ -31,10 +32,12 @@
             <p>
               Instances are sorted by an internal score based on the uptime, the current state, the HTTPS rank and the IPv6 support. Instances with closed registrations are at the bottom of the list.
             </p>
+            
             <p>
               There {{ 'are' if instances|length > 1 else 'is' }} currently <strong>{{ instances|length }}</strong> instance{{ 's' if instances|length > 1 else '' }} being tracked, with a total of <strong>{{ totalUsers }}</strong> users.
             </p>
-            <table class="table">
+            
+            <table class="table sortable">
               <thead>
                 <tr>
                   <th></th>
@@ -50,7 +53,7 @@
                 {% for instance in instances %}
                     <tr>
                       {% if instance.up %}<td class="table-success">UP{% else %}<td class="table-danger">DOWN{% endif %}</td>
-                      <th scope="row"><a href="https://{{instance.name}}">{{ instance.name }}</a></th>
+                      <td scope="row" data-value="{{ instance.name }}"><strong><a href="https://{{ instance.name }}">{{ instance.name }}</a></strong></td>
                       <td>{{ instance.users }}</td>
                       {% if not instance.openRegistrations %}<td class="table-danger">No{% else %}<td class="table-success">Yes{% endif %}</td>
                       {% if instance.uptime >= 99 %}
@@ -94,6 +97,8 @@
             <script type="text/javascript" src="/js/jquery.min.js"></script>
             <script type="text/javascript" src="/js/tether.min.js"></script>
             <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+            <script type="text/javascript" src="/js/moment.min.js"></script>
+            <script type="text/javascript" src="/js/bootstrap-sortable.js"></script>
         {% endblock %}
     </body>
 </html>
