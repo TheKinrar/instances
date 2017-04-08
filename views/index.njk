@@ -43,6 +43,8 @@
                   <th></th>
                   <th>Instance</th>
                   <th>Users</th>
+                  <th>Statuses</th>
+                  <th>Connections</th>
                   <th>Registrations</th>
                   <th>Uptime</th>
                   <th>HTTPS</th>
@@ -55,6 +57,8 @@
                       {% if instance.up %}<td class="table-success">UP{% else %}<td class="table-danger">DOWN{% endif %}</td>
                       <td scope="row" data-value="{{ instance.name }}"><strong><a href="https://{{ instance.name }}">{{ instance.name }}</a></strong></td>
                       <td>{{ instance.users }}</td>
+                      <td>{{ instance.statuses }}</td>
+                      <td>{{ instance.connections }}</td>
                       {% if not instance.openRegistrations %}<td class="table-danger">No{% else %}<td class="table-success">Yes{% endif %}</td>
                       {% if instance.uptime >= 99 %}
                         <td class="table-success" data-value="{{ instance.uptime}}">

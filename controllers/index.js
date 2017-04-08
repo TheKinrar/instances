@@ -64,6 +64,8 @@ router.get('/instances.json', (req, res) => {
 			json.ipv6 = instance.ipv6;
 			json.openRegistrations = instance.openRegistrations;
 			json.users = instance.users;
+			json.statuses = instance.statuses;
+			json.connections = instance.connections;
 
 			jsons.push(json);
 		});

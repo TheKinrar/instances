@@ -1,6 +1,26 @@
 const https = require('https');
 const dns = require('dns');
 
+const regex_infoboard = new RegExp([
+	/<div class='information-board'>/,
+	/<div class='section'>/,
+	/<span>(?:[\w ]+)<\/span>/,
+	/<strong>([0-9,]+)<\/strong>/,
+	/<span>(?:[\w ]+)<\/span>/,
+	/<\/div>/,
+	/<div class='section'>/,
+	/<span>(?:[\w ]+)<\/span>/,
+	/<strong>([0-9,]+)<\/strong>/,
+	/<span>(?:[\w ]+)<\/span>/,
+	/<\/div>/,
+	/<div class='section'>/,
+	/<span>(?:[\w ]+)<\/span>/,
+	/<strong>([0-9,]+)<\/strong>/,
+	/<span>(?:[\w ]+)<\/span>/,
+	/<\/div>/,
+	/<\/div>/
+].map(r => r.source).join('\\n'));
+
 const instances_seconds = {};
 
 module.exports = () => {
@@ -52,6 +72,8 @@ module.exports = () => {
 										ipv6: is_ipv6,
 										up: true,
 										users: stats.users,
+										statuses: stats.statuses,
+										connections: stats.connections,
 										openRegistrations
 									}, $inc: {
 										upchecks: 1
@@ -151,15 +173,18 @@ function getStats(base_url, cb) {
 		  let rawData = '';
 		  res.on('data', (chunk) => rawData += chunk);
 		  res.on('end', () => {
-		    let regex_users = /<strong>([0-9,]+)<\/strong>\n<span>users<\/span>/;
-		    let res_users = regex_users.exec(rawData);
+		    let res_infoboard = regex_infoboard.exec(rawData);
 
-		    if(res_users && res_users[1]) {
+		    if(res_infoboard && res_infoboard[1]) {
 		    	try {
-		    		let users = parseInt(res_users[1].replace(',', ''));
+		    		let users = parseInt(res_infoboard[1].replace(',', ''));
+		    		let statuses = parseInt(res_infoboard[2].replace(',', ''));
+		    		let connections = parseInt(res_infoboard[3].replace(',', ''));
 
 				    cb(null, {
-				    	users
+				    	users,
+				    	statuses,
+				    	connections
 				    });
 		    	} catch(e) {
 		    		return cb(e);
