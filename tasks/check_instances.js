@@ -177,9 +177,9 @@ function getStats(base_url, cb) {
 
 		    if(res_infoboard && res_infoboard[1]) {
 		    	try {
-		    		let users = parseInt(res_infoboard[1].replace(',', ''));
-		    		let statuses = parseInt(res_infoboard[2].replace(',', ''));
-		    		let connections = parseInt(res_infoboard[3].replace(',', ''));
+		    		let users = parseInt(res_infoboard[1].replace(/,/g, ''));
+		    		let statuses = parseInt(res_infoboard[2].replace(/,/g, ''));
+		    		let connections = parseInt(res_infoboard[3].replace(/,/g, ''));
 
 				    cb(null, {
 				    	users,
