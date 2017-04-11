@@ -36,6 +36,15 @@
             <p>
               There {{ 'are' if instances|length > 1 else 'is' }} currently <strong>{{ instances|length }}</strong> instance{{ 's' if instances|length > 1 else '' }} being tracked, with a total of <strong>{{ totalUsers }}</strong> users.
             </p>
+
+            <p><a href="#" onclick="$('#fordevs').toggle();">For developers</a></p>
+
+            <p id="fordevs" style="display: none;">
+              <a href="/instances.json">/instances.json</a> current state of all tracked instances<br />
+              <a href="/api/instances/history.json?instance=mastodon.xyz&start=0&end=1491895743">/api/instances/history.json?instance=<i>INSTANCE</i>&amp;start=<i>START_TIMESTAMP</i>&amp;end=<i>END_TIMESTAMP</i></a> history of one instance on one period<br /><br />
+
+              All dates are unix timestamps (in seconds).
+            </p>
             
             <table class="table sortable">
               <thead>
