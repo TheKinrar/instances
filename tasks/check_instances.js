@@ -4,19 +4,19 @@ const dns = require('dns');
 const regex_infoboard = new RegExp([
 	/<div class='information-board'>/,
 	/<div class='section'>/,
-	/<span>(?:[\w ⋅]+)<\/span>/,
+	/<span>(?:.+)<\/span>/,
 	/<strong>([0-9,]+)<\/strong>/,
-	/<span>(?:[\w ⋅]+)<\/span>/,
+	/<span>(?:.+)<\/span>/,
 	/<\/div>/,
 	/<div class='section'>/,
-	/<span>(?:[\w ⋅]+)<\/span>/,
+	/<span>(?:.+)<\/span>/,
 	/<strong>([0-9,]+)<\/strong>/,
-	/<span>(?:[\w ⋅]+)<\/span>/,
+	/<span>(?:.+)<\/span>/,
 	/<\/div>/,
 	/<div class='section'>/,
-	/<span>(?:[\w ⋅]+)<\/span>/,
+	/<span>(?:.+)<\/span>/,
 	/<strong>([0-9,]+)<\/strong>/,
-	/<span>(?:[\w ⋅]+)<\/span>/,
+	/<span>(?:.+)<\/span>/,
 	/<\/div>/,
 	/<\/div>/
 ].map(r => r.source).join('\\n'));
@@ -44,11 +44,13 @@ module.exports = () => {
 			console.log(second + ': Processing ' + instance.name);
 
 			getHttpsRank(instance.name, (err, rank) => {
-				if(err) return;
+				if(err) return console.error(instance.name, err);
 
 				checkIpv6(instance.name, (is_ipv6) => {
 					getStats(url, (err, stats) => {
 						if(err) {
+							console.error(instance.name, err);
+
 							db_instances.update({
 								_id: instance._id
 							}, {
@@ -189,6 +191,8 @@ function getStats(base_url, cb) {
 		    	} catch(e) {
 		    		return cb(e);
 		    	}
+		    } else {
+		    	return cb(new Error('Could not parse infoboard.'));
 		    }
 		  });
 
