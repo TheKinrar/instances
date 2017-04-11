@@ -230,10 +230,10 @@ function areRegistrationsOpened(url, cb) {
 	    	res.resume();
 
 		    res.on('error', (e) => {
-	  		  cb(e);
+	  		  cb(false);
 		    });
 		}).on('error', (e) => {
-			cb(e);
+	  		cb(false);
 		});
 	} catch(e) {
 		ch(false);
