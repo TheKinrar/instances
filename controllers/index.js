@@ -28,8 +28,10 @@ router.get('/', (req, res) => {
 			if(instance.ipv6)
 				instance.score += 5;
 
-			if(!instance.openRegistrations)
-				instance.score -= 1000;
+			if(instance.openRegistrations)
+				instance.score += 200;
+
+			instance.score_str = '' + Math.round(instance.score * 10);
 
 			totalUsers += instance.users;
 		});
@@ -81,6 +83,7 @@ router.post('/add', (req, res) => {
 		return res.sendStatus(400);
 
 	DB.get('instances').insert({
+		addedAt: new Date(),
 		name: req.body.name.toLowerCase(),
 		downchecks: 0,
 		upchecks: 0
