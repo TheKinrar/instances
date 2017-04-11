@@ -18,7 +18,8 @@ const regex_infoboard = new RegExp([
 	/<strong>([0-9,]+)<\/strong>/,
 	/<span>(?:.+)<\/span>/,
 	/<\/div>/,
-	/<\/div>/
+	/<\/div>/,
+	/(?:<div class='panel'>((?:.|\n)*?)<\/div>)?/
 ].map(r => r.source).join('\\n'));
 
 const instances_seconds = {};
@@ -76,6 +77,7 @@ module.exports = () => {
 										users: stats.users,
 										statuses: stats.statuses,
 										connections: stats.connections,
+										info: stats.info,
 										openRegistrations
 									}, $inc: {
 										upchecks: 1
@@ -182,11 +184,18 @@ function getStats(base_url, cb) {
 		    		let users = parseInt(res_infoboard[1].replace(/,/g, ''));
 		    		let statuses = parseInt(res_infoboard[2].replace(/,/g, ''));
 		    		let connections = parseInt(res_infoboard[3].replace(/,/g, ''));
+		    		let info = res_infoboard[4];
+
+		    		if(!info)
+		    			info = '';
+
+		    		info = info.replace(/<\/?[a-z]+>/gi, '');
 
 				    cb(null, {
 				    	users,
 				    	statuses,
-				    	connections
+				    	connections,
+				    	info
 				    });
 		    	} catch(e) {
 		    		return cb(e);
