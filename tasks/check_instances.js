@@ -120,7 +120,6 @@ function getHttpsRank(name, cb) {
 	  		data.hosts.forEach((host) => {
 	  			if(host.grade) {
 	  				n++;
-	  				score += host.grade.details.score;
 
 	  				switch(host.grade.rank) {
 	  					case 'A+':
