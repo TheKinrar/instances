@@ -31,7 +31,7 @@ router.get('/', (req, res) => {
 			if(instance.openRegistrations)
 				instance.score += 200;
 
-			instance.score_str = '' + Math.round(instance.score * 10);
+			instance.score_str = '' + Math.floor(instance.score * 10);
 
 			totalUsers += instance.users;
 		});
