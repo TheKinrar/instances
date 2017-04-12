@@ -1,5 +1,7 @@
 const https = require('https');
 const dns = require('dns');
+const request = require('request');
+const querystring = require('querystring');
 
 const regex_infoboard = new RegExp([
 	/<div class='information-board'>/,
@@ -47,44 +49,52 @@ module.exports = () => {
 			getHttpsRank(instance.name, (err, rank) => {
 				if(err) return console.error(instance.name, err);
 
-				checkIpv6(instance.name, (is_ipv6) => {
-					getStats(url, (err, stats) => {
-						if(err) {
-							console.error(instance.name, err);
+				getObsRank(instance.name, (err, obs_rank) => {
+					if(err) return console.error(instance.name, err);
 
-							db_instances.update({
-								_id: instance._id
-							}, {
-								$set: {
-									https_rank: rank.rank,
-									https_score: rank.score,
-									ipv6: is_ipv6,
-									up: false
-								}, $inc: {
-									downchecks: 1
-								}
-							});
-						} else {
-							areRegistrationsOpened(url, (openRegistrations) => {
+					checkIpv6(instance.name, (is_ipv6) => {
+						getStats(url, (err, stats) => {
+							if(err) {
+								console.error(instance.name, err);
+
 								db_instances.update({
 									_id: instance._id
 								}, {
 									$set: {
 										https_rank: rank.rank,
 										https_score: rank.score,
+										obs_rank: obs_rank.rank,
+										obs_score: obs_rank.score,
 										ipv6: is_ipv6,
-										up: true,
-										users: stats.users,
-										statuses: stats.statuses,
-										connections: stats.connections,
-										info: stats.info,
-										openRegistrations
+										up: false
 									}, $inc: {
-										upchecks: 1
+										downchecks: 1
 									}
 								});
-							});
-						}
+							} else {
+								areRegistrationsOpened(url, (openRegistrations) => {
+									db_instances.update({
+										_id: instance._id
+									}, {
+										$set: {
+											https_rank: rank.rank,
+											https_score: rank.score,
+											obs_rank: obs_rank.rank,
+											obs_score: obs_rank.score,
+											ipv6: is_ipv6,
+											up: true,
+											users: stats.users,
+											statuses: stats.statuses,
+											connections: stats.connections,
+											info: stats.info,
+											openRegistrations
+										}, $inc: {
+											upchecks: 1
+										}
+									});
+								});
+							}
+						});
 					});
 				});
 			});
@@ -169,6 +179,41 @@ function getHttpsRank(name, cb) {
 	  });
 	}).on('error', (e) => {
 		cb(e);
+	});
+}
+
+function getObsRank(name, cb) {
+	request.post('https://http-observatory.security.mozilla.org/api/v1/analyze?'+ querystring.stringify({
+	  	host: name
+	}), (err, res, raw) => {
+		if(err) return cb(err);
+
+		const statusCode = res.statusCode;
+		if (statusCode !== 200) {
+			res.resume();
+			return cb(new Error(`Status Code: ${statusCode}, expected 200`));
+		}
+
+	    const contentType = res.headers['content-type'];
+		if (!/^application\/json/.test(contentType)) {
+			res.resume();
+			return cb(new Error(`Content type: ${contentType}, expected application/json`));
+		}
+
+	  	try {
+	  		let data = JSON.parse(raw);
+
+	  		if(data.state === 'FINISHED') {
+	  			cb(null, {
+	  				rank: data.grade,
+	  				score: data.score
+	  			});
+	  		} else {
+	  			cb(new Error('Test isn\'t finished'));
+	  		}
+	  	} catch(ex) {
+	  		cb(ex);
+	  	}
 	});
 }
 
