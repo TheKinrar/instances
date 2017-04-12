@@ -122,6 +122,30 @@ function getHttpsRank(name, cb) {
 	  				n++;
 	  				score += host.grade.details.score;
 
+	  				switch(host.grade.rank) {
+	  					case 'A+':
+	  						score += 100;
+		  					break;
+	  					case 'A':
+	  						score += 80;
+		  					break;
+	  					case 'B':
+	  						score += 60;
+		  					break;
+	  					case 'C':
+	  						score += 40;
+		  					break;
+	  					case 'D':
+	  						score += 20;
+		  					break;
+	  					case 'E':
+	  						score += 10;
+		  					break;
+	  					case 'F':
+	  						score += 5;
+		  					break;
+	  				}
+
 	  				if(!grade) {
 	  					grade = host.grade.rank;
 	  				} else if(grade !== host.grade.rank){
