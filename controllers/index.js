@@ -13,9 +13,6 @@ router.get(/^\/(all)?$/, (req, res) => {
 	};
 
 	let all = req.params['0'] === 'all';
-	if(!all) {
-		q.openRegistrations = true;
-	}
 
 	DB.get('instances').find(q).then((instances) => {
 		var totalUsers = 0;
