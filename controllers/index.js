@@ -2,15 +2,22 @@ const router = require('express').Router();
 
 router.use('/api', require('./api'));
 
-router.get('/', (req, res) => {
-	DB.get('instances').find({
+router.get(/^\/(all)?$/, (req, res) => {
+	let q = {
 		"upchecks": {
 			"$gt": 0
 		},
 		"blacklisted": {
 			"$ne": true
 		}
-	}).then((instances) => {
+	};
+
+	let all = req.params['0'] === 'all';
+	if(!all) {
+		q.openRegistrations = true;
+	}
+
+	DB.get('instances').find(q).then((instances) => {
 		var totalUsers = 0;
 
 		instances.forEach((instance) => {
@@ -25,11 +32,11 @@ router.get('/', (req, res) => {
 			if(instance.https_score)
 				instance.score += instance.https_score / 5;
 
+			if(instance.obs_score)
+				instance.score += instance.obs_score / 5;
+
 			if(instance.ipv6)
 				instance.score += 5;
-
-			if(instance.openRegistrations)
-				instance.score += 200;
 
 			instance.score_str = '' + Math.floor(instance.score * 10);
 
@@ -42,7 +49,8 @@ router.get('/', (req, res) => {
 
 		res.render('index', {
 			instances,
-			totalUsers
+			totalUsers,
+			all
 		});
 	});
 });

@@ -16,7 +16,10 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="/">Instances</a>
+                            <a class="nav-link" href="/">Open instances</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/all">All instances</a>
                         </li>
                     </ul>
                 </div>
@@ -28,9 +31,10 @@
             Notice that instances may take up to a minute to be shown in the list.</p>
             <p><i>Contact <a href="https://mastodon.xyz/@TheKinrar">@TheKinrar@mastodon.xyz</a> if needed.</i></p>
 
-            <h3>Instances list</h3>
+            <h3>{{ 'All' if all else 'Open' }} instances</h3>
             <p>
-              By default, instances are sorted by an internal score based on the uptime, the current state, the HTTPS rank and the IPv6 support. Instances with closed registrations are at the bottom of the list.
+              Score is based on the uptime, the HTTPS score, the <i>Observatory by Mozilla</i> score and the IPv6 compatibility.<br />
+              Click on the column headers to sort the instances.
             </p>
             
             <p>
@@ -58,6 +62,7 @@
                   <th>Registrations</th>
                   <th>Uptime</th>
                   <th>HTTPS</th>
+                  <th><abbr title="Observatory by Mozilla">Obs</abbr></th>
                   <th>IPv6</th>
                 </tr>
               </thead>
@@ -89,6 +94,19 @@
                         {% endif %}
 
                         <a href="https://tls.imirhil.fr/https/{{ instance.name }}">{{ instance.https_rank }}</a>
+                      {% else %}
+                        <td>
+                      {% endif %}</td>
+                      {% if instance.obs_score %}
+                        {% if instance.obs_score >= 80 %}
+                        <td class="table-success" data-value="{{ instance.obs_score }}">
+                        {% elif instance.obs_score >= 60 %}
+                        <td class="table-warning" data-value="{{ instance.obs_score }}">
+                        {% else %}
+                        <td class="table-danger" data-value="{{ instance.obs_score }}">
+                        {% endif %}
+
+                        <a href="https://observatory.mozilla.org/analyze.html?host={{ instance.name }}">{{ instance.obs_rank }}</a>
                       {% else %}
                         <td>
                       {% endif %}</td>
