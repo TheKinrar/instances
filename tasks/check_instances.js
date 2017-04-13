@@ -48,14 +48,23 @@ module.exports = () => {
 
 			getHttpsRank(instance.name, (err, rank) => {
 				if(err) {
-					console.error(instance.name, err);
+					console.error(instance.name, 'CryptCheck failed: ' + err.message);
 
-					if(!instance.https_rank)
+					if(!instance.https_rank) {
+						console.error(instance.name, 'Cancelling update.');
 						return;
+					}
 				}
 
 				getObsRank(instance.name, (err, obs_rank) => {
-					if(err) return console.error(instance.name, err);
+					if(err) {
+						console.error(instance.name, 'Obs failed: ' + err.message);
+
+						if(!instance.obs_rank) {
+							console.error(instance.name, 'Cancelling update.');
+							return;
+						}
+					}
 
 					checkIpv6(instance.name, (is_ipv6) => {
 						getStats(url, (err, stats) => {
