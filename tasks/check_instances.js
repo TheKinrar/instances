@@ -47,7 +47,12 @@ module.exports = () => {
 			console.log(second + ': Processing ' + instance.name);
 
 			getHttpsRank(instance.name, (err, rank) => {
-				if(err) return console.error(instance.name, err);
+				if(err) {
+					console.error(instance.name, err);
+
+					if(!instance.https_rank)
+						return;
+				}
 
 				getObsRank(instance.name, (err, obs_rank) => {
 					if(err) return console.error(instance.name, err);
