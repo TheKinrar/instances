@@ -53,6 +53,11 @@ module.exports = () => {
 					if(!instance.https_rank) {
 						console.error(instance.name, 'Cancelling update.');
 						return;
+					} else {
+						rank = {
+							rank: instance.https_rank,
+							score: instance.https_score
+						}
 					}
 				}
 
@@ -63,6 +68,11 @@ module.exports = () => {
 						if(!instance.obs_rank) {
 							console.error(instance.name, 'Cancelling update.');
 							return;
+						} else {
+							obs_rank = {
+								rank: instance.obs_rank,
+								score: instance.obs_score
+							}
 						}
 					}
 
