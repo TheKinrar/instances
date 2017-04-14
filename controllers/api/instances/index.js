@@ -67,4 +67,40 @@ router.get(/^\/history(?:\.json)?$/, (req, res) => {
 	});
 });
 
+router.get(/^\/(.+?)(?:\.json)?$/, (req, res) => {
+	let name = req.params['0'];
+
+	DB.get('instances').findOne({
+		name,
+		"upchecks": {
+			"$gt": 0
+		},
+		"blacklisted": {
+			"$ne": true
+		}
+	}).then((instance) => {
+		let json = {
+			uptime: instance.upchecks / (instance.upchecks + instance.downchecks),
+			up: instance.up,
+			https: instance.https,
+			ipv6: instance.ipv6,
+			https_score: instance.https_score,
+			https_rank: instance.https_rank,
+			obs_score: instance.obs_score,
+			obs_rank: instance.obs_rank,
+			users: instance.users,
+			statuses: instance.statuses,
+			connections: instance.connections,
+			openRegistrations: instance.openRegistrations,
+			info: instance.info
+		};
+
+		res.json(json);
+	}).catch((err) => {
+		console.error(err);
+
+		res.sendStatus(500);
+	});
+});
+
 module.exports = router;

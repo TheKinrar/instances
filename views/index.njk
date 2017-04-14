@@ -1,139 +1,105 @@
-<html>
-    <head>
-        <meta charset="utf-8">
-        <link rel="stylesheet" href="/css/bootstrap.min.css">
-        <link rel="stylesheet" href="/css/bootstrap-sortable.css">
-        <title>Mastodon instances</title>
-    </head>
-    <body>
-        <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
-            <div class="container">
-                <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <a class="navbar-brand" href="/">Mastodon instances</a>
+{% extends 'layout.njk' %}
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/">Open instances</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/all">All instances</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
+{% block main %}
+    <h3>Selection of instances</h3>
 
-        <div class="container">
-            <p>Here is a list of Mastodon instances. You can add other instances using the form at the bottom of the page.<br />
-            Notice that instances may take up to a minute to be shown in the list.</p>
-            <p><i>Contact <a href="https://mastodon.xyz/@TheKinrar">@TheKinrar@mastodon.xyz</a> if needed.</i></p>
+    <p>
+      Here are some instances, picked randomly every minute from the full instance list <a href="/list">here</a>.<br />
+      Only instances with <b>open registrations, sufficient uptime, and security level</b> are shown here.
+    </p>
 
-            <h3>{{ 'All' if all else 'Open' }} instances</h3>
-            <p>
-              Score is based on the uptime, the HTTPS score, the <i>Observatory by Mozilla</i> score and the IPv6 compatibility.<br />
-              Click on the column headers to sort the instances.
-            </p>
-            
-            <p>
-              There {{ 'are' if instances|length > 1 else 'is' }} currently <strong>{{ instances|length }}</strong> instance{{ 's' if instances|length > 1 else '' }} being tracked, with a total of <strong>{{ totalUsers }}</strong> users.
-            </p>
+    <div class="row">
+    {% for instance in instances %}
+    	<div class="col-md-4" style="padding: 10px;">
+			<div class="card">
+			  <div class="card-block">
+			    <h4 class="card-title" style="overflow-wrap: break-word;">{{ instance.name }}</h4>
+			    <p class="card-text">
+					<nobr><abbr title="Percent of time this instance is available">Uptime</abbr> <span class="badge badge-success" style="vertical-align:middle;">{{ instance.uptime_str }}%</span></nobr><br />
 
-            <p><a href="#" onclick="$('#fordevs').toggle();">For developers</a></p>
+			    	<nobr>Users <span class="badge badge-info" style="vertical-align:middle;">{{ instance.users }}</span></nobr><br />
+			    	<nobr>Statuses <span class="badge badge-info" style="vertical-align:middle;">{{ instance.statuses }}</span></nobr><br />
+			    </p>
+			    <a href="https://{{ instance.name }}" class="btn btn-primary">Register</a>
+			    <a href="#" data-toggle="modal" data-target="#modalInstanceInfo" data-instance="{{ instance.name }}" class="btn btn-info">More info</a>
+			  </div>
+			</div>
+		</div>
+    {% endfor %}
+    </div>
 
-            <p id="fordevs" style="display: none;">
-              <a href="/instances.json">/instances.json</a> current state of all tracked instances<br />
-              <a href="/api/instances/history.json?instance=mastodon.xyz&start=0&end=1491895743">/api/instances/history.json?instance=<i>INSTANCE</i>&amp;start=<i>START_TIMESTAMP</i>&amp;end=<i>END_TIMESTAMP</i></a> history of one instance on one period<br /><br />
+    <div class="modal fade" id="modalInstanceInfo" tabindex="-1" role="dialog" aria-labelledby="modalInstanceInfoLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="modalInstanceInfoLabel"></h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	      	<p>
+				<nobr><abbr title="Percent of time this instance is available">Uptime</abbr> <span class="badge badge-success" style="vertical-align:middle;" id="modalInstanceInfo-uptime"></span></nobr><br />
 
-              All dates are unix timestamps (in seconds).
-            </p>
-            
-            <table class="table sortable">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Score</th>
-                  <th>Instance</th>
-                  <th>Users</th>
-                  <th>Statuses</th>
-                  <th>Connections</th>
-                  <th>Registrations</th>
-                  <th>Uptime</th>
-                  <th>HTTPS</th>
-                  <th><abbr title="Observatory by Mozilla">Obs</abbr></th>
-                  <th>IPv6</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for instance in instances %}
-                  {% if instance.openRegistrations or all %}
-                    <tr>
-                      {% if instance.up %}<td class="table-success">UP{% else %}<td class="table-danger">DOWN{% endif %}</td>
-                      <td>{{ instance.score_str }}</td>
-                      <td scope="row" data-value="{{ instance.name }}"><strong><a href="https://{{ instance.name }}">{{ instance.name }}</a></strong></td>
-                      <td>{{ instance.users }}</td>
-                      <td>{{ instance.statuses }}</td>
-                      <td>{{ instance.connections }}</td>
-                      {% if not instance.openRegistrations %}<td class="table-danger">No{% else %}<td class="table-success">Yes{% endif %}</td>
-                      {% if instance.uptime >= 99 %}
-                        <td class="table-success" data-value="{{ instance.uptime}}">
-                      {% elif instance.uptime >= 97 %}
-                        <td class="table-warning" data-value="{{ instance.uptime}}">
-                      {% else %}
-                        <td class="table-danger" data-value="{{ instance.uptime}}">
-                      {% endif %}
-                      {{ instance.uptime_str }}%</td>
-                      {% if instance.https_score %}
-                        {% if instance.https_score >= 80 %}
-                        <td class="table-success" data-value="{{ instance.https_score }}">
-                        {% elif instance.https_score >= 60 %}
-                        <td class="table-warning" data-value="{{ instance.https_score }}">
-                        {% else %}
-                        <td class="table-danger" data-value="{{ instance.https_score }}">
-                        {% endif %}
+		    	<nobr>HTTPS <span class="badge badge-success" style="vertical-align:middle;" id="modalInstanceInfo-https"></span></nobr>
+		    	<nobr>Observatory <span class="badge badge-success" style="vertical-align:middle;" id="modalInstanceInfo-obs"></span></nobr>
+		    	<nobr>IPv6 <span class="badge" style="vertical-align:middle;" id="modalInstanceInfo-ipv6"></span></nobr><br />
 
-                        <a href="https://tls.imirhil.fr/https/{{ instance.name }}">{{ instance.https_rank }}</a>
-                      {% else %}
-                        <td>
-                      {% endif %}</td>
-                      {% if instance.obs_score %}
-                        {% if instance.obs_score >= 80 %}
-                        <td class="table-success" data-value="{{ instance.obs_score }}">
-                        {% elif instance.obs_score >= 60 %}
-                        <td class="table-warning" data-value="{{ instance.obs_score }}">
-                        {% else %}
-                        <td class="table-danger" data-value="{{ instance.obs_score }}">
-                        {% endif %}
+		    	<nobr>Users <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-users"></span></nobr>
+		    	<nobr>Statuses <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-statuses"></span></nobr>
+		    	<nobr>Connections <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-connections"></span></nobr><br />
+		    </p>
 
-                        <a href="https://observatory.mozilla.org/analyze.html?host={{ instance.name }}">{{ instance.obs_rank }}</a>
-                      {% else %}
-                        <td>
-                      {% endif %}</td>
-                      {% if instance.ipv6 %}<td class="table-success">Yes{% else %}<td class="table-danger">No{% endif %}</td>
-                    </tr>
-                  {% endif %}
-                {% endfor %}
-              </tbody>
-            </table>
+		    <h5>About instance (<a id="modalInstanceInfo-moreLink" href="">more</a>)</h4>
 
-            <h3>Add an instance</h3>
-            <form action="/add" method="post">
-              <div class="form-group">
-                <label for="inputName">Name</label>
-                <input type="text" class="form-control" name="name" id="inputName" placeholder="mastodon.social">
-              </div>
-              <button type="submit" class="btn btn-primary">Add instance</button>
-            </form>
-        </div>
+	    	<p id="modalInstanceInfo-info" style="font-style: italic;"></p>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+{% endblock %}
 
-        {% block scripts %}
-            <script type="text/javascript" src="/js/jquery.min.js"></script>
-            <script type="text/javascript" src="/js/tether.min.js"></script>
-            <script type="text/javascript" src="/js/bootstrap.min.js"></script>
-            <script type="text/javascript" src="/js/moment.min.js"></script>
-            <script type="text/javascript" src="/js/bootstrap-sortable.js"></script>
-        {% endblock %}
-    </body>
-</html>
+{% block scripts %}
+	{{ super() }}
+
+	<script type="text/javascript">
+		$('#modalInstanceInfo').on('show.bs.modal', function (event) {
+		  var button = $(event.relatedTarget);
+		  var instanceName = button.data('instance');
+
+		  var modal = $(this);
+		  modal.find('.modal-title').text(instanceName);
+
+		  $.get('/api/instances/' + instanceName + '.json', function(instance) {
+		  	modal.find('#modalInstanceInfo-uptime').text((instance.uptime * 100).toFixed(3) + '%');
+
+		  	modal.find('#modalInstanceInfo-https').text(instance.https_rank);
+		  	modal.find('#modalInstanceInfo-obs').text(instance.obs_rank);
+
+		  	var ipv6 = modal.find('#modalInstanceInfo-ipv6');
+		  	if(instance.ipv6) {
+		  		ipv6.text('Yes');
+		  		ipv6.addClass('badge-success');
+		  		ipv6.removeClass('badge-danger');
+		  	} else {
+		  		ipv6.text('No');
+		  		ipv6.addClass('badge-danger');
+		  		ipv6.removeClass('badge-success');
+		  	}
+
+		  	modal.find('#modalInstanceInfo-users').text(instance.users);
+		  	modal.find('#modalInstanceInfo-statuses').text(instance.statuses);
+		  	modal.find('#modalInstanceInfo-connections').text(instance.connections);
+
+		  	if(instance.info.length > 500)
+		  		instance.info = instance.info.substring(0, 500) + '...';
+		  	modal.find('#modalInstanceInfo-info').html(instance.info.replace('\n', '<br />'));
+
+		  	modal.find('#modalInstanceInfo-moreLink').attr('href', 'https://' + instanceName + '/about/more');
+		  });
+		});
+	</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/css/bootstrap-sortable.css">
+        <title>Mastodon instances</title>
+    </head>
+    <body>
+        <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+            <div class="container">
+                <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <a class="navbar-brand" href="/">Mastodon instances</a>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Selection of instances</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/list">Instances list</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+          {% block main %}
+          {% endblock %}
+        </div>
+
+        {% block scripts %}
+            <script type="text/javascript" src="/js/jquery.min.js"></script>
+            <script type="text/javascript" src="/js/tether.min.js"></script>
+            <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+            <script type="text/javascript" src="/js/moment.min.js"></script>
+            <script type="text/javascript" src="/js/bootstrap-sortable.js"></script>
+        {% endblock %}
+    </body>
+</html>

@@ -2,7 +2,42 @@ const router = require('express').Router();
 
 router.use('/api', require('./api'));
 
-router.get(/^\/(all)?$/, (req, res) => {
+router.get('/', (req, res) => {
+	let q = {
+		"upchecks": {
+			"$gt": 1440
+		},
+		"blacklisted": {
+			"$ne": true
+		},
+		"uptime": {
+			$gte: 0.99
+		},
+		"https_score": {
+			$gte: 80
+		},
+		"obs_score": {
+			$gte: 65
+		},
+		"openRegistrations": true,
+		"info": {
+			"$type": 2
+		},
+		"$where": "this.info.length > 32"
+	};
+
+	DB.get('instances').find(q).then((instances) => {
+		instances.forEach((instance) => {
+			instance.uptime_str = (instance.uptime * 100).toFixed(3);
+		});
+
+		res.render('index', {
+			instances: shuffleArray(instances).slice(0, 30)
+		});
+	});
+});
+
+router.get('/list', (req, res) => {
 	let q = {
 		"upchecks": {
 			"$gt": 0
@@ -11,8 +46,6 @@ router.get(/^\/(all)?$/, (req, res) => {
 			"$ne": true
 		}
 	};
-
-	let all = req.params['0'] === 'all';
 
 	DB.get('instances').find(q).then((instances) => {
 		var totalUsers = 0;
@@ -44,10 +77,9 @@ router.get(/^\/(all)?$/, (req, res) => {
 			return a.score - b.score;
 		});
 
-		res.render('index', {
+		res.render('list', {
 			instances,
-			totalUsers,
-			all
+			totalUsers
 		});
 	});
 });
@@ -98,3 +130,22 @@ router.post('/add', (req, res) => {
 });
 
 module.exports = router;
+
+function shuffleArray(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
