@@ -90,7 +90,8 @@ module.exports = () => {
 										obs_rank: obs_rank.rank,
 										obs_score: obs_rank.score,
 										ipv6: is_ipv6,
-										up: false
+										up: false,
+										uptime: instance.upchecks / (instance.upchecks + instance.downchecks + 1)
 									}, $inc: {
 										downchecks: 1
 									}
@@ -111,7 +112,8 @@ module.exports = () => {
 											statuses: stats.statuses,
 											connections: stats.connections,
 											info: stats.info,
-											openRegistrations
+											openRegistrations,
+											uptime: (instance.upchecks + 1) / (instance.upchecks + instance.downchecks + 1)
 										}, $inc: {
 											upchecks: 1
 										}
