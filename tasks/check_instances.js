@@ -283,7 +283,7 @@ function getStats(base_url, cb) {
 		    		if(!info)
 		    			info = '';
 
-		    		info = info.replace(/<br *\/?>/gi, '\n').replace(/<\/?.+>/gi, '');
+		    		info = info.replace(/<br *\/?>/gi, '\n').replace(/<\/?(.+?)>/gi, '');
 
 				    cb(null, {
 				    	users,
