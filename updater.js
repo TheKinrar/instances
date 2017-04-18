@@ -10,4 +10,4 @@ setInterval(clearInstances, 3600000);
 
 const saveHistory = require('./tasks/save_history');
 saveHistory();
-setInterval(saveHistory, 3600000);
+setInterval(saveHistory, 5 * 60 * 1000);
