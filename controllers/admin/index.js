@@ -212,9 +212,11 @@ router.post('/activate', (req, res) => {
                 req.flash('adminRegistered', true);
                 res.redirect('/admin');
             }).catch((e) => {
+                console.error(e);
                 res.sendStatus(500);
             });
         }).catch((e) => {
+            console.error(e);
             res.sendStatus(500);
         });
     }
