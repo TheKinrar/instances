@@ -5,6 +5,7 @@ const Languages = require('languages');
 
 router.use((req, res, next) => {
     res.set('Cache-Control', 'no-cache');
+    next();
 });
 
 router.get('/', (req, res) => {
@@ -15,6 +16,22 @@ router.get('/', (req, res) => {
     DB.get('instances').findOne({
         name: req.user.instance
     }).then((instance) => {
+        if(!instance.infos) {
+            instance.infos = {
+              shortDescription: '',
+              fullDescription: '',
+              theme: '',
+              languages: [],
+              noOtherLanguages: false,
+              prohibitedContent:
+               [],
+              otherProhibitedContent: [],
+              federation: 'all',
+              bots: 'yes',
+              brands: 'yes'
+            };
+        }
+
         res.render('admin/dashboard', {
             instance,
             langs: Languages.getAllLanguageCode().map(function(e) {
@@ -204,7 +221,7 @@ router.post('/activate', (req, res) => {
             }, {
                 $set: {
                     activated: true,
-                    password: passwordHash.hash(req.body.password1, {
+                    password: passwordHash.generate(req.body.password1, {
                         algorithm: 'sha256'
                     })
                 }
@@ -213,9 +230,11 @@ router.post('/activate', (req, res) => {
                 res.redirect('/admin');
             }).catch((e) => {
                 res.sendStatus(500);
+console.error(e);
             });
         }).catch((e) => {
             res.sendStatus(500);
+console.error(e);
         });
     }
 });
