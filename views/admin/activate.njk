@@ -1,0 +1,36 @@
+{% extends 'layout.njk' %}
+
+{% block main %}
+
+    <form class="col-md-12" action="/admin/activate" method="post">
+        <h4>Account activation</h4>
+        <noscript><strong>Please enable JavaScript.</strong></noscript>
+        <div id="signup-password" style="display: none;">
+            <p>Please define a password to activate your account.</p>
+
+            <div class="form-group">
+                <label for="signup-inputPassword1">Password</label>
+                <input type="password" class="form-control" name="password1" id="signup-inputPassword1">
+            </div>
+            <div class="form-group">
+                <label for="signup-inputPassword2">Password confirmation</label>
+                <input type="password" class="form-control" name="password2" id="signup-inputPassword2">
+            </div>
+
+            <input type="hidden" name="token" value="{{ token }}">
+            <button id="activate-btn" type="submit" class="btn btn-primary" disabled>Activate</button>
+        </div>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+
+    <script type="text/javascript">
+        var passwordZone = $('#signup-password');
+        var activateBtn = $('#activate-btn');
+
+        passwordZone.show();
+        activateBtn.attr('disabled', false);
+    </script>
+{% endblock %}

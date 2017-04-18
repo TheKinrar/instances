@@ -1,0 +1,7 @@
+{
+  "mailgun": {
+    "key": "key-e8d402e08ea053baf49ec5b9b140584b",
+    "domain": "mastodon.xyz"
+  },
+  "session_secret": "qodzzqdjzhlhesffs5r4drg5x8er6t54hyjgukhj6vbg4f5"
+}

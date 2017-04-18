@@ -1,6 +1,20 @@
 const router = require('express').Router();
 
 router.use('/api', require('./api'));
+router.use('/admin', (req, res, next) => {
+	if(req.session.user) {
+		DB.get('admins').findOne({
+			_id: req.session.user
+		}).then((admin) => {
+			req.user = res.locals.user = admin;
+			next();
+		}).catch((e) => {
+			res.sendStatus(500);
+		});
+	} else {
+		next();
+	}
+}, require('./admin'));
 
 router.get('/', (req, res) => {
 	let q = {

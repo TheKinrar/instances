@@ -1,0 +1,99 @@
+{% extends 'layout.njk' %}
+
+{% block main %}
+    <p><strong>This section concerns instance owners only.</strong></p>
+
+    {% if messages.adminRegistered %}
+        <div class="alert alert-success" role="alert">
+          <strong>Activation successful.</strong> You may now sign in using the form on the right.
+        </div>
+    {% endif %}
+
+    {% if messages.loginError %}
+        <div class="alert alert-danger" role="alert">
+          <strong>Login failed.</strong> {{ messages.loginError }}
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <h4>Sign up</h4>
+
+            <p>
+                If you own a Mastodon instance and want to make it appear on this website, sign up here.
+            </p>
+
+            <form>
+                <noscript><strong>Please enable JavaScript.</strong></noscript>
+                <div id="signup-name" style="display: none;">
+                    <div class="form-group">
+                        <label for="signup-inputName">Instance name</label>
+                        <input type="text" class="form-control" id="signup-inputName" aria-describedby="signup-inputNameHelp" placeholder="mastodon.social">
+                        <small id="signup-inputNameHelp" class="form-text text-muted">You'll use your instance name to login. You can't have more than one account per instance.</small>
+                    </div>
+                </div>
+
+                <div id="signup-activation" style="display: none;">
+                    <p>
+                        We have sent an e-mail to <span id="signup-email"></span> to confirm you are the administrator of this instance.<br />
+                        Please click the link in this e-mail.
+                    </p>
+                    <p>
+                        <i>Bad e-mail address? E-mail not received?</i><br />
+                        Please contact <a href="https://mastodon.xyz/@TheKinrar">@TheKinrar@mastodon.xyz</a>.
+                    </p>
+                </div>
+
+                <button id="signup-btn" type="button" class="btn btn-primary" disabled>Sign up</button>
+            </form>
+        </div>
+
+        <div class="col-md-4">
+            <h4>Sign in</h4>
+
+            <form action="/admin/login" method="POST">
+                <div class="form-group">
+                    <label for="signin-inputName">Instance name</label>
+                    <input type="text" class="form-control" name="instance" id="signin-inputName">
+                </div>
+                <div class="form-group">
+                    <label for="signin-inputPassword">Password</label>
+                    <input type="password" class="form-control" name="password" id="signin-inputPassword">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Sign in</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+
+    <script type="text/javascript">
+        var signupBtn = $('#signup-btn');
+        var nameZone = $('#signup-name');
+
+        nameZone.show();
+        signupBtn.attr('disabled', false);
+        signupBtn.click(function() {
+            signupBtn.attr('disabled', true);
+            signupBtn.text('Loading...');
+
+            var instanceName = $('#signup-inputName').val();
+
+            $.post('/admin/sign_up', {
+                instance: instanceName
+            }, function(res) {
+                nameZone.hide();
+
+                $('#signup-email').text(res.email);
+                $('#signup-activation').show();
+                signupBtn.hide();
+            }).fail(function() {
+                signupBtn.attr('disabled', false);
+                signupBtn.text('Sign up');
+            });
+        });
+    </script>
+{% endblock %}

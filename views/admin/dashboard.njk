@@ -1,0 +1,123 @@
+{% extends 'layout.njk' %}
+
+{% block main %}
+    <p>
+        Define here the informations about your instance, which will be shown on this website and will help users to choose an instance which best suits their needs.<br />
+        Informations are not currently shown but will be in the next days. Instances with no information set won't be shown.
+    </p>
+
+    {% if messages.validationError %}
+        <div class="alert alert-danger" role="alert">
+          <strong>Could not save info:</strong>&nbsp;{{ messages.validationError }}
+        </div>
+    {% endif %}
+
+    <form action="/admin" method="POST">
+      <div class="form-group">
+        <label for="inputShortdesc">Short description</label>
+        <textarea class="form-control" name="shortDescription" rows="2" maxlength="150">{{ instance.infos.shortDescription }}</textarea>
+        <small class="form-text text-muted">At most 150 characters. This will be shown with your instance name. Use it to briefly describe the specificities of your instance, if any. You may also leave this field empty if you want to.</small>
+      </div>
+      <div class="form-group">
+        <label for="inputFulldesc">Full description</label>
+        <textarea class="form-control" name="fullDescription" rows="5">{{ instance.infos.fullDescription }}</textarea>
+        <small class="form-text text-muted">This is the extended description of your instance, like what's shown on the <i>/about/more</i> page of your instance.</small>
+      </div>
+      <div class="form-group">
+        <label for="inputTheme">Theme</label>
+        <input type="text" class="form-control" id="inputTheme" name="theme" value="{{ instance.infos.theme }}">
+        <small class="form-text text-muted">Leave empty for a generalistic instance.</small>
+      </div>
+      <div class="form-group">
+        <label for="selectContent">Main languages</label>
+        <select multiple class="form-control" id="selectLanguages" name="languages" style="height: 300px;">
+          {% for lang in langs %}
+            <option value="{{ lang.code }}"{{ ' selected="selected"' if instance.infos.languages.includes(lang.code) }}>{{ lang.name }} ({{ lang.nativeName }})</option>
+          {% endfor %}
+        </select>
+        <small class="form-text text-muted">Use Control key to select multiple at once and to unselect items.</small>
+      </div>
+      <div class="form-check">
+        <label class="form-check-label">
+          <input type="checkbox" class="form-check-input" name="noOtherLanguages"{{ ' checked' if instance.infos.noOtherLanguages }}>
+          Other languages are not accepted
+        </label>
+      </div>
+      <div class="form-group">
+        <label for="selectContent">Prohibited content</label>
+        <select multiple class="form-control" name="prohibitedContent" style="height: 300px;">
+          {% for content in ProhibitedContent.array %}
+            <option value="{{ content.code }}"{{ ' selected="selected"' if instance.infos.prohibitedContent.includes(content.code) }}>{{ content.name }}</option>
+          {% endfor %}
+        </select>
+        <small class="form-text text-muted">Use Control key to select multiple at once and to unselect items.</small>
+      </div>
+      <div class="form-group">
+        <label for="inputOtherProhibited">Other prohibited content</label>
+        <input type="text" class="form-control" name="otherProhibitedContent" value="{{ otherProhibitedContent }}">
+        <small class="form-text text-muted">Please use a comma-separated list.</small>
+      </div>
+      <fieldset class="form-group">
+        <legend>Federation</legend>
+        <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" class="form-check-input" name="federation" value="all"{{ ' checked' if instance.infos.federation === 'all' }}>
+            Federates with all instances
+          </label>
+        </div>
+        <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" class="form-check-input" name="federation" value="some"{{ ' checked' if instance.infos.federation === 'some' }}>
+            Federates with some instances
+          </label>
+        </div>
+      </fieldset>
+      <fieldset class="form-group">
+        <legend>Bots</legend>
+        <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" class="form-check-input" name="bots" value="yes"{{ ' checked' if instance.infos.bots === 'yes' }}>
+            Allowed
+          </label>
+        </div>
+        <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" class="form-check-input" name="bots" value="conditions"{{ ' checked' if instance.infos.bots === 'conditions' }}>
+            Allowed with conditions
+          </label>
+        </div>
+        <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" class="form-check-input" name="bots" value="no"{{ ' checked' if instance.infos.bots === 'no' }}>
+            Not allowed
+          </label>
+        </div>
+      </fieldset>
+      <fieldset class="form-group">
+        <legend>Brands</legend>
+        <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" class="form-check-input" name="brands" value="yes"{{ ' checked' if instance.infos.brands === 'yes' }}>
+            Allowed
+          </label>
+        </div>
+        <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" class="form-check-input" name="brands" value="conditions"{{ ' checked' if instance.infos.brands === 'conditions' }}>
+            Allowed with conditions
+          </label>
+        </div>
+        <div class="form-check">
+          <label class="form-check-label">
+            <input type="radio" class="form-check-input" name="brands" value="no"{{ ' checked' if instance.infos.brands === 'no' }}>
+            Not allowed
+          </label>
+        </div>
+      </fieldset>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}

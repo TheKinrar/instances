@@ -1,0 +1,7 @@
+{
+    "mailgun": {
+        "key": "MAILGUN API KEY",
+        "domain": "MAILGUN DOMAIN"
+    },
+    "session_secret": "RANDOM THING HERE"
+}

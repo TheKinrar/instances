@@ -1,0 +1,11 @@
+{
+	"nudity_nocw": "Nudity without content warning",
+	"nudity_all": "Nudity, even without content warning",
+	"sexism": "Sexism",
+	"racism": "Racism",
+	"illegalContentLinks": "Links to illegal content",
+	"spam": "Spam",
+	"advertising": "Advertising",
+	"hateSpeeches": "Hate speeches",
+	"harrassment": "Harrassment"
+}
