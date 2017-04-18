@@ -3,6 +3,10 @@ const randomstring = require('randomstring');
 const passwordHash = require('password-hash');
 const Languages = require('languages');
 
+router.use((req, res, next) => {
+    res.set('Cache-Control', 'no-cache');
+});
+
 router.get('/', (req, res) => {
     if(!req.user) {
         return res.render('admin/index');
