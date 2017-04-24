@@ -1,11 +1,14 @@
 {
-	"nudity_nocw": "Nudity without content warning",
-	"nudity_all": "Nudity, even without content warning",
+	"nudity_nocw": "Nudity without NSFW tag",
+	"nudity_all": "Nudity, even with NSFW tag",
+	"pornography_nocw": "Pornography without NSFW tag",
+	"pornography_all": "Pornography, even with NSFW tag",
 	"sexism": "Sexism",
 	"racism": "Racism",
 	"illegalContentLinks": "Links to illegal content",
 	"spam": "Spam",
 	"advertising": "Advertising",
 	"hateSpeeches": "Hate speeches",
-	"harrassment": "Harrassment"
+	"harrassment": "Harrassment",
+	"spoilers_nocw": "Spoilers without content warning"
 }

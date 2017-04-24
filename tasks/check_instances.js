@@ -98,6 +98,12 @@ module.exports = () => {
 								});
 							} else {
 								areRegistrationsOpened(url, (openRegistrations) => {
+									let usersChangeRatio = NaN;
+
+									if(instance.users) {
+                                        usersChangeRatio = stats.users / instance.users;
+                                    }
+
 									db_instances.update({
 										_id: instance._id
 									}, {
@@ -109,6 +115,7 @@ module.exports = () => {
 											ipv6: is_ipv6,
 											up: true,
 											users: stats.users,
+											usersChangeRatio,
 											statuses: stats.statuses,
 											connections: stats.connections,
 											info: stats.info,

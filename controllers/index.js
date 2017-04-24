@@ -24,6 +24,9 @@ router.get('/', (req, res) => {
 		"blacklisted": {
 			"$ne": true
 		},
+                "dead": {
+                        "$ne": true
+                },
 		"uptime": {
 			$gte: 0.99
 		},
@@ -58,7 +61,10 @@ router.get('/list', (req, res) => {
 		},
 		"blacklisted": {
 			"$ne": true
-		}
+		},
+                "dead": {
+                        "$ne": true
+                }
 	};
 
 	DB.get('instances').find(q).then((instances) => {
@@ -105,7 +111,10 @@ router.get('/instances.json', (req, res) => {
 		},
 		"blacklisted": {
 			"$ne": true
-		}
+		},
+                "dead": {
+                        "$ne": true
+                }
 	}).then((instances) => {
 		let jsons = [];
 

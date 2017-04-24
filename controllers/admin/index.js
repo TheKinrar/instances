@@ -8,6 +8,8 @@ router.use((req, res, next) => {
     next();
 });
 
+router.use('/admin', require('./admin'));
+
 router.get('/', (req, res) => {
     if(!req.user) {
         return res.render('admin/index');
@@ -28,7 +30,8 @@ router.get('/', (req, res) => {
               otherProhibitedContent: [],
               federation: 'all',
               bots: 'yes',
-              brands: 'yes'
+              brands: 'yes',
+              optOut: false
             };
         }
 
@@ -57,6 +60,8 @@ router.post('/', (req, res) => {
         req.flash('validationError', msg);
         res.redirect('/admin');
     };
+
+    let optOut = req.body.optOut === 'on';
 
     if(!isNonEmptyString(req.body.shortDescription))
         return error('Missing short description.');
@@ -99,6 +104,7 @@ router.post('/', (req, res) => {
         return error('Missing brands policy.');
 
     let infos = {
+        optOut,
         shortDescription: req.body.shortDescription,
         fullDescription: req.body.fullDescription,
         theme,
@@ -134,6 +140,8 @@ router.post('/sign_up', (req, res) => {
             return res.sendStatus(400);
         }
 
+        req.body.instance = req.body.instance.toLowerCase();
+
         let instanceJson = JSON.parse(body);
 
         DB.get('admins').findOne({
@@ -143,6 +151,13 @@ router.post('/sign_up', (req, res) => {
                 return res.sendStatus(400);
 
             const activation_token = randomstring.generate(64);
+
+            DB.get('instances').insert({
+                addedAt: new Date(),
+                name: req.body.instance,
+                downchecks: 0,
+                upchecks: 0
+            }).catch((e) => {});
 
             DB.get('admins').insert({
                 createdAt: new Date(),

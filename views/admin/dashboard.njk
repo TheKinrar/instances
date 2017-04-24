@@ -13,6 +13,12 @@
     {% endif %}
 
     <form action="/admin" method="POST">
+      <div class="form-check">
+        <label class="form-check-label">
+          <input type="checkbox" class="form-check-input" name="optOut"{{ ' checked' if instance.infos.optOut }}>
+          Hide this instance from the instances selection
+        </label>
+      </div>
       <div class="form-group">
         <label for="inputShortdesc">Short description</label>
         <textarea class="form-control" name="shortDescription" rows="2" maxlength="150">{{ instance.infos.shortDescription }}</textarea>
