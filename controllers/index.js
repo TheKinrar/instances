@@ -105,6 +105,8 @@ router.get('/list', (req, res) => {
 });
 
 router.get('/instances.json', (req, res) => {
+	res.set('Access-Control-Allow-Origin', '*');
+	
 	DB.get('instances').find({
 		"upchecks": {
 			"$gt": 0

@@ -118,6 +118,8 @@ module.exports = () => {
 											usersChangeRatio,
 											statuses: stats.statuses,
 											connections: stats.connections,
+											version: stats.version,
+											version_score: stats.version_score,
 											info: stats.info,
 											openRegistrations,
 											uptime: (instance.upchecks + 1) / (instance.upchecks + instance.downchecks + 1)
@@ -292,12 +294,61 @@ function getStats(base_url, cb) {
 
 		    		info = info.replace(/<br *\/?>/gi, '\n').replace(/<\/?(.+?)>/gi, '');
 
-				    cb(null, {
-				    	users,
-				    	statuses,
-				    	connections,
-				    	info
-				    });
+					https.get(base_url + '/api/v1/instance', (res) => {
+					  const statusCode = res.statusCode;
+					  const contentType = res.headers['content-type'];
+
+					  if (statusCode !== 200) {
+					  	res.resume();
+					    return cb(new Error(`Status Code: ${statusCode}, expected 200`));
+					  }
+
+					  if (!/^application\/json/.test(contentType)) {
+					  	res.resume();
+					    return cb(new Error(`Content type: ${contentType}, expected application/json`));
+					  }
+
+					  res.setEncoding('utf8');
+					  let rawData = '';
+					  res.on('data', (chunk) => rawData += chunk);
+					  res.on('end', () => {
+				    	try {
+				    		let data = JSON.parse(rawData);
+
+				    		let version = '<1.3';
+				    		let version_score = 0;
+
+				    		if(data.version)
+				    			version = data.version;
+
+				    		if(version === 'Mastodon::Version') {
+				    			version = '1.3.x';
+				    			version_score = 130;
+				    		} else if(/^[0-9]\.[0-9](\.[0-9])?$/.test(version)) {
+				    			let version_a = version.split('.').map((e) => {return parseInt(e);});
+
+				    			version_score = (100 * version_a[0]) + (10 * version_a[1]) + (version_a.length == 3 ? version_a[2] : 0);
+				    		}
+
+						    cb(null, {
+						    	users,
+						    	statuses,
+						    	connections,
+						    	info,
+						    	version,
+						    	version_score
+						    });
+				    	} catch(e) {
+				    		return cb(e);
+				    	}
+					  });
+
+					  res.on('error', (e) => {
+				  		cb(e);
+					  });
+					}).on('error', (e) => {
+						cb(e);
+					});
 		    	} catch(e) {
 		    		return cb(e);
 		    	}

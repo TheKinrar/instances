@@ -30,6 +30,7 @@
           <th></th>
           <th>Score</th>
           <th>Instance</th>
+          <th>Version</th>
           <th>Users</th>
           <th>Statuses</th>
           <th>Connections</th>
@@ -46,6 +47,7 @@
               {% if instance.up %}<td class="table-success">UP{% else %}<td class="table-danger">DOWN{% endif %}</td>
               <td>{{ instance.score_str }}</td>
               <td scope="row" data-value="{{ instance.name }}"><strong><a href="https://{{ instance.name }}">{{ instance.name }}</a></strong></td>
+              <td data-value="{{ instance.version_score }}">{{ instance.version }}</td>
               <td>{{ instance.users }}</td>
               <td>{{ instance.statuses }}</td>
               <td>{{ instance.connections }}</td>

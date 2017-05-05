@@ -10,8 +10,6 @@ const influx = new Influx.InfluxDB({
 	    uptime: Influx.FieldType.FLOAT,
 	    https_score: Influx.FieldType.INTEGER,
 	    obs_score: Influx.FieldType.INTEGER,
-	    https_rank: Influx.FieldType.STRING,
-	    obs_rank: Influx.FieldType.STRING,
 	    ipv6: Influx.FieldType.BOOLEAN,
 	    openRegistrations: Influx.FieldType.BOOLEAN,
 	    users: Influx.FieldType.INTEGER,
@@ -43,26 +41,20 @@ const influx = new Influx.InfluxDB({
  ]
 });
 
-influx.getDatabaseNames().then(names => {
-	if (!names.includes('mastodon_instances')) {
-	  return influx.createDatabase('mastodon_instances');
-	}
-}).catch(err => {
-	console.error(`Error creating Influx database: ${err}`);
-});
+const date = new Date(1491844817026);
+const max_date = new Date(1493592264513);
 
-module.exports = () => {
-	const db_instances = DB.get('instances');
-	const db_history = DB.get('history');
+generate();
 
-	db_instances.find({
-		"upchecks": {
-			"$gt": 0
-		},
-		"blacklisted": {
-			"$ne": true
-		}
-	}).then((instances) => {
+function generate() {
+	console.log('Generating network stats for ' + date);
+
+	let prev_date = new Date(date.getTime() - (5 * 60 * 1000)); 
+	influx.query(`
+		SELECT * FROM instance_stats
+		WHERE time <= ${date.getTime()}000000 AND time >= ${prev_date.getTime()}000000
+		ORDER BY time DESC`)
+	.then((rows) => {
 		let uptimes = [],
 		    uptimes_sum = 0,
 		    https_scores = [],
@@ -75,18 +67,14 @@ module.exports = () => {
 		    statuses = 0,
 		    connections = 0;
 
-		const clearPoints = points => {
-			for(let key of Object.keys(points)) {
-				if(typeof points[key] === 'undefined' || points[key] === null || Number.isNaN(points[key]))
-					delete points[key];
-			}
-
-			return points;
-		};
-
+		const processedInstances = [];
 		const pointsToWrite = [];
 
-		instances.forEach((instance) => {
+		rows.forEach((instance) => {
+			if(processedInstances.includes(instance.instance))
+				return;
+			processedInstances.push(instance.instance);
+
 			uptimes.push(instance.uptime);
 			uptimes_sum += instance.uptime;
 			https_scores.push(instance.https_score);
@@ -102,10 +90,6 @@ module.exports = () => {
 			if(!isNaN(instance.connections))
 				connections += instance.connections;
 
-			delete instance._id;
-			instance.date = new Date();
-			db_history.insert(instance);
-
 			pointsToWrite.push({
 			    measurement: 'instance_stats',
 			    tags: { instance: instance.name },
@@ -113,8 +97,6 @@ module.exports = () => {
 				    uptime: instance.uptime,
 				    https_score: instance.https_score,
 				    obs_score: instance.obs_score,
-				    https_rank: instance.https_rank,
-				    obs_rank: instance.obs_rank,
 				    ipv6: instance.ipv6,
 				    openRegistrations: instance.openRegistrations,
 				    users: instance.users,
@@ -123,57 +105,18 @@ module.exports = () => {
 			    })
 			  });
 		});
-
-		let average = (arr) => {
-			let sum = 0,
-			    n = 0;
-
-			arr.forEach(e => {
-				if(!isNaN(e) && e !== null) {
-					sum += e;
-					n++;
-				}
-			});
-
-			return sum / n;
-		};
-
-		let median = (arr) => {
-			arr.sort((a, b) => a - b);
-
-			if(arr.length % 2 == 0)
-				return (arr[arr.length / 2] + arr[(arr.length / 2) + 1]) / 2;
-
-			return arr[((arr.length - 1) / 2) + 1];
-		};
-
-		influx.writePoints(pointsToWrite).catch(e => {
-			console.error('Error while writing instance_stats to InfluxDB.', e);
-		});
-
-		influx.writePoints([
-		  {
-		    measurement: 'network_stats',
-		    fields: {
-			    average_uptime: average(uptimes),
-			    median_uptime: median(uptimes),
-			    average_https_score: average(https_scores),
-			    median_https_score: median(https_scores),
-			    average_obs_score:  average(obs_scores),
-			    median_obs_score: median(obs_scores),
-			    ipv6_absolute: ipv6_count,
-			    ipv6_relative: ipv6_count / instances.length,
-			    openRegistrations_absolute: openRegistrations_count,
-			    openRegistrations_relative: openRegistrations_count / instances.length,
-			    users,
-			    statuses,
-			    connections
-		    }
-		  }
-		]).catch(e => {
-			console.error('Error while writing network_stats to InfluxDB.', e);
-		});
-	}).catch((e) => {
-		console.error(e);
 	});
+
+	/*date.setTime(date.getTime() + (5 * 60 * 1000));
+	if(date < max_date)
+		generate();*/
+}
+
+function clearPoints(points) {
+	for(let key of Object.keys(points)) {
+		if(typeof points[key] === 'undefined' || points[key] === null || Number.isNaN(points[key]))
+			delete points[key];
+	}
+
+	return points;
 };
