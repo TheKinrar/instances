@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const Languages = require('languages');
 
 router.use('/api', require('./api'));
 router.use('/admin', (req, res, next) => {
@@ -16,6 +17,18 @@ router.use('/admin', (req, res, next) => {
 	}
 }, require('./admin'));
 
+router.get('/wizard', (req, res) => {
+    res.render('wizard', {
+        langs: Languages.getAllLanguageCode().map(function(e) {
+            var info = Languages.getLanguageInfo(e);
+            info.code = e;
+            return info;
+        }).sort(function(a, b) {
+            return a.name.localeCompare(b.name);
+        })
+    });
+});
+
 router.get('/', (req, res) => {
 	let q = {
 		"upchecks": {
@@ -24,9 +37,9 @@ router.get('/', (req, res) => {
 		"blacklisted": {
 			"$ne": true
 		},
-		"dead": {
-				"$ne": true
-		},
+                "dead": {
+                        "$ne": true
+                },
 		"uptime": {
 			$gte: 0.99
 		},
@@ -62,9 +75,9 @@ router.get('/list', (req, res) => {
 		"blacklisted": {
 			"$ne": true
 		},
-		"dead": {
-				"$ne": true
-		}
+                "dead": {
+                        "$ne": true
+                }
 	};
 
 	DB.get('instances').find(q).then((instances) => {
@@ -128,9 +141,9 @@ router.get('/instances.json', (req, res) => {
 		"blacklisted": {
 			"$ne": true
 		},
-		"dead": {
-				"$ne": true
-		}
+                "dead": {
+                        "$ne": true
+                }
 	}).then((instances) => {
 		let jsons = [];
 
