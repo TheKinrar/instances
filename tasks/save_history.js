@@ -151,7 +151,7 @@ module.exports = () => {
 			console.error('Error while writing instance_stats to InfluxDB.', e);
 		});
 
-		influx.writePoints([
+		/*influx.writePoints([
 		  {
 		    measurement: 'network_stats',
 		    fields: {
@@ -172,7 +172,7 @@ module.exports = () => {
 		  }
 		]).catch(e => {
 			console.error('Error while writing network_stats to InfluxDB.', e);
-		});
+		});*/
 	}).catch((e) => {
 		console.error(e);
 	});

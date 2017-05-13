@@ -1,0 +1,65 @@
+{% extends 'layout.njk' %}
+
+{% block main %}
+
+    <h3>Versions</h3>
+
+    <div class="row">
+        <div class="col-md-9">
+            <table class="table table-sm sortable">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Version</th>
+                    <th>Instances</th>
+                    <th>Instances (%)</th>
+                    <th>Release date</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% set i = 1 %}
+                {% for version in versions %}
+                    <tr>
+                        <td data-value="{{ i }}">#{{ i }}</td>
+                        <td>{{ version.name }}</td>
+                        <td>{{ version.instances }}</td>
+                        <td>{{ (version.instances_ratio * 100) | round(2) }}</td>
+                        <td>{{ version.publishedAt }}</td>
+                    </tr>
+                    {% set i = i + 1 %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-3">
+            <canvas id="versionsChart"></canvas>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+
+    <script src="/js/Chart.bundle.min.js"></script>
+
+    <script>
+        var versionsChart = new Chart('versionsChart', {
+            type: 'pie',
+            data: {
+                labels: [
+                    ''{% for version in versions %},
+                        '{{ version.name | safe }}'
+                    {% endfor %}
+                ].slice(1),
+                datasets: [
+                    {
+                        data:[
+                            0{% for version in versions %},
+                            {{ version.instances }}
+                            {% endfor %}].slice(1)
+                    }
+                ]
+            }
+        });
+    </script>
+{% endblock %}

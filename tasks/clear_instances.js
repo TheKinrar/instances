@@ -22,4 +22,43 @@ module.exports = () => {
 	        }
 	    ]
 	});
+
+	checkDeadInstances().then(() => {
+		console.log('Cleared dead instances.');
+	}).catch(console.error);
 };
+
+async function checkDeadInstances() {
+    const db_instances = DB.get('instances');
+    const db_history = DB.get('history');
+
+    const deadDate = new Date(new Date().getTime() - (7 * 24 * 60 * 60 * 1000));
+
+    console.log('Looking for dead instances. Dead date: ' + deadDate);
+
+    let instances = await db_instances.find({
+        "up": false
+    });
+
+    for(let instance of instances) {
+		let history = await db_history.findOne({
+            "name": instance.name,
+            "up": true,
+            "date": {
+                "$gt": deadDate
+            }
+        });
+
+		if(!history) {
+            console.log(instance.name + ' is dead.');
+
+            await db_instances.update({
+				_id: instance._id
+			}, {
+            	$set: {
+            		dead: true
+				}
+			});
+		}
+	}
+}

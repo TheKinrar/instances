@@ -7,6 +7,8 @@ router.use((req, res, next) => {
 	next();
 });
 
+router.use('/1.0', require('./v1'));
+
 router.use('/instances', require('./instances'));
 
 module.exports = router;

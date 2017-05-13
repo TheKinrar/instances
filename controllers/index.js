@@ -24,9 +24,9 @@ router.get('/', (req, res) => {
 		"blacklisted": {
 			"$ne": true
 		},
-                "dead": {
-                        "$ne": true
-                },
+		"dead": {
+				"$ne": true
+		},
 		"uptime": {
 			$gte: 0.99
 		},
@@ -62,22 +62,22 @@ router.get('/list', (req, res) => {
 		"blacklisted": {
 			"$ne": true
 		},
-                "dead": {
-                        "$ne": true
-                }
+		"dead": {
+				"$ne": true
+		}
 	};
 
 	DB.get('instances').find(q).then((instances) => {
-		var totalUsers = 0;
+		let totalUsers = 0;
 
 		instances.forEach((instance) => {
 			instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
 			instance.uptime_str = instance.uptime.toFixed(3);
 
-			instance.score = instance.uptime * Math.min(1, instance.upchecks / 1440);
+			instance.score = 0.5 * instance.uptime * Math.min(1, instance.upchecks / 1440);
 
-			if(instance.up)
-				instance.score += 5;
+			/*if(instance.version_score)
+				instance.score += instance.version_score / 10;*/
 
 			if(instance.https_score)
 				instance.score += instance.https_score / 5;
@@ -86,11 +86,10 @@ router.get('/list', (req, res) => {
 				instance.score += instance.obs_score / 5;
 
 			if(instance.ipv6)
-				instance.score += 5;
+				instance.score += 10;
 
-			instance.score_str = '' + Math.floor(instance.score * 10);
-
-			totalUsers += instance.users;
+			if(instance.users)
+				totalUsers += instance.users;
 		});
 
 		instances.sort((b, a) => {
@@ -104,6 +103,21 @@ router.get('/list', (req, res) => {
 	});
 });
 
+router.get('/network', (req, res) => {
+	DB.get('versions').find({
+		instances: {
+			$gt: 0
+		}
+	}, {sort:{
+        instances: -1
+    }}).then((versions) => {
+		res.render('network', {versions});
+	}).catch((e) => {
+		res.sendStatus(500);
+		console.error(e);
+	});
+});
+
 router.get('/instances.json', (req, res) => {
 	res.set('Access-Control-Allow-Origin', '*');
 	
@@ -114,9 +128,9 @@ router.get('/instances.json', (req, res) => {
 		"blacklisted": {
 			"$ne": true
 		},
-                "dead": {
-                        "$ne": true
-                }
+		"dead": {
+				"$ne": true
+		}
 	}).then((instances) => {
 		let jsons = [];
 
@@ -152,6 +166,52 @@ router.post('/add', (req, res) => {
 	}).catch((e) => {});
 
 	res.redirect('/');
+});
+
+router.get('/:instance', (req, res) => {
+    DB.get('instances').findOne({
+        name: req.params.instance
+    }).then((instance) => {
+        if(!instance)
+            return res.sendStatus(404);
+
+        influx.query(`
+			select last("users"), last(statuses), last(connections)
+			from instance_stats
+			where instance = '${instance.name}'
+			and time <= ${new Date(new Date().getTime() - (7 * 24 * 60 * 60 * 1000)).getTime()}000000`)
+		.then(dbres => {
+			let lastWeek = null;
+			if(dbres.length > 0) {
+				lastWeek = {
+                    users: dbres[0].last,
+                    statuses: dbres[0].last_1,
+                    connections: dbres[0].last_2
+				};
+			}
+
+			let score = {
+				total: 0
+			};
+
+            score.total += instance.uptime * 50;
+            score.total += instance.https_score / 5;
+            score.total += instance.obs_score / 5;
+            score.total += instance.ipv6 ? 10 : 0;
+
+            res.render('instance', {
+            	instance,
+				lastWeek,
+				score
+            });
+		}).catch(err => {
+			console.error(err);
+			res.sendStatus(500);
+		});
+    }).catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+    });
 });
 
 module.exports = router;
