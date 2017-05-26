@@ -18,21 +18,66 @@
 
 			<select style="margin: 10px; height: 200px; max-width: 700px;" multiple class="form-control mx-auto" id="selectLanguages">
                 {% for lang in langs %}
-					<option value="{{ lang.code }}">{{ lang.name }} ({{ lang.nativeName }})</option>
+					<option value="{{ lang.iso639_1 }}">{{ lang.name[0] }} ({{ lang.nativeName[0] }})</option>
                 {% endfor %}
 			</select>
 
 			<button id="btn-next-languages" type="button" class="btn btn-primary">Next</button>
 		</div>
 
+		<div id="collapse-user-count" class="collapse hide text-center" role="tabpanel">
+			<h4 style="margin-top: 100px;">How many users must be on the instance?</h4>
+
+			<div class="form-check">
+				<label class="form-check-label">
+					<input type="radio" class="form-check-input" name="users" value="less_100">
+					Less than 100
+				</label>
+			</div>
+			<div class="form-check">
+				<label class="form-check-label">
+					<input type="radio" class="form-check-input" name="users" value="less_500">
+					Less than 500
+				</label>
+			</div>
+			<div class="form-check">
+				<label class="form-check-label">
+					<input type="radio" class="form-check-input" name="users" value="less_1000">
+					Less than 1000
+				</label>
+			</div>
+			<div class="form-check">
+				<label class="form-check-label">
+					<input type="radio" class="form-check-input" name="users" value="no_matter">
+					No matters
+				</label>
+			</div>
+
+			<button id="btn-next-user-count" type="button" class="btn btn-primary">Next</button>
+		</div>
+
 		<div id="collapse-moderation" class="collapse hide text-center" role="tabpanel">
 			<h4 style="margin-top: 100px;">What should be prohibited on the instance you're looking for?</h4>
-
-			<select style="margin: 10px; height: 200px; max-width: 700px;" multiple class="form-control mx-auto" id="selectProhibitedContent">
-                {% for content in ProhibitedContent.array %}
-					<option value="{{ content.code }}">{{ content.name }}</option>
-                {% endfor %}
-			</select>
+			<table>
+				<thead>
+					<tr>
+						<th style="padding-right:10px"></th>
+						<th style="padding-left:10px; padding-right:10px">Authorized</th>
+						<th style="padding-left:10px; padding-right:10px" >No matters</th>
+						<th style="padding-left:10px">Denied</th>
+					</tr>
+				</thead>
+				<tbody>
+                	{% for content in ProhibitedContent.array %}
+						<tr style="text-align: center">
+							<td>{{ content.name }}</td>
+							<td><input type="radio" class="form-check-input" name="{{ content.code }}" value="not_moderated" style="margin: auto"/></td>
+							<td><input type="radio" class="form-check-input" name="{{ content.code }}" value="no_matters" style="margin: auto" checked/></td>
+							<td><input type="radio" class="form-check-input" name="{{ content.code }}" value="moderated" style="margin: auto"/></td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
 
 			<p class="font-italic">No selection means you don't want any moderation. If you just don't care about that, click Skip.</p>
 
@@ -106,27 +151,69 @@
 					<legend>Brands</legend>
 					<div class="form-check">
 						<label class="form-check-label">
-							<input type="radio" class="form-check-input" name="bots" value="yes"{{ ' checked' if instance.infos.bots === 'yes' }}>
+							<input type="radio" class="form-check-input" name="brands" value="yes"{{ ' checked' if instance.infos.brands === 'yes' }}>
 							Allowed
 						</label>
 					</div>
 					<div class="form-check">
 						<label class="form-check-label">
-							<input type="radio" class="form-check-input" name="bots" value="conditions"{{ ' checked' if instance.infos.bots === 'conditions' }}>
+							<input type="radio" class="form-check-input" name="brands" value="conditions"{{ ' checked' if instance.infos.brands === 'conditions' }}>
 							Allowed with conditions
 						</label>
 					</div>
 					<div class="form-check">
 						<label class="form-check-label">
-							<input type="radio" class="form-check-input" name="bots" value="no"{{ ' checked' if instance.infos.bots === 'no' }}>
+							<input type="radio" class="form-check-input" name="brands" value="no"{{ ' checked' if instance.infos.brands === 'no' }}>
 							Not allowed
 						</label>
 					</div>
 				</div>
 			</div>
 
-			<button type="button" class="btn btn-primary">Next</button>
+			<button id="btn-next-bots-brands" type="button" class="btn btn-primary">Next</button>
 		</div>
+
+		<div id="collapse-theme" class="collapse hide text-center" role="tabpanel">
+			<h4 style="margin-top: 100px;">What special(s) theme(s) do you want for your instance?</h4>
+
+			<!-- TODO -->
+
+			<button id="btn-next-theme" type="button" class="btn btn-primary">Next</button>
+		</div>
+
+		<div id="collapse-admin-location" class="collapse hide text-center" role="tabpanel">
+			<h4 style="margin-top: 100px;">Where do you want the admin to be?</h4>
+
+			<select class="form-control mx-auto" id="selectAdminLocation">
+				<option value="">...</option>
+                {% for country in countries %}
+					<option value="{{ country.code_2 }}">{{ country.name }}</option>
+                {% endfor %}
+			</select>
+
+			<button id="btn-next-admin-location" type="button" class="btn btn-primary">Next</button>
+		</div>
+
+		<div id="collapse-host-location" class="collapse hide text-center" role="tabpanel">
+			<h4 style="margin-top: 100px;">Where do you want your host to be?</h4>
+
+			<select class="form-control mx-auto" id="selectHostLocation">
+				<option value="">...</option>
+                {% for country in countries %}
+					<option value="{{ country.code_2 }}">{{ country.name }}</option>
+                {% endfor %}
+			</select>
+
+			<button id="btn-send" type="button" class="btn btn-primary">Send</button>
+		</div>
+
+
+
+
+		<div id="collapse-result" class="collapse hide text-center" role="tabpanel">
+			<h4 style="margin-top: 100px;">Results</h4>
+		</div>
+
 	</div>
 {% endblock %}
 
@@ -147,21 +234,72 @@
                 query.languages.push($(this).val());
 			});
 
+            collapse('user-count');
+        });
+
+        $('#btn-next-user-count').click(function() {
+            query.user_count = $('#collapse-user-count').find(":checked").first().val();
+
             collapse('moderation');
         });
 
         $('#btn-next-moderation').click(function() {
-            query.prohibitedContent = [];
+            query.moderation = { allowed : [], prohibited: []};
 
-            $('#selectProhibitedContent').find(":selected").each(function() {
-                query.prohibitedContent.push($(this).val());
+            $('#collapse-moderation').find(":checked").each(function() {
+                if($(this).val() == "moderated"){
+                    query.moderation.prohibited.push($(this).attr("name"));
+				}
+				else if($(this).val() == "not_moderated")
+				    query.moderation.allowed.push($(this).attr("name"));
             });
 
             collapse('security');
         });
 
         $('#btn-next-security').click(function() {
+            query.security = $('#collapse-security').find(':checked').first().val();
             collapse('bots-brands');
+        });
+
+        $('#btn-next-bots-brands').click(function() {
+            query.bots = $('[name=bots]:checked').val();
+            query.brands = $('[name=brands]:checked').val();
+
+            let themes = () => {
+                // TODO
+                return [];
+            };
+            if(themes.length > 0) {
+                collapse('theme');
+                $('#collapse-theme').append('<select style="margin: 10px; height: 200px; max-width: 700px;" multiple class="form-control mx-auto" id="selectTheme"></select>');
+                $.each(themes, (theme) => {
+                    $('#selectTheme').append('<option value="'+theme+'">'+theme+'</option>');
+                });
+			}
+			else {
+                collapse('admin-location');
+			}
+
+        });
+
+        $('#btn-next-theme').click(function() {
+            query.themes = [];
+
+            $('#selectTheme').find(":selected").each(function() {
+                query.themes.push($(this).val());
+            });
+
+            collapse('admin-location');
+		});
+
+        $('#btn-next-admin-location').click(function() {
+            query.admin_location = [];
+
+            $('#selectAdminLocation').find(":selected").each(function() {
+                query.admin_location.push($(this).val());
+            });
+            collapse('host-location');
         });
 
 		function collapse(id) {
@@ -175,5 +313,30 @@
 				}
 			});
 		}
+
+		$('#btn-send').click(function() {
+            query.host_location = [];
+
+            $('#selectHostLocation').find(":selected").each(function() {
+                query.host_location.push($(this).val());
+            });
+
+            $.ajax({
+                dataType: 'html',
+                data: {query:JSON.stringify(query)},
+                type: 'GET',
+                success: (result) => {
+                    $('#collapse-result').append(result);
+                    collapse('result');
+                },
+                error: (err) => {
+                    console.log("ERROR");
+                    console.log(err)
+                }
+            });
+
+		});
+
+
 	</script>
 {% endblock %}
