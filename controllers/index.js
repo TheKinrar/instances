@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const Languages = require('languages');
+const CountryLanguages = require('country-language');
 
 router.use('/api', require('./api'));
 router.use('/admin', (req, res, next) => {
@@ -18,15 +18,122 @@ router.use('/admin', (req, res, next) => {
 }, require('./admin'));
 
 router.get('/wizard', (req, res) => {
-    res.render('wizard', {
-        langs: Languages.getAllLanguageCode().map(function(e) {
-            var info = Languages.getLanguageInfo(e);
-            info.code = e;
-            return info;
-        }).sort(function(a, b) {
-            return a.name.localeCompare(b.name);
-        })
-    });
+	if(req.query.query === undefined) {
+        res.render('wizard', {
+            langs: CountryLanguages.getLanguages().filter((a)=>{return a.nativeName[0] !== ""}).sort((a,b)=>{return a.name[0].localeCompare(b.name[0])}),
+			countries: CountryLanguages.getCountries().sort((a,b)=>{return a.name[0].localeCompare(b.name[0])})
+        });
+    }
+    else {
+        let data = JSON.parse(req.query.query);
+        let query = {};
+
+        // desired languages
+        if(data.languages != undefined && data.languages.length != 0){
+            query['infos.languages'] = { $in: data.languages };
+        }
+
+        // desired instance size
+        if(data.user_count != undefined && data.user_count != "no_matter"){
+            query.users = { $lt : data.user_count.split('_')[1]};
+        }
+
+        // desired moderation
+        if(data.moderation != undefined && data.moderation.length != 0) {
+            let mod = {};
+            if(data.moderation.allowed != undefined && data.moderation.allowed.length != 0){
+                mod.$nin = data.moderation.allowed;
+            }
+            if(data.moderation.prohibited != undefined && data.moderation.prohibited.length != 0){
+                mod.$all = data.moderation.prohibited;
+            }
+            if(mod.length > 0)
+            	query['infos.prohibitedContent'] = mod;
+        }
+
+        // desired security
+        if(data.security != undefined){
+            switch (data.security){
+                case "very_high":
+                    query.obs_score = { $gt: 85};
+                    query.https_score = 100;
+                    break;
+                case "high":
+                    query.obs_score = { $gt: 65};
+                    query.https_score = { $gt: 80 };
+                    break;
+                case "medium":
+                    query.obs_score = { $gt: 45};
+                    query.https_score = { $gt: 60 };
+            }
+        }
+
+        // desired bots or brands
+        if(data.bots != undefined){
+            query['infos.bots'] = data.bots;
+        }
+        if(data.brands != undefined){
+            query['infos.brands'] = data.brands;
+        }
+
+        // desired admin location
+		if(data.admin_location != undefined && data.admin_location != 0){
+        	query['info.admin_location'] = data.admin_location;
+		}
+
+        // desired host location
+		if(data.host_location != undefined && data.host_location != 0){
+            query['info.host_location'] = data.host_location;
+        }
+
+        DB.get('instances').find(query).then((instances) => {
+            // fixme code duplication with router.get('/list')
+			if(instances.length != 0) {
+                instances.forEach((instance) => {
+                    instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
+                    instance.uptime_str = instance.uptime.toFixed(3);
+
+                    instance.score = 0.5 * instance.uptime * Math.min(1, instance.upchecks / 1440);
+
+					/*if(instance.version_score)
+					 instance.score += instance.version_score / 10;*/
+
+                    if (instance.https_score)
+                        instance.score += instance.https_score / 5;
+
+                    if (instance.obs_score)
+                        instance.score += instance.obs_score / 5;
+
+                    if (instance.ipv6)
+                        instance.score += 10;
+
+                    // define accuracy of the result
+                    let commonLang = 0;
+                    if (data.languages != undefined) {
+                    	if(instance.infos != undefined &&
+							instance.infos.languages != undefined){
+
+                            instance.infos.languages.forEach((lang) => {
+                                if (data.languages.includes(lang))
+                                    commonLang += 1;
+                            });
+
+						}
+						instance.accuracy = commonLang / data.languages.length * 100;
+                    }
+
+                });
+
+                instances.sort((b, a) => {
+                    return a.accuracy - b.accuracy;
+                });
+            }
+
+            res.render('instancesDisplay', {
+                instances
+            });
+        });
+	}
 });
 
 router.get('/', (req, res) => {

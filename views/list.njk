@@ -24,73 +24,7 @@
       All dates are unix timestamps (in seconds).
     </p>
     
-    <table class="table table-sm sortable">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Score</th>
-          <th>Instance</th>
-          <th>Version</th>
-          <th>Users</th>
-          <th>Statuses</th>
-          <th>Connections</th>
-          <th>Registrations</th>
-          <th>Uptime</th>
-          <th>HTTPS</th>
-          <th><abbr title="Observatory by Mozilla">Obs</abbr></th>
-          <th>IPv6</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for instance in instances %}
-            <tr>
-              {% if instance.up %}<td class="table-success">UP{% else %}<td class="table-danger">DOWN{% endif %}</td>
-              <td data-value="{{ instance.score }}">{{ instance.score | round(2) }}</td>
-              <td scope="row" data-value="{{ instance.name }}"><strong><a href="https://{{ instance.name }}">{{ instance.name }}</a></strong></td>
-              <td data-value="{{ instance.version_score }}">{{ instance.version }}</td>
-              <td>{{ instance.users }}</td>
-              <td>{{ instance.statuses }}</td>
-              <td>{{ instance.connections }}</td>
-              {% if not instance.openRegistrations %}<td class="table-danger">No{% else %}<td class="table-success">Yes{% endif %}</td>
-              {% if instance.uptime >= 99 %}
-                <td class="table-success" data-value="{{ instance.uptime}}">
-              {% elif instance.uptime >= 97 %}
-                <td class="table-warning" data-value="{{ instance.uptime}}">
-              {% else %}
-                <td class="table-danger" data-value="{{ instance.uptime}}">
-              {% endif %}
-              {{ instance.uptime_str }}%</td>
-              {% if instance.https_score %}
-                {% if instance.https_score >= 80 %}
-                <td class="table-success" data-value="{{ instance.https_score }}">
-                {% elif instance.https_score >= 60 %}
-                <td class="table-warning" data-value="{{ instance.https_score }}">
-                {% else %}
-                <td class="table-danger" data-value="{{ instance.https_score }}">
-                {% endif %}
-
-                <a href="https://tls.imirhil.fr/https/{{ instance.name }}">{{ instance.https_rank }}</a>
-              {% else %}
-                <td>
-              {% endif %}</td>
-              {% if instance.obs_score %}
-                {% if instance.obs_score >= 80 %}
-                <td class="table-success" data-value="{{ instance.obs_score }}">
-                {% elif instance.obs_score >= 60 %}
-                <td class="table-warning" data-value="{{ instance.obs_score }}">
-                {% else %}
-                <td class="table-danger" data-value="{{ instance.obs_score }}">
-                {% endif %}
-
-                <a href="https://observatory.mozilla.org/analyze.html?host={{ instance.name }}">{{ instance.obs_rank }}</a>
-              {% else %}
-                <td>
-              {% endif %}</td>
-              {% if instance.ipv6 %}<td class="table-success">Yes{% else %}<td class="table-danger">No{% endif %}</td>
-            </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    {% include 'instancesDisplay.njk' %}
 
     <h3>Add an instance</h3>
     <form action="/add" method="post">
