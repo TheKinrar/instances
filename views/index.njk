@@ -1,105 +1,209 @@
 {% extends 'layout.njk' %}
 
+{% block css %}
+    {{ super() }}
+    <link rel="stylesheet" href="/css/select2.min.css">
+{% endblock %}
+
 {% block main %}
-    <h3>Selection of instances</h3>
+	<div id="collapse-parent" role="tablist" aria-multiselectable="true">
+		<div id="collapse-welcome" class="collapse show text-center" role="tabpanel">
+			<h4 style="margin-top: 100px;">Let me help you choose an instance</h4>
 
-    <p>
-      Here are some instances, picked randomly every minute from the full instance list <a href="/list">here</a>.<br />
-      Only instances with <b>open registrations, sufficient uptime, and security level</b> are shown here.
-    </p>
+			<p>I will ask you a few questions about your needs, then I will show you instances that
+				best suit these.</p>
 
-    <div class="row">
-    {% for instance in instances %}
-    	<div class="col-md-4" style="padding: 10px;">
-			<div class="card">
-			  <div class="card-block">
-			    <h4 class="card-title" style="overflow-wrap: break-word;">{{ instance.name }}</h4>
-			    <p class="card-text">
-					<nobr><abbr title="Percent of time this instance is available">Uptime</abbr> <span class="badge badge-success" style="vertical-align:middle;">{{ instance.uptime_str }}%</span></nobr><br />
+			<p>You may skip any step by keeping default options if you want to.</p>
 
-			    	<nobr>Users <span class="badge badge-info" style="vertical-align:middle;">{{ instance.users }}</span></nobr><br />
-			    	<nobr>Statuses <span class="badge badge-info" style="vertical-align:middle;">{{ instance.statuses }}</span></nobr><br />
-			    </p>
-			    <a href="https://{{ instance.name }}" class="btn btn-primary">Register</a>
-			    <a href="#" data-toggle="modal" data-target="#modalInstanceInfo" data-instance="{{ instance.name }}" class="btn btn-info">More info</a>
-			  </div>
-			</div>
+			<button id="btn-start" type="button" class="btn btn-primary">Start</button>
 		</div>
-    {% endfor %}
-    </div>
 
-    <div class="modal fade" id="modalInstanceInfo" tabindex="-1" role="dialog" aria-labelledby="modalInstanceInfoLabel" aria-hidden="true">
-	  <div class="modal-dialog" role="document">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <h5 class="modal-title" id="modalInstanceInfoLabel"></h5>
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-	          <span aria-hidden="true">&times;</span>
-	        </button>
-	      </div>
-	      <div class="modal-body">
-	      	<p>
-				<nobr><abbr title="Percent of time this instance is available">Uptime</abbr> <span class="badge badge-success" style="vertical-align:middle;" id="modalInstanceInfo-uptime"></span></nobr><br />
+		<div id="collapse-languages" class="collapse hide text-center" role="tabpanel">
+			<h4 style="margin-top: 100px;">What language(s) do you speak?</h4>
 
-		    	<nobr>HTTPS <span class="badge badge-success" style="vertical-align:middle;" id="modalInstanceInfo-https"></span></nobr>
-		    	<nobr>Observatory <span class="badge badge-success" style="vertical-align:middle;" id="modalInstanceInfo-obs"></span></nobr>
-		    	<nobr>IPv6 <span class="badge" style="vertical-align:middle;" id="modalInstanceInfo-ipv6"></span></nobr><br />
+            <div style="margin: 10px; max-width: 700px; width: 100%;" class="mx-auto">
+                <select id="selectLanguages" style="width: 100%;" multiple="multiple">
+                    {% for lang in langs %}
+                        <option value="{{ lang.iso639_1 }}">{{ lang.name[0] }} ({{ lang.nativeName[0] }})</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-		    	<nobr>Users <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-users"></span></nobr>
-		    	<nobr>Statuses <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-statuses"></span></nobr>
-		    	<nobr>Connections <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-connections"></span></nobr><br />
-		    </p>
+			<button id="btn-next-languages" type="button" class="btn btn-primary">Next</button>
+		</div>
 
-		    <h5>About instance (<a id="modalInstanceInfo-moreLink" href="">more</a>)</h4>
+		<div id="collapse-user-count" class="collapse hide text-center" role="tabpanel">
+			<h4 style="margin-top: 100px;">Would you prefer an instance with a user count...</h4>
 
-	    	<p id="modalInstanceInfo-info" style="font-style: italic;"></p>
-	      </div>
-	      <div class="modal-footer">
-	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-	      </div>
-	    </div>
-	  </div>
+
+			<button onclick="userCount(100);" type="button" class="btn btn-primary mb-2">less than 100</button>
+			<button onclick="userCount(500);" type="button" class="btn btn-primary mb-2">less than 500</button>
+			<button onclick="userCount(1000);" type="button" class="btn btn-primary mb-2">less than 1,000</button>
+			<button onclick="userCount(10000);" type="button" class="btn btn-primary mb-2">less than 10,000</button><br />
+			<button onclick="userCount();" type="button" class="btn btn-secondary">It does not matter</button>
+		</div>
+
+		<div id="collapse-moderation" class="collapse hide text-center" role="tabpanel">
+			<h4 style="margin-top: 100px;">Any specific moderation rules?</h4>
+			<table style="margin: auto;">
+				<thead>
+					<tr>
+						<th style="padding-right:10px"></th>
+						<th style="padding-left:10px; padding-right:10px">Authorized</th>
+						<th style="padding-left:10px; padding-right:10px" >No matter</th>
+						<th style="padding-left:10px">Denied</th>
+					</tr>
+				</thead>
+				<tbody>
+                	{% for content in ProhibitedContent.array %}
+						<tr style="text-align: center">
+							<td>{{ content.name }}</td>
+							<td><input type="radio" class="form-check-input" name="{{ content.code }}" value="not_moderated" style="margin: auto"/></td>
+							<td><input type="radio" class="form-check-input" name="{{ content.code }}" value="no_matters" style="margin: auto" checked/></td>
+							<td><input type="radio" class="form-check-input" name="{{ content.code }}" value="moderated" style="margin: auto"/></td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+
+			<button id="btn-next-moderation" type="button" class="btn btn-primary">Next</button>
+		</div>
+
+        <div id="collapse-version" class="collapse hide text-center" role="tabpanel">
+            <h4 style="margin-top: 100px;">Stable version or latest features?</h4>
+
+            <p>An instance running the stable version of Mastodon should be more stable than an instance
+            running an in-development version, but those have the latest features of Mastodon before stable ones.</p>
+
+            <button id="btn-version-master" type="button" class="btn btn-primary">Latest features</button>
+            <button id="btn-version-skip" type="button" class="btn btn-secondary">It does not matter</button>
+            <button id="btn-version-stable" type="button" class="btn btn-primary">Stable</button>
+        </div>
+
+		<div id="collapse-theme" class="collapse hide text-center" role="tabpanel">
+			<h4 style="margin-top: 100px;">What special theme(s) do you want for your instance?</h4>
+
+			<!-- TODO -->
+
+			<button id="btn-next-theme" type="button" class="btn btn-primary">Next</button>
+		</div>
 	</div>
 {% endblock %}
 
 {% block scripts %}
 	{{ super() }}
 
+    <script type="text/javascript" src="/js/select2.full.min.js"></script>
+
 	<script type="text/javascript">
-		$('#modalInstanceInfo').on('show.bs.modal', function (event) {
-		  var button = $(event.relatedTarget);
-		  var instanceName = button.data('instance');
+        $("#selectLanguages").select2({
+            width: 'resolve'
+        }).select2('val', ['{{ acceptsLanguage }}']);
 
-		  var modal = $(this);
-		  modal.find('.modal-title').text(instanceName);
+		var query = {};
 
-		  $.get('/api/instances/' + instanceName + '.json', function(instance) {
-		  	modal.find('#modalInstanceInfo-uptime').text((instance.uptime * 100).toFixed(3) + '%');
+        $('#btn-start').click(function() {
+            collapse('languages');
+        });
 
-		  	modal.find('#modalInstanceInfo-https').text(instance.https_rank);
-		  	modal.find('#modalInstanceInfo-obs').text(instance.obs_rank);
+        $('#btn-next-languages').click(function() {
+            query.languages = [];
 
-		  	var ipv6 = modal.find('#modalInstanceInfo-ipv6');
-		  	if(instance.ipv6) {
-		  		ipv6.text('Yes');
-		  		ipv6.addClass('badge-success');
-		  		ipv6.removeClass('badge-danger');
-		  	} else {
-		  		ipv6.text('No');
-		  		ipv6.addClass('badge-danger');
-		  		ipv6.removeClass('badge-success');
-		  	}
+            $('#selectLanguages').find(":selected").each(function() {
+                query.languages.push($(this).val());
+			});
 
-		  	modal.find('#modalInstanceInfo-users').text(instance.users);
-		  	modal.find('#modalInstanceInfo-statuses').text(instance.statuses);
-		  	modal.find('#modalInstanceInfo-connections').text(instance.connections);
+            collapse('user-count');
+        });
 
-		  	if(instance.info.length > 500)
-		  		instance.info = instance.info.substring(0, 500) + '...';
-		  	modal.find('#modalInstanceInfo-info').html(instance.info.replace('\n', '<br />'));
+        function userCount(count) {
+            if(count)
+            	query.user_count = count;
 
-		  	modal.find('#modalInstanceInfo-moreLink').attr('href', 'https://' + instanceName + '/about/more');
-		  });
+            collapse('moderation');
+        }
+
+        $('#btn-next-moderation').click(function() {
+            query.moderation = { allowed : [], prohibited: []};
+
+            $('#collapse-moderation').find(":checked").each(function() {
+                if($(this).val() == "moderated"){
+                    query.moderation.prohibited.push($(this).attr("name"));
+				}
+				else if($(this).val() == "not_moderated")
+				    query.moderation.allowed.push($(this).attr("name"));
+            });
+
+            return collapse('version');
+
+            let themes = () => {
+                // TODO
+                return [];
+            };
+            if(themes.length > 0) {
+                collapse('theme');
+                $('#collapse-theme').append('<select style="margin: 10px; height: 200px; max-width: 700px;" multiple class="form-control mx-auto" id="selectTheme"></select>');
+                $.each(themes, (theme) => {
+                    $('#selectTheme').append('<option value="'+theme+'">'+theme+'</option>');
+                });
+            }
+            else {
+                sendQuery();
+            }
+        });
+
+        $('#btn-version-master').click(function() {
+            query.version = 'master';
+
+            sendQuery();
+        });
+
+        $('#btn-version-stable').click(function() {
+            query.version = 'stable';
+
+            sendQuery();
+        });
+
+        $('#btn-version-skip').click(function() {
+            sendQuery();
+        });
+
+        $('#btn-next-theme').click(function() {
+            query.themes = [];
+
+            $('#selectTheme').find(":selected").each(function() {
+                query.themes.push($(this).val());
+            });
+
+            collapse('admin-location');
 		});
+
+		function collapse(id) {
+		    id = 'collapse-' + id;
+
+		    $('#collapse-parent').children().each(function(i, e) {
+		        if(e.id !== id) {
+                    $(e).collapse('hide');
+                } else {
+                    $(e).collapse('show');
+				}
+			});
+		}
+
+		function sendQuery() {
+            $.ajax({
+                type: 'POST',
+                url: '/wizard',
+                data: JSON.stringify(query),
+                contentType: "application/json",
+                success: () => {
+                    window.location.href = '/list';
+                },
+                error: (err) => {
+                    console.log("ERROR");
+                    console.log(err)
+                }
+            });
+		}
 	</script>
 {% endblock %}

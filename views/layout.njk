@@ -1,9 +1,11 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <link rel="stylesheet" href="/css/bootstrap.min.css">
-        <link rel="stylesheet" href="/css/bootstrap-sortable.css">
-        <link rel="stylesheet" href="/css/font-awesome.min.css">
+        {% block css %}
+            <link rel="stylesheet" href="/css/bootstrap.min.css">
+            <link rel="stylesheet" href="/css/bootstrap-sortable.css">
+            <link rel="stylesheet" href="/css/font-awesome.min.css">
+        {% endblock %}
         <title>Mastodon instances</title>
     </head>
     <body>
@@ -17,10 +19,10 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="/">Selection of instances</a>
+                            <a class="nav-link" href="/">Wizard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/list">Instances list</a>
+                            <a class="nav-link" href="/list">List</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/admin">Admin space</a>

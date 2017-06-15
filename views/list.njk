@@ -1,37 +1,242 @@
 {% extends 'layout.njk' %}
 
 {% block main %}
-    <p>Here is a list of Mastodon instances. You can add other instances using the form at the bottom of the page.<br />
-    Notice that instances may take up to a minute to be shown in the list.</p>
-    <p><i>Contact <a href="https://mastodon.xyz/@TheKinrar">@TheKinrar@mastodon.xyz</a> if needed.</i></p>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card mb-3">
+                <div class="card-block text-center">
+                    <a href="/" class="btn btn-primary">OPEN WIZARD</a>
+                </div>
+            </div>
 
-    <h3>All instances</h3>
-    <p>
-      Score is based on the uptime, the HTTPS score, the <i>Observatory by Mozilla</i> score and the IPv6 compatibility.<br />
-      Click on the column headers to sort the instances.
-    </p>
-    
-    <p>
-      There {{ 'are' if instances|length > 1 else 'is' }} currently <strong>{{ instances|length }}</strong> instance{{ 's' if instances|length > 1 else '' }} being tracked, with a total of <strong>{{ totalUsers }}</strong> users.
-    </p>
+            <div id="card-wizard-criteria" class="card mb-3">
+                <div id="loading-wizard" class="card-block">
+                    <i style="display: block;" class="fa fa-refresh fa-spin fa-2x fa-fw mx-auto"></i>
+                </div>
+                <div style="display: none;" id="wizard-criteria" class="card-block"></div>
+            </div>
+        </div>
 
-    <p><a href="#" onclick="$('#fordevs').toggle();">For developers</a></p>
+        <div class="col-md-9">
+            <div class="card">
+                <ul id="list-instances" class="list-group list-group-flush"></ul>
+                <div class="card-block">
+                    <i id="loading-instances" style="display: block;" class="fa fa-refresh fa-spin fa-2x fa-fw mx-auto"></i>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <p id="fordevs" style="display: none;">
-      <a href="/instances.json">/instances.json</a> current state of all tracked instances<br />
-      <a href="/api/instances/history.json?instance=mastodon.xyz&start=0&end=1491895743">/api/instances/history.json?instance=<i>INSTANCE</i>&amp;start=<i>START_TIMESTAMP</i>&amp;end=<i>END_TIMESTAMP</i></a> history of one instance on one period<br /><br />
+    <div class="modal fade" id="modalInstanceInfo" tabindex="-1" role="dialog" aria-labelledby="modalInstanceInfoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalInstanceInfoLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        <nobr><abbr title="Percent of time this instance is available">Uptime</abbr> <span class="badge badge-success" style="vertical-align:middle;" id="modalInstanceInfo-uptime"></span></nobr><br />
 
-      All dates are unix timestamps (in seconds).
-    </p>
-    
-    {% include 'instancesDisplay.njk' %}
+                        <nobr>HTTPS <span class="badge badge-success" style="vertical-align:middle;" id="modalInstanceInfo-https"></span></nobr>
+                        <nobr>Observatory <span class="badge badge-success" style="vertical-align:middle;" id="modalInstanceInfo-obs"></span></nobr>
+                        <nobr>IPv6 <span class="badge" style="vertical-align:middle;" id="modalInstanceInfo-ipv6"></span></nobr><br />
 
-    <h3>Add an instance</h3>
-    <form action="/add" method="post">
-      <div class="form-group">
-        <label for="inputName">Name</label>
-        <input type="text" class="form-control" name="name" id="inputName" placeholder="mastodon.social">
-      </div>
-      <button type="submit" class="btn btn-primary">Add instance</button>
-    </form>
+                        <nobr>Users <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-users"></span></nobr>
+                        <nobr>Statuses <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-statuses"></span></nobr>
+                        <nobr>Connections <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-connections"></span></nobr><br />
+                    </p>
+
+                    <h5>About instance (<a id="modalInstanceInfo-moreLink" href="">more</a>)</h4>
+
+                        <p id="modalInstanceInfo-info" style="font-style: italic;"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+
+    <script type="text/javascript">
+
+        $('#modalInstanceInfo').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var instanceName = button.data('instance');
+
+            var modal = $(this);
+            modal.find('.modal-title').text(instanceName);
+
+            $.get('/api/instances/' + instanceName + '.json', function(instance) {
+                modal.find('#modalInstanceInfo-uptime').text((instance.uptime * 100).toFixed(3) + '%');
+
+                modal.find('#modalInstanceInfo-https').text(instance.https_rank);
+                modal.find('#modalInstanceInfo-obs').text(instance.obs_rank);
+
+                var ipv6 = modal.find('#modalInstanceInfo-ipv6');
+                if(instance.ipv6) {
+                    ipv6.text('Yes');
+                    ipv6.addClass('badge-success');
+                    ipv6.removeClass('badge-danger');
+                } else {
+                    ipv6.text('No');
+                    ipv6.addClass('badge-danger');
+                    ipv6.removeClass('badge-success');
+                }
+
+                modal.find('#modalInstanceInfo-users').text(instance.users);
+                modal.find('#modalInstanceInfo-statuses').text(instance.statuses);
+                modal.find('#modalInstanceInfo-connections').text(instance.connections);
+
+                if(instance.info.length > 500)
+                    instance.info = instance.info.substring(0, 500) + '...';
+                modal.find('#modalInstanceInfo-info').html(instance.info.replace('\n', '<br />'));
+
+                modal.find('#modalInstanceInfo-moreLink').attr('href', 'https://' + instanceName + '/about/more');
+            });
+        });
+    </script>
+
+    <script type="text/javascript">
+        let languages = null, countries = null, prohibitedContent = null;
+
+        $(function() {
+            $.get('/wizard.json').done(function(data) {
+                languages = data.languages;
+                countries = data.countries;
+                prohibitedContent = data.prohibitedContent;
+
+                let html = '<span class="text-left"><small>';
+
+                if(data.query.languages && data.query.languages.length > 0) {
+                    html += '<b>LANGUAGES:</b> ';
+
+                    let first = true;
+                    data.query.languages.forEach((code) => {
+                        let language = getLanguage(languages, code);
+
+                        if (!first)
+                            html += ', ';
+
+                        html += language.name[0];
+                        first = false;
+                    });
+
+                    html += '<br />';
+                }
+
+                if(data.query.user_count) {
+                    html += '<b>MAX USERS:</b> ' + data.query.user_count + '<br />';
+                }
+
+                if(data.query.moderation) {
+                    if (data.query.moderation.allowed && data.query.moderation.allowed.length > 0) {
+                        html += '<b>ALLOWED:</b> ';
+
+                        let first = true;
+                        data.query.moderation.allowed.forEach((code) => {
+                            let content = prohibitedContent[code];
+
+                            if (!first)
+                                html += ', ';
+
+                            html += content;
+                            first = false;
+                        });
+
+                        html += '<br>';
+                    }
+
+                    if (data.query.moderation.prohibited && data.query.moderation.prohibited.length > 0) {
+                        html += '<b>PROHIBITED:</b> ';
+
+                        let first = true;
+                        data.query.moderation.prohibited.forEach((code) => {
+                            let content = prohibitedContent[code];
+
+                            if (!first)
+                                html += ', ';
+
+                            html += content;
+                            first = false;
+                        });
+
+                        html += '<br>';
+                    }
+                }
+
+                if(data.query.version === 'master') {
+                    html += '<b>VERSION:</b> Latest<br />';
+                } else if(data.query.version === 'stable') {
+                    html += '<b>VERSION:</b> Stable<br />';
+                }
+
+                html += '</small></span>';
+
+                $('#wizard-criteria').show();
+                $('#wizard-criteria').append(html);
+
+                $('#loading-wizard').hide();
+                showInstances(data.instances);
+                $('#loading-instances').hide();
+            }).fail(function() {
+                $('#card-wizard-criteria').hide();
+
+                $.get('/list.json').done(function(data) {
+                    languages = data.languages;
+                    countries = data.countries;
+                    prohibitedContent = data.prohibitedContent;
+
+                    showInstances(data.instances);
+                    $('#loading-instances').hide();
+                });
+            });
+        });
+
+        function showInstances(instances) {
+            const list = $('#list-instances');
+            list.empty();
+
+            instances.forEach(function(instance) {
+                list.append(generateInstanceHtml(instance));
+            });
+        }
+
+        function generateInstanceHtml(instance) {
+            let html = '<a href="" data-toggle="modal" data-target="#modalInstanceInfo" data-instance="' + instance.name + '" class="list-group-item list-group-item-action flex-column align-items-start">' +
+                '<div class="d-flex w-100 justify-content-between">' +
+                '<h5 class="mb-1">' + instance.name +
+                ' <small class="text-muted">' +
+                ((instance.infos && instance.infos.theme) ? instance.infos.theme : 'No theme') +
+                '</small>' +
+                '</h5>' +
+                '<small>' + instance.users + ' users&nbsp;&bull;&nbsp;' + instance.statuses + ' statuses</small>' +
+                '</div>';
+
+            if(instance.infos) {
+                html += '<p class="mb-1">'
+                    + instance.infos.shortDescription
+                    + '</p>';
+            }
+
+            html += '</a>';
+
+            return html;
+        }
+
+        function getLanguage(languages, code) {
+            for(let language of languages) {
+                if(language.iso639_1 === code)
+                    return language;
+            }
+
+            return null;
+        }
+    </script>
 {% endblock %}
