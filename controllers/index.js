@@ -1,5 +1,6 @@
 const router = require('express').Router();
-const Languages = require('languages');
+const CountryLanguages = require('country-language');
+const alParser = require('accept-language-parser');
 
 router.use('/api', require('./api'));
 router.use('/admin', (req, res, next) => {
@@ -17,57 +18,117 @@ router.use('/admin', (req, res, next) => {
 	}
 }, require('./admin'));
 
-router.get('/wizard', (req, res) => {
-    res.render('wizard', {
-        langs: Languages.getAllLanguageCode().map(function(e) {
-            var info = Languages.getLanguageInfo(e);
-            info.code = e;
-            return info;
-        }).sort(function(a, b) {
-            return a.name.localeCompare(b.name);
-        })
-    });
-});
-
 router.get('/', (req, res) => {
-	let q = {
-		"upchecks": {
-			"$gt": 1440
-		},
-		"blacklisted": {
-			"$ne": true
-		},
-                "dead": {
-                        "$ne": true
-                },
-		"uptime": {
-			$gte: 0.99
-		},
-		"https_score": {
-			$gte: 80
-		},
-		"obs_score": {
-			$gte: 65
-		},
-		"openRegistrations": true,
-		"info": {
-			"$type": 2
-		},
-		"$where": "this.info.length > 32"
-	};
-
-	DB.get('instances').find(q).then((instances) => {
-		instances.forEach((instance) => {
-			instance.uptime_str = (instance.uptime * 100).toFixed(3);
-		});
-
-		res.render('index', {
-			instances: shuffleArray(instances).slice(0, 30)
-		});
+    res.render('index', {
+    	acceptsLanguage: alParser.pick(req.app.locals.langCodes, req.get('Accept-Language'))
 	});
 });
 
-router.get('/list', (req, res) => {
+router.post('/wizard', (req, res) => {
+	req.flash('wizard', req.body);
+	res.status(204).send();
+});
+
+router.get('/wizard.json', (req, res) => {
+    let data = req.flash('wizard')[0];
+    if(data) {
+        console.log(data);
+
+        let q = {
+            "upchecks": {
+                "$gt": 1440
+            },
+            "blacklisted": {
+                "$ne": true
+            },
+            "dead": {
+                "$ne": true
+            },
+            "uptime": {
+                $gte: 0.99
+            },
+            "https_score": {
+                $gte: 80
+            },
+            "obs_score": {
+                $gte: 65
+            },
+            "openRegistrations": true,
+            "infos": {
+                "$exists": true
+            }
+        };
+
+        DB.get('instances').find(q).then((instances) => {
+            instances.forEach((instance) => {
+                let score = 0;
+
+                // desired languages
+                if (Array.isArray(data.languages)) {
+                    data.languages.forEach((language) => {
+                        if (instance.infos.languages.includes(language)) {
+                            score += 10;
+                        }
+                    });
+                }
+
+                // desired instance size
+                if (Number.isInteger(data.user_count)) {
+                    if (instance.users < data.user_count) {
+                        score += 10;
+                    }
+                }
+
+                // desired moderation
+                if (Array.isArray(data.moderation)) {
+                    data.moderation.forEach((e) => {
+                        if ((e.allowed && !instance.prohibitedContent.includes(e.id)) ||
+                            (e.prohibited && instance.prohibitedContent.includes(e.id))) {
+                            score += 10;
+                        }
+                    });
+                }
+
+                instance.sorting_score = score;
+
+                instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
+                instance.uptime_str = instance.uptime.toFixed(3);
+
+                instance.score = 0.5 * instance.uptime * Math.min(1, instance.upchecks / 1440);
+
+				/*if(instance.version_score)
+				 instance.score += instance.version_score / 10;*/
+
+                if (instance.https_score)
+                    instance.score += instance.https_score / 5;
+
+                if (instance.obs_score)
+                    instance.score += instance.obs_score / 5;
+
+                if (instance.ipv6)
+                    instance.score += 10;
+            });
+
+            shuffleArray(instances);
+            instances.sort((a, b) => b.sorting_score - a.sorting_score);
+
+            res.json({
+                query: data,
+				instances,
+                languages: req.app.locals.langs,
+                countries: req.app.locals.countries,
+                prohibitedContent: req.app.locals.ProhibitedContent
+			});
+        }).catch((err) => {
+            console.error(err);
+            res.sendStatus(500);
+        });
+    } else {
+    	res.sendStatus(404);
+	}
+});
+
+router.get('/list.json', (req, res) => {
 	let q = {
 		"upchecks": {
 			"$gt": 0
@@ -75,22 +136,21 @@ router.get('/list', (req, res) => {
 		"blacklisted": {
 			"$ne": true
 		},
-                "dead": {
-                        "$ne": true
-                }
+		"dead": {
+			"$ne": true
+		}
 	};
 
 	DB.get('instances').find(q).then((instances) => {
 		let totalUsers = 0;
 
 		instances.forEach((instance) => {
-			instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
 			instance.uptime_str = instance.uptime.toFixed(3);
 
 			instance.score = 0.5 * instance.uptime * Math.min(1, instance.upchecks / 1440);
 
-			/*if(instance.version_score)
-				instance.score += instance.version_score / 10;*/
+			//if(instance.version_score)
+			// instance.score += instance.version_score / 10;
 
 			if(instance.https_score)
 				instance.score += instance.https_score / 5;
@@ -105,15 +165,22 @@ router.get('/list', (req, res) => {
 				totalUsers += instance.users;
 		});
 
-		instances.sort((b, a) => {
-			return a.score - b.score;
+		instances.sort((a, b) => {
+			return a.name.localeCompare(b.name);
 		});
 
-		res.render('list', {
+		res.json({
 			instances,
-			totalUsers
+			totalUsers,
+            languages: req.app.locals.langs,
+            countries: req.app.locals.countries,
+            prohibitedContent: req.app.locals.ProhibitedContent
 		});
 	});
+});
+
+router.get('/list', (req, res) => {
+    res.render('list');
 });
 
 router.get('/network', (req, res) => {
@@ -167,20 +234,6 @@ router.get('/instances.json', (req, res) => {
 	});
 });
 
-router.post('/add', (req, res) => {
-	if(typeof req.body.name !== 'string')
-		return res.sendStatus(400);
-
-	DB.get('instances').insert({
-		addedAt: new Date(),
-		name: req.body.name.toLowerCase(),
-		downchecks: 0,
-		upchecks: 0
-	}).catch((e) => {});
-
-	res.redirect('/');
-});
-
 router.get('/:instance', (req, res) => {
     DB.get('instances').findOne({
         name: req.params.instance
@@ -229,21 +282,9 @@ router.get('/:instance', (req, res) => {
 
 module.exports = router;
 
-function shuffleArray(array) {
-  var currentIndex = array.length, temporaryValue, randomIndex;
-
-  // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
-
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
-
-  return array;
+function shuffleArray(a) {
+    for (let i = a.length; i; i--) {
+        let j = Math.floor(Math.random() * i);
+        [a[i - 1], a[j]] = [a[j], a[i - 1]];
+    }
 }

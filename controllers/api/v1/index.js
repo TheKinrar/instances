@@ -13,7 +13,6 @@ router.use((req, res, next) => {
     };
 
     req.url = req.url.replace(/\.json(\?|$)/i, '$1');
-
     let auth = req.header('Authorization');
     if(auth) {
         let arr = auth.split(" ");
@@ -42,5 +41,6 @@ router.use((req, res, next) => {
 });
 
 router.use('/instances', require('./instances'));
+router.use('/themes', require('./themes'));
 
 module.exports = router;

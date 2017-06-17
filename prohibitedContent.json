@@ -1,8 +1,8 @@
 {
 	"nudity_nocw": "Nudity without NSFW tag",
-	"nudity_all": "Nudity, even with NSFW tag",
+	"nudity_all": "Nudity with NSFW tag",
 	"pornography_nocw": "Pornography without NSFW tag",
-	"pornography_all": "Pornography, even with NSFW tag",
+	"pornography_all": "Pornography with NSFW tag",
 	"sexism": "Sexism",
 	"racism": "Racism",
 	"illegalContentLinks": "Links to illegal content",

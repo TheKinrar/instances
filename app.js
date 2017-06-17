@@ -1,11 +1,12 @@
 const express = require('express');
-const flash = require('express-flash');
+const flash = require('connect-flash');
 const bodyParser = require('body-parser');
 const nunjucks = require('nunjucks');
 const Influx = require('influx');
 const fs = require('fs');
 const Session = require('express-session');
 const Languages = require('languages');
+const CountryLanguages = require('country-language');
 const MongoStore = require('connect-mongo')(Session);
 global.Request = require('request').defaults({
     headers: {
@@ -78,6 +79,12 @@ const app = express();
 
 app.locals.ProhibitedContent = ProhibitedContent;
 app.locals.Languages = Languages;
+app.locals.langs = CountryLanguages.getLanguages()
+    .filter((a)=>{return a.nativeName[0] !== ""})
+    .sort((a,b)=>{return a.name[0].localeCompare(b.name[0])});
+app.locals.langCodes = app.locals.langs.map(l => l.iso639_1);
+app.locals.countries = CountryLanguages.getCountries()
+    .sort((a,b)=>{return a.name[0].localeCompare(b.name[0])});
 
 updateNetworkStats();
 setInterval(updateNetworkStats, 5 * 60 * 1000);
@@ -123,7 +130,7 @@ const session = Session({
 	cookie: {
 		httpOnly: true,
 		maxAge: 60 * 60 * 1000,
-		secure: true
+		secure: false
 	},
 	proxy: true,
 	secret: config.session_secret,
@@ -142,8 +149,9 @@ nunjucks.configure('views', {
 app.set('view engine', 'njk');
 
 app.use(bodyParser.urlencoded({
-	extended: false
+    extended: false
 }));
+app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use(require('./controllers'));
 

@@ -1,9 +1,11 @@
 {
   "dependencies": {
+    "accept-language-parser": "^1.4.0",
     "apicache": "^0.8.4",
     "body-parser": "^1.17.1",
     "connect-flash": "^0.1.1",
     "connect-mongo": "^1.3.2",
+    "country-language": "^0.1.7",
     "express": "^4.15.2",
     "express-basic-auth": "^1.0.1",
     "express-flash": "0.0.2",
@@ -24,6 +26,6 @@
     "version": "1.0.0",
     "description": "apiDoc basic example",
     "title": "Custom apiDoc browser title",
-    "url" : "https://api.github.com/v1"
+    "url": "https://api.github.com/v1"
   }
 }

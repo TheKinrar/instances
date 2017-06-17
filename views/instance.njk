@@ -1,7 +1,13 @@
 {% extends 'layout.njk' %}
 
 {% block main %}
-    <h3>{{ instance.name }} <small class="text-muted">{{ instance.infos.theme if instance.infos and instance.infos.theme else 'Generalistic instance' }}</small></h3>
+    <h3>
+        {{ instance.name }}
+        {% if instance.upchecks > 1440 and not instance.blacklisted and not instance.dead and instance.uptime >= 0.99 and instance.https_score >= 80 and instance.obs_score >= 65 and instance.openRegistrations and instance.infos %}
+            <abbr title="This instance meets the requirements to be shown in the results of the wizard"><i class="fa fa-check" aria-hidden="true"></i></abbr>
+        {% endif %}
+        <small class="text-muted">{{ instance.infos.theme if instance.infos and instance.infos.theme else 'Generalistic instance' }}</small>
+    </h3>
 
     {% if instance.infos %}
         <p>
