@@ -109,6 +109,7 @@ router.get('/wizard.json', (req, res) => {
                     instance.score += 10;
             });
 
+            shuffleArray(instances);
             instances.sort((a, b) => b.sorting_score - a.sorting_score);
 
             res.json({
@@ -144,7 +145,6 @@ router.get('/list.json', (req, res) => {
 		let totalUsers = 0;
 
 		instances.forEach((instance) => {
-			instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
 			instance.uptime_str = instance.uptime.toFixed(3);
 
 			instance.score = 0.5 * instance.uptime * Math.min(1, instance.upchecks / 1440);
@@ -165,13 +165,16 @@ router.get('/list.json', (req, res) => {
 				totalUsers += instance.users;
 		});
 
-		instances.sort((b, a) => {
-			return a.score - b.score;
+		instances.sort((a, b) => {
+			return a.name.localeCompare(b.name);
 		});
 
 		res.json({
 			instances,
-			totalUsers
+			totalUsers,
+            languages: req.app.locals.langs,
+            countries: req.app.locals.countries,
+            prohibitedContent: req.app.locals.ProhibitedContent
 		});
 	});
 });
@@ -278,3 +281,10 @@ router.get('/:instance', (req, res) => {
 });
 
 module.exports = router;
+
+function shuffleArray(a) {
+    for (let i = a.length; i; i--) {
+        let j = Math.floor(Math.random() * i);
+        [a[i - 1], a[j]] = [a[j], a[i - 1]];
+    }
+}

@@ -95,14 +95,6 @@ router.post('/', (req, res) => {
     if(!isNonEmptyString(federation) || !['all', 'some'].includes(federation))
         return error('Missing federation policy.');
 
-    let bots = req.body.bots;
-    if(!isNonEmptyString(bots) || !['yes', 'conditions', 'no'].includes(bots))
-        return error('Missing bots policy.');
-
-    let brands = req.body.brands;
-    if(!isNonEmptyString(brands) || !['yes', 'conditions', 'no'].includes(brands))
-        return error('Missing brands policy.');
-
     let infos = {
         optOut,
         shortDescription: req.body.shortDescription,
@@ -112,9 +104,7 @@ router.post('/', (req, res) => {
         noOtherLanguages,
         prohibitedContent,
         otherProhibitedContent,
-        federation,
-        bots,
-        brands
+        federation
     };
 
     console.log(req.body);

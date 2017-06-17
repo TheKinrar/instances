@@ -30,7 +30,7 @@
         <small class="form-text text-muted">This is the extended description of your instance, like what's shown on the <i>/about/more</i> page of your instance.</small>
       </div>
       <div class="form-group">
-        <label for="inputTheme">Theme</label>
+        <label for="inputTheme">Topic</label>
         <input type="text" class="form-control" id="inputTheme" name="theme" value="{{ instance.infos.theme }}">
         <small class="form-text text-muted">Leave empty for a generalistic instance.</small>
       </div>
@@ -75,48 +75,6 @@
           <label class="form-check-label">
             <input type="radio" class="form-check-input" name="federation" value="some"{{ ' checked' if instance.infos.federation === 'some' }}>
             Federates with some instances
-          </label>
-        </div>
-      </fieldset>
-      <fieldset class="form-group">
-        <legend>Bots</legend>
-        <div class="form-check">
-          <label class="form-check-label">
-            <input type="radio" class="form-check-input" name="bots" value="yes"{{ ' checked' if instance.infos.bots === 'yes' }}>
-            Allowed
-          </label>
-        </div>
-        <div class="form-check">
-          <label class="form-check-label">
-            <input type="radio" class="form-check-input" name="bots" value="conditions"{{ ' checked' if instance.infos.bots === 'conditions' }}>
-            Allowed with conditions
-          </label>
-        </div>
-        <div class="form-check">
-          <label class="form-check-label">
-            <input type="radio" class="form-check-input" name="bots" value="no"{{ ' checked' if instance.infos.bots === 'no' }}>
-            Not allowed
-          </label>
-        </div>
-      </fieldset>
-      <fieldset class="form-group">
-        <legend>Brands</legend>
-        <div class="form-check">
-          <label class="form-check-label">
-            <input type="radio" class="form-check-input" name="brands" value="yes"{{ ' checked' if instance.infos.brands === 'yes' }}>
-            Allowed
-          </label>
-        </div>
-        <div class="form-check">
-          <label class="form-check-label">
-            <input type="radio" class="form-check-input" name="brands" value="conditions"{{ ' checked' if instance.infos.brands === 'conditions' }}>
-            Allowed with conditions
-          </label>
-        </div>
-        <div class="form-check">
-          <label class="form-check-label">
-            <input type="radio" class="form-check-input" name="brands" value="no"{{ ' checked' if instance.infos.brands === 'no' }}>
-            Not allowed
           </label>
         </div>
       </fieldset>
