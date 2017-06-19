@@ -3,6 +3,17 @@
 {% block css %}
     {{ super() }}
     <link rel="stylesheet" href="/css/select2.min.css">
+    <style>
+        /* fix bad padding in language select box */
+        #collapse-languages .select2-container .select2-selection--multiple {
+            min-height: 38px;
+        }
+
+        /* Fix cursor in radios */
+        .btn-group .btn {
+            cursor: default;
+        }
+    </style>
 {% endblock %}
 
 {% block main %}
@@ -48,21 +59,23 @@
 		<div id="collapse-moderation" class="collapse hide text-center" role="tabpanel">
 			<h4 style="margin-top: 100px;">Any specific moderation rules?</h4>
 			<table style="margin: auto;" class="mb-3">
-				<thead>
-					<tr>
-						<th style="padding-right:10px"></th>
-						<th style="padding-left:10px; padding-right:10px">Authorized</th>
-						<th style="padding-left:10px; padding-right:10px" >No matter</th>
-						<th style="padding-left:10px">Denied</th>
-					</tr>
-				</thead>
 				<tbody>
                 	{% for content in ProhibitedContent.array %}
 						<tr style="text-align: center">
-							<td>{{ content.name }}</td>
-							<td><input type="radio" class="form-check-input" name="{{ content.code }}" value="not_moderated" style="margin: auto"/></td>
-							<td><input type="radio" class="form-check-input" name="{{ content.code }}" value="no_matters" style="margin: auto" checked/></td>
-							<td><input type="radio" class="form-check-input" name="{{ content.code }}" value="moderated" style="margin: auto"/></td>
+							<td style="padding-right: 10px">{{ content.name }}</td>
+                            <td>
+                                <div class="btn-group" data-toggle="buttons">
+                                    <a class="btn btn-secondary">
+                                        <input type="radio" class="form-check-input" name="{{ content.code }}" autocomplete="off" value="not_moderated"/>Allowed
+                                    </a>
+                                    <a class="btn btn-secondary active">
+                                        <input type="radio" class="form-check-input" name="{{ content.code }}" autocomplete="off" value="no_matters" checked/>Don't care
+                                    </a>
+                                    <a class="btn btn-secondary">
+                                        <input type="radio" class="form-check-input" name="{{ content.code }}" autocomplete="off" value="moderated"/>Forbidden
+                                    </a>
+                                </div>
+                            </td>
 						</tr>
 					{% endfor %}
 				</tbody>
