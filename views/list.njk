@@ -19,11 +19,10 @@
                 </div>
             </div>
 
-            <div id="card-wizard-criteria" class="card mb-3">
-                <div id="loading-wizard" class="card-block">
-                    <i style="display: block;" class="fa fa-refresh fa-spin fa-2x fa-fw mx-auto"></i>
+            <div id="card-filters" class="card mb-3">
+                <div class="card-block">
+                    <p id="filters"></p>
                 </div>
-                <div style="display: none;" id="wizard-criteria" class="card-block"></div>
             </div>
         </div>
 
@@ -93,6 +92,8 @@
         var advancedMode = false;
         var markdown = new showdown.Converter();
 
+        let filters = {};
+
         $('#modalInstanceInfo').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
             var instanceName = button.data('instance');
@@ -141,11 +142,30 @@
         });
 
         $(function() {
-            $.get('/wizard.json').done(function(data) {
+            if(window.location.hash) {
+                let params = window.location.hash.substr(1).split(';');
+
+                for(let param of params) {
+                    let param_a = param.split('=');
+                    let key = param_a[0];
+                    let value = param_a[1];
+
+                    if(value) {
+                        if (key === 'l') {
+                            filters['languages'] = value.split(',');
+                        } else if (key === 'ac') {
+                            filters['allowedContent'] = value.split(',');
+                        } else if (key === 'pc') {
+                            filters['prohibitedContent'] = value.split(',');
+                        }
+                    }
+                }
+            }
+
+            $.get('/list-utils.json').done(function(data) {
                 languages = data.languages;
                 countries = data.countries;
                 prohibitedContent = data.prohibitedContent;
-                instancesArray = data.instances;
 
                 let html = '<span class="text-left"><small>';
 
