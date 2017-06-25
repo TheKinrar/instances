@@ -183,6 +183,55 @@ router.get('/list', (req, res) => {
     res.render('list');
 });
 
+router.get('/list/old', (req, res) => {
+    let q = {
+        "upchecks": {
+            "$gt": 0
+        },
+        "blacklisted": {
+            "$ne": true
+        },
+        "dead": {
+            "$ne": true
+        }
+    };
+
+    DB.get('instances').find(q).then((instances) => {
+        let totalUsers = 0;
+
+        instances.forEach((instance) => {
+            instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
+            instance.uptime_str = instance.uptime.toFixed(3);
+
+            instance.score = 0.5 * instance.uptime * Math.min(1, instance.upchecks / 1440);
+
+            /*if(instance.version_score)
+             instance.score += instance.version_score / 10;*/
+
+            if(instance.https_score)
+                instance.score += instance.https_score / 5;
+
+            if(instance.obs_score)
+                instance.score += instance.obs_score / 5;
+
+            if(instance.ipv6)
+                instance.score += 10;
+
+            if(instance.users)
+                totalUsers += instance.users;
+        });
+
+        instances.sort((b, a) => {
+            return a.score - b.score;
+        });
+
+        res.render('oldlist', {
+            instances,
+            totalUsers
+        });
+    });
+});
+
 router.get('/network', (req, res) => {
 	DB.get('versions').find({
 		instances: {

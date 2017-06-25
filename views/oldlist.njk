@@ -1,0 +1,15 @@
+{% extends 'layout.njk' %}
+
+{% block main %}
+    <h3>All instances</h3>
+    <p>
+        Score is based on the uptime, the HTTPS score, the <i>Observatory by Mozilla</i> score and the IPv6 compatibility.<br />
+        Click on the column headers to sort the instances.
+    </p>
+
+    <p>
+        There {{ 'are' if instances|length > 1 else 'is' }} currently <strong>{{ instances|length }}</strong> instance{{ 's' if instances|length > 1 else '' }} being tracked, with a total of <strong>{{ totalUsers }}</strong> users.
+    </p>
+
+    {% include 'instancesDisplay.njk' %}
+{% endblock %}
