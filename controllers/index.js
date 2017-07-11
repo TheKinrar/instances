@@ -24,110 +24,6 @@ router.get('/', (req, res) => {
 	});
 });
 
-router.post('/wizard', (req, res) => {
-	req.flash('wizard', req.body);
-	res.status(204).send();
-});
-
-router.get('/wizard.json', (req, res) => {
-    let data = req.flash('wizard')[0];
-    if(data) {
-        console.log(data);
-
-        let q = {
-            "upchecks": {
-                "$gt": 1440
-            },
-            "blacklisted": {
-                "$ne": true
-            },
-            "dead": {
-                "$ne": true
-            },
-            "uptime": {
-                $gte: 0.99
-            },
-            "https_score": {
-                $gte: 80
-            },
-            "obs_score": {
-                $gte: 65
-            },
-            "openRegistrations": true,
-            "infos": {
-                "$exists": true
-            }
-        };
-
-        DB.get('instances').find(q).then((instances) => {
-            instances.forEach((instance) => {
-                let score = 0;
-
-                // desired languages
-                if (Array.isArray(data.languages)) {
-                    data.languages.forEach((language) => {
-                        if (instance.infos.languages.includes(language)) {
-                            score += 10;
-                        }
-                    });
-                }
-
-                // desired instance size
-                if (Number.isInteger(data.user_count)) {
-                    if (instance.users < data.user_count) {
-                        score += 10;
-                    }
-                }
-
-                // desired moderation
-                if (Array.isArray(data.moderation)) {
-                    data.moderation.forEach((e) => {
-                        if ((e.allowed && !instance.prohibitedContent.includes(e.id)) ||
-                            (e.prohibited && instance.prohibitedContent.includes(e.id))) {
-                            score += 10;
-                        }
-                    });
-                }
-
-                instance.sorting_score = score;
-
-                instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
-                instance.uptime_str = instance.uptime.toFixed(3);
-
-                instance.score = 0.5 * instance.uptime * Math.min(1, instance.upchecks / 1440);
-
-				/*if(instance.version_score)
-				 instance.score += instance.version_score / 10;*/
-
-                if (instance.https_score)
-                    instance.score += instance.https_score / 5;
-
-                if (instance.obs_score)
-                    instance.score += instance.obs_score / 5;
-
-                if (instance.ipv6)
-                    instance.score += 10;
-            });
-
-            shuffleArray(instances);
-            instances.sort((a, b) => b.sorting_score - a.sorting_score);
-
-            res.json({
-                query: data,
-				instances,
-                languages: req.app.locals.langs,
-                countries: req.app.locals.countries,
-                prohibitedContent: req.app.locals.ProhibitedContent
-			});
-        }).catch((err) => {
-            console.error(err);
-            res.sendStatus(500);
-        });
-    } else {
-    	res.sendStatus(404);
-	}
-});
-
 router.get('/list.json', (req, res) => {
 	let q = {
 		"upchecks": {
@@ -138,49 +34,216 @@ router.get('/list.json', (req, res) => {
 		},
 		"dead": {
 			"$ne": true
-		}
+		},
+        "users": {
+            "$exists": true
+        },
+        "version": {
+            "$exists": true
+        }
 	};
 
-	DB.get('instances').find(q).then((instances) => {
-		let totalUsers = 0;
+	let cq = req.query.q;
+	let strict = req.query.strict === 'true';
+	let infoNeeded = false;
 
+    if(Array.isArray(cq.languages) && cq.languages.length > 0) {
+        infoNeeded = true;
+
+        if(!strict) {
+            q['infos.languages'] = {
+                $elemMatch: {
+                    $in: cq.languages
+                }
+            };
+        } else {
+            q['infos.languages'] = {
+                $all: cq.languages
+            };
+        }
+    }
+
+    if(strict) {
+        if (Array.isArray(cq.prohibited) && cq.prohibited.length > 0) {
+            infoNeeded = true;
+
+            q['infos.prohibitedContent'] = {
+                $all: cq.prohibited
+            };
+        }
+
+        if (Array.isArray(cq.allowed) && cq.allowed.length > 0) {
+            infoNeeded = true;
+
+            q['infos.prohibitedContent'] = {
+                $not: {
+                    $elemMatch: {
+                        $in: cq.allowed
+                    }
+                }
+            };
+        }
+
+        if(cq.users) {
+            try {
+                q['users'] = {
+                    $lte: Number.parseInt(cq.users)
+                };
+            } catch(e) {}
+        }
+    }
+
+    if(infoNeeded) {
+	    q['infos'] = {
+	        '$exists': true
+        };
+    }
+
+    DB.get('instances').find(q).then((instances) => {
 		instances.forEach((instance) => {
-			instance.uptime_str = instance.uptime.toFixed(3);
+			instance.uptime_str = (instance.uptime * 100).toFixed(3);
 
-			instance.score = 0.5 * instance.uptime * Math.min(1, instance.upchecks / 1440);
+			if(!strict) {
+                let score = 0;
+                let max = 0;
 
-			//if(instance.version_score)
-			// instance.score += instance.version_score / 10;
+                if(Array.isArray(cq.languages) && cq.languages.length > 0) {
+                    max += 1;
 
-			if(instance.https_score)
-				instance.score += instance.https_score / 5;
+                    let _score = 0;
+                    let _max = cq.languages.length;
+                    cq.languages.forEach((language) => {
+                        if(instance.infos.languages.includes(language)) {
+                            _score++;
+                        }
+                    });
 
-			if(instance.obs_score)
-				instance.score += instance.obs_score / 5;
+                    score += _score / _max;
+                }
 
-			if(instance.ipv6)
-				instance.score += 10;
+                if(Array.isArray(cq.allowed) && cq.allowed.length > 0) {
+                    max += 1;
 
-			if(instance.users)
-				totalUsers += instance.users;
+                    let _score = 0;
+                    let _max = cq.allowed.length;
+                    cq.allowed.forEach((content) => {
+                        if(!instance.infos.prohibitedContent.includes(content)) {
+                            _score++;
+                        }
+                    });
+
+                    score += _score / _max;
+                }
+
+                if(Array.isArray(cq.prohibited) && cq.prohibited.length > 0) {
+                    max += 1;
+
+                    let _score = 0;
+                    let _max = cq.prohibited.length;
+                    cq.prohibited.forEach((content) => {
+                        if(instance.infos.prohibitedContent.includes(content)) {
+                            _score++;
+                        }
+                    });
+
+                    score += _score / _max;
+                }
+
+                if(cq.users) {
+                    try {
+                        max += 1;
+
+                        if(instance.users <= cq.users)
+                            score += 1;
+                    } catch(e) {}
+                }
+
+                instance.score = 10 * score;
+                instance.score_str = Math.floor(10 * score).toFixed(1);
+            }
 		});
 
-		instances.sort((a, b) => {
-			return a.name.localeCompare(b.name);
-		});
+        if(!strict) {
+            shuffleArray(instances);
+
+            instances.sort((a, b) => {
+                return b.score - a.score;
+            });
+        }
 
 		res.json({
 			instances,
-			totalUsers,
             languages: req.app.locals.langs,
-            countries: req.app.locals.countries,
             prohibitedContent: req.app.locals.ProhibitedContent
 		});
 	});
 });
 
 router.get('/list', (req, res) => {
-    res.render('list');
+    res.render('list', {
+        languages: req.app.locals.langs,
+        countries: req.app.locals.countries,
+        prohibitedContent: req.app.locals.ProhibitedContent
+    });
+});
+
+router.get('/list/advanced', (req, res) => {
+    res.render('list', {
+        languages: req.app.locals.langs,
+        countries: req.app.locals.countries,
+        prohibitedContent: req.app.locals.ProhibitedContent,
+        advanced: true,
+        fluid: true
+    });
+});
+
+router.get('/list/old', (req, res) => {
+    let q = {
+        "upchecks": {
+            "$gt": 0
+        },
+        "blacklisted": {
+            "$ne": true
+        },
+        "dead": {
+            "$ne": true
+        }
+    };
+
+    DB.get('instances').find(q).then((instances) => {
+        let totalUsers = 0;
+
+        instances.forEach((instance) => {
+            instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
+            instance.uptime_str = instance.uptime.toFixed(3);
+
+            instance.score = 0.5 * instance.uptime * Math.min(1, instance.upchecks / 1440);
+
+            /*if(instance.version_score)
+             instance.score += instance.version_score / 10;*/
+
+            if(instance.https_score)
+                instance.score += instance.https_score / 5;
+
+            if(instance.obs_score)
+                instance.score += instance.obs_score / 5;
+
+            if(instance.ipv6)
+                instance.score += 10;
+
+            if(instance.users)
+                totalUsers += instance.users;
+        });
+
+        instances.sort((b, a) => {
+            return a.score - b.score;
+        });
+
+        res.render('oldlist', {
+            instances,
+            totalUsers
+        });
+    });
 });
 
 router.get('/list/old', (req, res) => {
@@ -290,39 +353,9 @@ router.get('/:instance', (req, res) => {
         if(!instance)
             return res.sendStatus(404);
 
-        influx.query(`
-			select last("users"), last(statuses), last(connections)
-			from instance_stats
-			where instance = '${instance.name}'
-			and time <= ${new Date(new Date().getTime() - (7 * 24 * 60 * 60 * 1000)).getTime()}000000`)
-		.then(dbres => {
-			let lastWeek = null;
-			if(dbres.length > 0) {
-				lastWeek = {
-                    users: dbres[0].last,
-                    statuses: dbres[0].last_1,
-                    connections: dbres[0].last_2
-				};
-			}
-
-			let score = {
-				total: 0
-			};
-
-            score.total += instance.uptime * 50;
-            score.total += instance.https_score / 5;
-            score.total += instance.obs_score / 5;
-            score.total += instance.ipv6 ? 10 : 0;
-
-            res.render('instance', {
-            	instance,
-				lastWeek,
-				score
-            });
-		}).catch(err => {
-			console.error(err);
-			res.sendStatus(500);
-		});
+        res.render('instance', {
+            instance
+        });
     }).catch((e) => {
         console.error(e);
         res.sendStatus(500);

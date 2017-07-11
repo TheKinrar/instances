@@ -3,307 +3,521 @@
 {% block css %}
     {{ super() }}
 
+    <link rel="stylesheet" href="/css/select2.min.css">
+    <link rel="stylesheet" href="/css/dataTables.bootstrap4.min.css">
+
     <style>
-        .advancedInfo, .modalInstanceInfo-extraInfo {
+        /* fix bad padding in select boxes */
+        .select2-container .select2-selection--multiple {
+            padding-bottom: 5px;
+        }
+
+        .modalInstanceInfo-extraInfo {
             display: none;
+        }
+
+        .text-linethrough {
+            text-decoration: line-through !important;
         }
     </style>
 {% endblock %}
 
 {% block main %}
     <div class="row mt-3">
-        <div class="col-md-3">
+        <div class="{% if advanced %}col-md-2{% else %}col-md-3{% endif %}">
             <div class="card mb-3">
-                <div class="card-block text-center">
-                    <a href="/" class="btn btn-primary">OPEN WIZARD</a>
+                <div class="card-block" style="padding-bottom: 0px;">
+                    <div class="row mb-3">
+                        <small>LANGUAGES</small>
+                        <select id="filters-languages" style="width: 100%;" multiple="multiple" autocomplete="off">
+                            {% for lang in languages %}
+                                <option value="{{ lang.iso639_1 }}">{{ lang.name[0] }} ({{ lang.nativeName[0] }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row mb-3">
+                        <small>ALLOWED CONTENT</small>
+                        <select id="filters-allowed" style="width: 100%;" multiple="multiple" autocomplete="off">
+                            {% for e in prohibitedContent.array %}
+                                <option value="{{ e.code }}">{{ e.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row mb-3">
+                        <small>PROHIBITED CONTENT</small>
+                        <select id="filters-prohibited" style="width: 100%;" multiple="multiple" autocomplete="off">
+                            {% for e in prohibitedContent.array %}
+                                <option value="{{ e.code }}">{{ e.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row mb-3">
+                        <small>MAX USERS</small>
+                        <input id="filters-users" type="number" min="0" value="" autocomplete="off" style="width: 100%;">
+                    </div>
+
+                    <div class="row mb-1">
+                        <a id="btn-search" href="#" class="btn btn-primary mx-auto" style="display: block;">SEARCH</a>
+                    </div>
+
+                    <div class="row">
+                        <p class="text-center" style="width: 100%;">
+                            {% if advanced %}
+                                <a href="/list"><small>Simple mode</small></a>
+                            {% else %}
+                                <a href="/list/advanced"><small>Advanced mode</small></a>
+                            {% endif %}
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <div id="card-wizard-criteria" class="card mb-3">
-                <div id="loading-wizard" class="card-block">
-                    <i style="display: block;" class="fa fa-refresh fa-spin fa-2x fa-fw mx-auto"></i>
-                </div>
-                <div style="display: none;" id="wizard-criteria" class="card-block"></div>
-            </div>
-        </div>
+            {% if advanced %}
+                <div class="card">
+                    <div class="card-header" role="tab">
+                        <h5 class="mb-0">
+                            <a data-toggle="collapse" href="#collapseColumns" aria-expanded="true" aria-controls="collapseColumns">
+                                Toggle columns
+                            </a>
+                        </h5>
+                    </div>
 
-        <div class="col-md-9">
-            <div class="card">
-                <ul id="list-instances" class="list-group list-group-flush"></ul>
-                <div class="card-block" id="loading-instances">
-                    <i style="display: block;" class="fa fa-refresh fa-spin fa-2x fa-fw mx-auto"></i>
-                </div>
-                <div class="card-block text-center" id="load-more-instances" style="display: none;">
-                    <a onclick="loadMoreInstances();">Load more</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modalInstanceInfo" tabindex="-1" role="dialog" aria-labelledby="modalInstanceInfoLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalInstanceInfoLabel"></h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="advancedInfo">
-                        <nobr>Uptime <span class="badge badge-success" style="vertical-align:middle;" id="modalInstanceInfo-uptime"></span></nobr><br />
-
-                        <nobr>HTTPS <span class="badge badge-success" style="vertical-align:middle;" id="modalInstanceInfo-https"></span></nobr>
-                        <nobr>Observatory <span class="badge badge-success" style="vertical-align:middle;" id="modalInstanceInfo-obs"></span></nobr>
-                        <nobr>IPv6 <span class="badge" style="vertical-align:middle;" id="modalInstanceInfo-ipv6"></span></nobr>
-                    </p>
-
-                    <p>
-                        <nobr>Users <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-users"></span></nobr>
-                        <nobr>Statuses <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-statuses"></span></nobr>
-                        <nobr class="advancedInfo">Connections <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-connections"></span></nobr>
-                    </p>
-
-                    <p class="modalInstanceInfo-extraInfo">
-                        <b>Languages: </b><span id="modalInstanceInfo-languages"></span>
-                    </p>
-
-                    <div class="card modalInstanceInfo-extraInfo">
+                    <div id="collapseColumns" class="collapse hide" role="tabpanel">
                         <div class="card-block">
-                            <p class="card-text" id="modalInstanceInfo-description"></p>
+                            <p>
+                                <a class="toggle-column" data-column="1" href="#">users</a>
+                                <a class="toggle-column" data-column="2" href="#">statuses</a>
+                                <a class="toggle-column" data-column="3" href="#">connections</a>
+                                <a class="toggle-column" data-column="4" href="#">registrations</a>
+                                <a class="toggle-column" data-column="5" href="#">version</a>
+                                <a class="toggle-column" data-column="6" href="#">uptime</a>
+                                <a class="toggle-column" data-column="7" href="#">https</a>
+                                <a class="toggle-column" data-column="8" href="#">obs</a>
+                            </p>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <a id="modalInstanceInfo-btn-go" class="btn btn-primary">Go to instance</a>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            {% endif %}
+        </div>
+
+        <div class="{% if advanced %}col-md-10{% else %}col-md-9{% endif %} mb-3">
+            {% if not advanced %}
+                <div class="card simple">
+                    <ul id="list-instances" class="list-group list-group-flush"></ul>
+                    <div class="card-block" id="loading-instances">
+                        <i style="display: block;" class="fa fa-refresh fa-spin fa-2x fa-fw mx-auto"></i>
+                    </div>
+                    <div class="card-block text-center" id="load-more-instances" style="display: none;">
+                        <a onclick="loadMoreInstances();">Load more</a>
+                    </div>
+                </div>
+            {% else %}
+                <div>
+                    <table id="table-advanced" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Instance</th>
+                                <th>Users</th>
+                                <th>Statuses</th>
+                                <th>Connections</th>
+                                <th>Registrations</th>
+                                <th>Version</th>
+                                <th>Uptime</th>
+                                <th>HTTPS</th>
+                                <th>Obs</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Instance</th>
+                                <th>Users</th>
+                                <th>Statuses</th>
+                                <th>Connections</th>
+                                <th>Registrations</th>
+                                <th>Version</th>
+                                <th>Uptime</th>
+                                <th>HTTPS</th>
+                                <th>Obs</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if not advanced %}
+        <div class="modal fade" id="modalInstanceInfo" tabindex="-1" role="dialog" aria-labelledby="modalInstanceInfoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalInstanceInfoLabel"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            <nobr>Users <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-users"></span></nobr>
+                            <nobr>Statuses <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-statuses"></span></nobr>
+                            <nobr class="advancedInfo">Connections <span class="badge badge-info" style="vertical-align:middle;" id="modalInstanceInfo-connections"></span></nobr>
+                        </p>
+
+                        <p class="modalInstanceInfo-extraInfo">
+                            <b>Languages: </b><span id="modalInstanceInfo-languages"></span>
+                        </p>
+
+                        <div class="card modalInstanceInfo-extraInfo">
+                            <div class="card-block">
+                                <p class="card-text" id="modalInstanceInfo-description"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a id="modalInstanceInfo-btn-go" class="btn btn-primary">Go to instance</a>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    {% endif %}
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
 
-    <script type="text/javascript" src="/js/showdown.min.js"></script>
+    <script type="text/javascript" src="/js/select2.full.min.js"></script>
 
+    {% if advanced %}
+        <script type="text/javascript" src="/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="/js/dataTables.bootstrap4.min.js"></script>
+    {% else %}
+        <script type="text/javascript" src="/js/showdown.min.js"></script>
+    {% endif %}
+
+    <!-- COMMON -->
     <script type="text/javascript">
-        var languages = null, countries = null, prohibitedContent = null, instancesData = {}, instancesArray = null;
-        var advancedMode = false;
-        var markdown = new showdown.Converter();
+        let languages = null, prohibitedContent = null, instancesData = {}, instancesArray = null;
 
-        $('#modalInstanceInfo').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var instanceName = button.data('instance');
+        let filters = {};
 
-            var modal = $(this);
-            modal.find('.modal-title').text(instanceName);
+        let selectLanguages
+          , selectAllowed
+          , selectProhibited
+          , inputUsers;
 
-            let instance = instancesData[instanceName];
+        $(() => {
+            selectLanguages = $('#filters-languages');
+            selectAllowed = $('#filters-allowed');
+            selectProhibited = $('#filters-prohibited');
+            inputUsers = $('#filters-users');
 
-            modal.find('#modalInstanceInfo-uptime').text((instance.uptime * 100).toFixed(3) + '%');
-
-            modal.find('#modalInstanceInfo-https').text(instance.https_rank);
-            modal.find('#modalInstanceInfo-obs').text(instance.obs_rank);
-
-            var ipv6 = modal.find('#modalInstanceInfo-ipv6');
-            if(instance.ipv6) {
-                ipv6.text('Yes');
-                ipv6.addClass('badge-success');
-                ipv6.removeClass('badge-danger');
-            } else {
-                ipv6.text('No');
-                ipv6.addClass('badge-danger');
-                ipv6.removeClass('badge-success');
-            }
-
-            modal.find('#modalInstanceInfo-users').text(instance.users);
-            modal.find('#modalInstanceInfo-statuses').text(instance.statuses);
-            modal.find('#modalInstanceInfo-connections').text(instance.connections);
-
-            if(instance.infos) {
-                $('.modalInstanceInfo-extraInfo').show();
-
-                modal.find('#modalInstanceInfo-description').html(markdown.makeHtml(escapeHtml(instance.infos.fullDescription)));
-
-                let textL = '';
-                instance.infos.languages.forEach((language) => {
-                    if(textL.length > 0)
-                        textL += ', ';
-
-                    textL += getLanguage(languages, language).name[0];
-                });
-                modal.find('#modalInstanceInfo-languages').html(textL);
-            }
-
-            modal.find('#modalInstanceInfo-btn-go').attr('href', 'https://' + instanceName);
-        });
-
-        $(function() {
-            $.get('/wizard.json').done(function(data) {
-                languages = data.languages;
-                countries = data.countries;
-                prohibitedContent = data.prohibitedContent;
-                instancesArray = data.instances;
-
-                let html = '<span class="text-left"><small>';
-
-                if(data.query.languages && data.query.languages.length > 0) {
-                    html += '<b>LANGUAGES:</b> ';
-
-                    let first = true;
-                    data.query.languages.forEach((code) => {
-                        let language = getLanguage(languages, code);
-
-                        if (!first)
-                            html += ', ';
-
-                        html += language.name[0];
-                        first = false;
-                    });
-
-                    html += '<br />';
-                }
-
-                if(data.query.user_count) {
-                    html += '<b>MAX USERS:</b> ' + data.query.user_count + '<br />';
-                }
-
-                if(data.query.moderation) {
-                    if (data.query.moderation.allowed && data.query.moderation.allowed.length > 0) {
-                        html += '<b>ALLOWED:</b> ';
-
-                        let first = true;
-                        data.query.moderation.allowed.forEach((code) => {
-                            let content = prohibitedContent[code];
-
-                            if (!first)
-                                html += ', ';
-
-                            html += content;
-                            first = false;
-                        });
-
-                        html += '<br>';
-                    }
-
-                    if (data.query.moderation.prohibited && data.query.moderation.prohibited.length > 0) {
-                        html += '<b>PROHIBITED:</b> ';
-
-                        let first = true;
-                        data.query.moderation.prohibited.forEach((code) => {
-                            let content = prohibitedContent[code];
-
-                            if (!first)
-                                html += ', ';
-
-                            html += content;
-                            first = false;
-                        });
-
-                        html += '<br>';
-                    }
-                }
-
-                if(data.query.version === 'master') {
-                    html += '<b>VERSION:</b> Latest<br />';
-                } else if(data.query.version === 'stable') {
-                    html += '<b>VERSION:</b> Stable<br />';
-                }
-
-                html += '</small></span>';
-
-                $('#wizard-criteria').show();
-                $('#wizard-criteria').append(html);
-
-                $('#loading-wizard').hide();
-                showInstances(instancesArray.splice(0, 50));
-                $('#loading-instances').hide();
-            }).fail(function() {
-                advancedMode = true;
-                $('.advancedInfo').show();
-                $('#card-wizard-criteria').hide();
-
-                $.get('/list.json').done(function(data) {
-                    languages = data.languages;
-                    countries = data.countries;
-                    prohibitedContent = data.prohibitedContent;
-                    instancesArray = data.instances;
-
-                    showInstances(instancesArray.splice(0, 50));
-                    $('#loading-instances').hide();
-                });
-            });
-        });
-
-        function showInstances(instances) {
-            const list = $('#list-instances');
-            list.empty();
-
-            appendInstances(instances);
-        }
-
-        function appendInstances(instances) {
-            const list = $('#list-instances');
-
-            instances.forEach(function(instance) {
-                instancesData[instance.name] = instance;
-                list.append(generateInstanceHtml(instance));
+            selectLanguages.select2({
+                width: 'resolve'
             });
 
-            if(instancesArray.length > 0) {
-                $('#load-more-instances').show();
-            } else {
-                $('#load-more-instances').hide();
-            }
-        }
+            selectAllowed.select2({
+                width: 'resolve'
+            });
 
-        function loadMoreInstances() {
-            $('#load-more-instances').hide();
-            $('#loading-instances').show();
-            appendInstances(instancesArray.splice(0, 50));
-            $('#loading-instances').hide();
-        }
+            selectProhibited.select2({
+                width: 'resolve'
+            });
 
-        function generateInstanceHtml(instance) {
-            let html = '<a href="" data-toggle="modal" data-target="#modalInstanceInfo" data-instance="' + instance.name + '" class="list-group-item list-group-item-action flex-column align-items-start">' +
-                '<div class="d-flex w-100 justify-content-between">' +
-                '<h5 class="mb-1">' + instance.name +
-                ' <small class="text-muted">' +
-                ((instance.infos && instance.infos.theme) ? escapeHtml(instance.infos.theme) : 'Generalistic') +
-                '</small>' +
-                '</h5>' +
-                '<small>' + instance.users + '&nbsp;users&nbsp;&bull;&nbsp;' + instance.statuses + '&nbsp;statuses' + (advancedMode ? '&nbsp;&bull;&nbsp;' + instance.connections + '&nbsp;connections' : '') + '</small>' +
-                '</div>';
+            if(window.location.hash) {
+                let params = window.location.hash.substr(1).split('&');
 
-            if(instance.infos) {
-                html += '<p class="mb-1">'
-                    + escapeHtml(instance.infos.shortDescription)
-                    + '</p>';
-            }
+                for(let param of params) {
+                    let param_a = param.split('=');
+                    let key = param_a[0];
+                    let value = param_a[1];
 
-            html += '</a>';
-
-            return html;
-        }
-
-        function getLanguage(languages, code) {
-            for(let language of languages) {
-                if(language.iso639_1 === code)
-                    return language;
+                    if(value) {
+                        if (key === 'lang') {
+                            filters.languages = value.split(',');
+                        } else if (key === 'allowed') {
+                            filters.allowedContent = value.split(',');
+                        } else if (key === 'prohibited') {
+                            filters.prohibitedContent = value.split(',');
+                        } else if (key === 'users') {
+                            try {
+                                filters.users = Number.parseInt(value);
+                            } catch(e) {
+                                console.error(e);
+                            }
+                        }
+                    }
+                }
             }
 
-            return null;
-        }
+            if(filters.languages) {
+                selectLanguages.val(filters.languages);
+                selectLanguages.trigger('change');
+            }
 
-        function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+            if(filters.allowedContent) {
+                selectAllowed.val(filters.allowedContent);
+                selectAllowed.trigger('change');
+            }
+
+            if(filters.prohibitedContent) {
+                selectProhibited.val(filters.prohibitedContent);
+                selectProhibited.trigger('change');
+            }
+
+            if(filters.users) {
+                inputUsers.val(filters.users);
+                inputUsers.trigger('change');
+            }
+        });
+
+        function buildQuery() {
+            let query = {};
+
+            query.languages = [];
+            selectLanguages.find(":selected").each(function() {
+                query.languages.push($(this).val());
+            });
+
+            query.allowed = [];
+            query.prohibited = [];
+            selectAllowed.find(":selected").each(function() {
+                query.allowed.push($(this).val());
+            });
+            selectProhibited.find(":selected").each(function() {
+                query.prohibited.push($(this).val());
+            });
+
+            query.users = inputUsers.val();
+
+            return {
+                q: query,
+                strict: advancedMode
+            };
         }
     </script>
+
+    {% if advanced %}
+        <!-- ADVANCED MODE -->
+        <script type="text/javascript">
+            const advancedMode = true;
+
+            $(() => {
+                const advTable = $('#table-advanced').DataTable({
+                    'ajax': {
+                        'dataType': 'json',
+                        'contentType': 'application/json; charset=utf-8',
+                        'type': 'GET',
+                        'url': '/list.json',
+                        'dataSrc': 'instances',
+                        'data': buildQuery
+                    },
+                    'columns': [
+                        {
+                            'data': 'name',
+                            'render': function (data) {
+                                return `<a href="/${data}">${data}</a>`;
+                            }
+                        },
+                        { 'data': 'users' },
+                        { 'data': 'statuses' },
+                        { 'data': 'connections' },
+                        {
+                            'data': 'openRegistrations',
+                            'render': function (data) {
+                                if(data)
+                                    return 'Open';
+
+                                return 'Closed';
+                            }
+                        },
+                        { 'data': 'version' },
+                        {
+                            'data': 'uptime_str',
+                            'render': function (data) {
+                                return data + '%';
+                            }
+                        },
+                        { 'data': {
+                            _: 'https_rank',
+                            sort: 'https_score'
+                        } },
+                        { 'data': {
+                            _: 'obs_rank',
+                            sort: 'obs_score'
+                        } }
+                    ],
+                    'deferRender': true
+                });
+
+                $('a.toggle-column').click(function(e) {
+                    e.preventDefault();
+
+                    let link = $(this);
+
+                    let column = advTable.column(link.attr('data-column'));
+                    column.visible(!column.visible());
+
+                    if(column.visible()) {
+                        link.removeClass('text-linethrough');
+                    } else {
+                        link.addClass('text-linethrough');
+                    }
+                });
+
+                $('#btn-search').click(function(e) {
+                    e.preventDefault();
+                    advTable.ajax.reload();
+                });
+            });
+        </script>
+    {% else %}
+        <!-- SIMPLE MODE -->
+        <script type="text/javascript">
+            const advancedMode = false;
+            const markdown = new showdown.Converter();
+
+            $(() => {
+                $('#btn-search').click(function(e) {
+                    e.preventDefault();
+                    sendQuery();
+                });
+
+                $('#modalInstanceInfo').on('show.bs.modal', function (event) {
+                    let button = $(event.relatedTarget);
+                    let instanceName = button.data('instance');
+
+                    let modal = $(this);
+                    modal.find('.modal-title').text(instanceName);
+
+                    let instance = instancesData[instanceName];
+
+                    modal.find('#modalInstanceInfo-uptime').text((instance.uptime * 100).toFixed(3) + '%');
+
+                    modal.find('#modalInstanceInfo-https').text(instance.https_rank);
+                    modal.find('#modalInstanceInfo-obs').text(instance.obs_rank);
+
+                    let ipv6 = modal.find('#modalInstanceInfo-ipv6');
+                    if(instance.ipv6) {
+                        ipv6.text('Yes');
+                        ipv6.addClass('badge-success');
+                        ipv6.removeClass('badge-danger');
+                    } else {
+                        ipv6.text('No');
+                        ipv6.addClass('badge-danger');
+                        ipv6.removeClass('badge-success');
+                    }
+
+                    modal.find('#modalInstanceInfo-users').text(instance.users);
+                    modal.find('#modalInstanceInfo-statuses').text(instance.statuses);
+                    modal.find('#modalInstanceInfo-connections').text(instance.connections);
+
+                    if(instance.infos) {
+                        $('.modalInstanceInfo-extraInfo').show();
+
+                        modal.find('#modalInstanceInfo-description').html(markdown.makeHtml(escapeHtml(instance.infos.fullDescription)));
+
+                        let textL = '';
+                        instance.infos.languages.forEach((language) => {
+                            if(textL.length > 0)
+                                textL += ', ';
+
+                            textL += getLanguage(languages, language).name[0];
+                        });
+                        modal.find('#modalInstanceInfo-languages').html(textL);
+                    } else {
+                        $('.modalInstanceInfo-extraInfo').hide();
+                    }
+
+                    modal.find('#modalInstanceInfo-btn-go').attr('href', 'https://' + instanceName);
+                });
+
+                sendQuery();
+            });
+
+            function sendQuery() {
+                let query = buildQuery();
+
+                $.get('/list.json', query, (data) => {
+                    languages = data.languages;
+
+                    instancesArray = data.instances;
+                    showInstances(instancesArray.splice(0, 50));
+                    $('#loading-instances').hide();
+                }, 'json');
+            }
+
+            function showInstances(instances) {
+                const list = $('#list-instances');
+                list.empty();
+
+                appendInstances(instances);
+            }
+
+            function appendInstances(instances) {
+                const list = $('#list-instances');
+
+                instances.forEach(function(instance) {
+                    instancesData[instance.name] = instance;
+                    list.append(generateInstanceHtml(instance));
+                });
+
+                if(instancesArray.length > 0) {
+                    $('#load-more-instances').show();
+                } else {
+                    $('#load-more-instances').hide();
+                }
+            }
+
+            function loadMoreInstances() {
+                $('#load-more-instances').hide();
+                $('#loading-instances').show();
+                appendInstances(instancesArray.splice(0, 50));
+                $('#loading-instances').hide();
+            }
+
+            function generateInstanceHtml(instance) {
+                let html = '<a href="" data-toggle="modal" data-target="#modalInstanceInfo" data-instance="' + instance.name + '" class="list-group-item list-group-item-action flex-column align-items-start">' +
+                    '<div class="d-flex w-100 justify-content-between">' +
+                    '<h5 class="mb-1">' + instance.name +
+                    ' <small class="text-muted">' +
+                    ((instance.infos && instance.infos.theme) ? escapeHtml(instance.infos.theme) : 'Generalistic') +
+                    '</small>' +
+                    '</h5>' +
+                    '<small>' + instance.users + '&nbsp;users&nbsp;&bull;&nbsp;' + instance.statuses + '&nbsp;statuses' + (advancedMode ? '&nbsp;&bull;&nbsp;' + instance.connections + '&nbsp;connections' : '') + '</small>' +
+                    '</div>';
+
+                if(instance.infos) {
+                    html += '<p class="mb-1">'
+                        + escapeHtml(instance.infos.shortDescription)
+                        + '</p>';
+                }
+
+                html += '</a>';
+
+                return html;
+            }
+
+            function getLanguage(languages, code) {
+                for(let language of languages) {
+                    if(language.iso639_1 === code)
+                        return language;
+                }
+
+                return null;
+            }
+
+            function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+        </script>
+    {% endif %}
 {% endblock %}
