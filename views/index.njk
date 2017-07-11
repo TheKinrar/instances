@@ -96,14 +96,6 @@
             <button id="btn-version-skip" type="button" class="btn btn-secondary">It does not matter</button>
             <button id="btn-version-stable" type="button" class="btn btn-primary">Stable</button>
         </div>
-
-		<div id="collapse-theme" class="collapse hide text-center" role="tabpanel">
-			<h4 style="margin-top: 100px;">What special theme(s) do you want for your instance?</h4>
-
-			<!-- TODO -->
-
-			<button id="btn-next-theme" type="button" class="btn btn-primary">Next</button>
-		</div>
 	</div>
 {% endblock %}
 
@@ -117,56 +109,48 @@
             width: 'resolve'
         }).select2('val', ['{{ acceptsLanguage }}']);
 
-		var query = {};
+		let query = {};
 
         $('#btn-start').click(function() {
             collapse('languages');
         });
 
         $('#btn-next-languages').click(function() {
-            query.languages = [];
+            query.lang = [];
 
             $('#selectLanguages').find(":selected").each(function() {
-                query.languages.push($(this).val());
+                query.lang.push($(this).val());
 			});
+
+            query.lang = query.lang.join(',');
 
             collapse('user-count');
         });
 
         function userCount(count) {
             if(count)
-            	query.user_count = count;
+            	query.users = count;
 
             collapse('moderation');
         }
 
         $('#btn-next-moderation').click(function() {
-            query.moderation = { allowed : [], prohibited: []};
+            query.allowed = [];
+            query.prohibited = [];
 
             $('#collapse-moderation').find(":checked").each(function() {
                 if($(this).val() == "moderated"){
-                    query.moderation.prohibited.push($(this).attr("name"));
+                    query.prohibited.push($(this).attr("name"));
 				}
 				else if($(this).val() == "not_moderated")
-				    query.moderation.allowed.push($(this).attr("name"));
+				    query.allowed.push($(this).attr("name"));
             });
 
-            return collapse('version');
+            query.allowed = query.allowed.join(',');
+            query.prohibited = query.prohibited.join(',');
 
-            let themes = () => {
-                // TODO
-                return [];
-            };
-            if(themes.length > 0) {
-                collapse('theme');
-                $('#collapse-theme').append('<select style="margin: 10px; height: 200px; max-width: 700px;" multiple class="form-control mx-auto" id="selectTheme"></select>');
-                $.each(themes, (theme) => {
-                    $('#selectTheme').append('<option value="'+theme+'">'+theme+'</option>');
-                });
-            }
-            else {
-                sendQuery();
-            }
+            //collapse('version');
+            sendQuery();
         });
 
         $('#btn-version-master').click(function() {
@@ -185,16 +169,6 @@
             sendQuery();
         });
 
-        $('#btn-next-theme').click(function() {
-            query.themes = [];
-
-            $('#selectTheme').find(":selected").each(function() {
-                query.themes.push($(this).val());
-            });
-
-            collapse('admin-location');
-		});
-
 		function collapse(id) {
 		    id = 'collapse-' + id;
 
@@ -208,19 +182,7 @@
 		}
 
 		function sendQuery() {
-            $.ajax({
-                type: 'POST',
-                url: '/wizard',
-                data: JSON.stringify(query),
-                contentType: "application/json",
-                success: () => {
-                    window.location.href = '/list';
-                },
-                error: (err) => {
-                    console.log("ERROR");
-                    console.log(err)
-                }
-            });
+            window.location = '/list#' + $.param(query).replace(/%2C/g, ',');
 		}
 	</script>
 {% endblock %}

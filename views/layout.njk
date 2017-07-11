@@ -3,6 +3,7 @@
         <meta charset="utf-8">
         {% block css %}
             <link rel="stylesheet" href="/css/bootstrap.min.css">
+            <link rel="stylesheet" href="/css/sticky-footer.css">
             <link rel="stylesheet" href="/css/bootstrap-sortable.css">
             <link rel="stylesheet" href="/css/font-awesome.min.css">
         {% endblock %}
@@ -32,10 +33,16 @@
             </div>
         </nav>
 
-        <div class="container">
+        <div id="container-main" class="container{{ '-fluid' if fluid }}">
           {% block main %}
           {% endblock %}
         </div>
+
+        <footer class="footer">
+            <div class="container">
+                <span class="text-muted">This website is maintained by <a href="https://mastodon.xyz/@TheKinrar">thekinrar</a>. Source code and issues on <a href="https://github.com/thekinrar/mastodon-instances">GitHub</span>.
+            </div>
+        </footer>
 
         {% block scripts %}
             <script type="text/javascript" src="/js/jquery.min.js"></script>
