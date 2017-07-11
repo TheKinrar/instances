@@ -428,6 +428,8 @@
                             textL += getLanguage(languages, language).name[0];
                         });
                         modal.find('#modalInstanceInfo-languages').html(textL);
+                    } else {
+                        $('.modalInstanceInfo-extraInfo').hide();
                     }
 
                     modal.find('#modalInstanceInfo-btn-go').attr('href', 'https://' + instanceName);
