@@ -1,4 +1,7 @@
-global.DB = require('monk')('localhost/mastodon-instances');
+const fs = require('fs');
+
+global.config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+global.DB = require('monk')(config.database);
 global.Request = require('request').defaults({
     headers: {
         'User-Agent': 'MastodonInstances/1.0.0 (https://instances.mastodon.xyz)'

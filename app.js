@@ -28,7 +28,7 @@ global.Mailgun = require('mailgun-js')({
     domain: config.mailgun.domain
 });
 
-global.DB = require('monk')('localhost/mastodon-instances');
+global.DB = require('monk')(config.database);
 const app = express();
 
 app.locals.ProhibitedContent = ProhibitedContent;
