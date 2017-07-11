@@ -2,7 +2,7 @@
 
 {% block main %}
     <h3>
-        {{ instance.name }}
+        <a href="https://{{ instance.name }}">{{ instance.name }}</a>
         <small class="text-muted">{{ instance.infos.theme if instance.infos and instance.infos.theme else 'Generalistic instance' }}</small>
     </h3>
 
