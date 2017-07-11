@@ -88,14 +88,15 @@
                     <div id="collapseColumns" class="collapse hide" role="tabpanel">
                         <div class="card-block">
                             <p>
-                                <a class="toggle-column" data-column="1" href="#">users</a>
-                                <a class="toggle-column" data-column="2" href="#">statuses</a>
-                                <a class="toggle-column" data-column="3" href="#">connections</a>
-                                <a class="toggle-column" data-column="4" href="#">registrations</a>
-                                <a class="toggle-column" data-column="5" href="#">version</a>
-                                <a class="toggle-column" data-column="6" href="#">uptime</a>
-                                <a class="toggle-column" data-column="7" href="#">https</a>
-                                <a class="toggle-column" data-column="8" href="#">obs</a>
+                                <a class="toggle-column" data-column="0" href="#">status</a>
+                                <a class="toggle-column" data-column="2" href="#">users</a>
+                                <a class="toggle-column" data-column="3" href="#">statuses</a>
+                                <a class="toggle-column" data-column="4" href="#">connections</a>
+                                <a class="toggle-column" data-column="5" href="#">registrations</a>
+                                <a class="toggle-column" data-column="6" href="#">version</a>
+                                <a class="toggle-column" data-column="7" href="#">uptime</a>
+                                <a class="toggle-column" data-column="8" href="#">https</a>
+                                <a class="toggle-column" data-column="9" href="#">obs</a>
                             </p>
                         </div>
                     </div>
@@ -119,6 +120,7 @@
                     <table id="table-advanced" class="table table-striped table-bordered" cellspacing="0" width="100%">
                         <thead>
                             <tr>
+                                <th></th>
                                 <th>Instance</th>
                                 <th>Users</th>
                                 <th>Statuses</th>
@@ -132,6 +134,7 @@
                         </thead>
                         <tfoot>
                             <tr>
+                                <th></th>
                                 <th>Instance</th>
                                 <th>Users</th>
                                 <th>Statuses</th>
@@ -317,6 +320,11 @@
                     },
                     'columns': [
                         {
+                            'data': 'up',
+                            'render': function (data) {
+                                return data ? 'UP' : 'DOWN';
+                            }
+                        }, {
                             'data': 'name',
                             'render': function (data) {
                                 return `<a href="/${data}">${data}</a>`;

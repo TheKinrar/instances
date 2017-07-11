@@ -35,9 +35,6 @@ router.get('/list.json', (req, res) => {
         "dead": {
             "$ne": true
         },
-        "up": {
-            "$eq": true
-        },
         "users": {
             "$exists": true
         },
@@ -94,6 +91,10 @@ router.get('/list.json', (req, res) => {
                 };
             } catch(e) {}
         }
+    } else {
+        q["up"] = {
+            "$eq": true
+        };
     }
 
     if(infoNeeded) {
