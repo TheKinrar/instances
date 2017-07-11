@@ -66,9 +66,9 @@
                     <div class="row">
                         <p class="text-center" style="width: 100%;">
                             {% if advanced %}
-                                <a href="/list"><small>Simple mode</small></a>
+                                <a id="btn-switch-mode" href="/list"><small>Simple mode</small></a>
                             {% else %}
-                                <a href="/list/advanced"><small>Advanced mode</small></a>
+                                <a id="btn-switch-mode" href="/list/advanced"><small>Advanced mode</small></a>
                             {% endif %}
                         </p>
                     </div>
@@ -295,6 +295,25 @@
             });
 
             query.users = inputUsers.val();
+
+            let hq = {
+                lang: query.languages.join(','),
+                allowed: query.allowed.join(','),
+                prohibited: query.prohibited.join(','),
+                users: query.users
+            };
+
+            let hash = $.param(hq).replace(/%2C/g, ',');
+            window.location.hash = '#' + hash;
+
+            let btn = $('#btn-switch-mode');
+            let url = btn.attr('href');
+            let i = url.indexOf('#');
+            if(i > -1) {
+                btn.attr('href', url.substring(0, i + 1) + hash);
+            } else {
+                btn.attr('href', url + '#' + hash);
+            }
 
             return {
                 q: query,
