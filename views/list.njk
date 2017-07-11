@@ -361,7 +361,18 @@
                                 return 'Closed';
                             }
                         },
-                        { 'data': 'version' },
+                        {
+                            'data': 'version_score',
+                            'render': function (data, type, instance) {
+                                if(type === 'display')
+                                    return instance.version;
+
+                                if(type === 'filter')
+                                    return 'v:' + instance.version;
+
+                                return data;
+                            }
+                        },
                         {
                             'data': 'uptime_str',
                             'render': function (data) {
