@@ -43,7 +43,7 @@ router.get('/list.json', (req, res) => {
         }
 	};
 
-	let cq = req.query.q;
+	let cq = req.query.q || {};
 	let strict = req.query.strict === 'true';
 	let infoNeeded = false;
 
@@ -102,6 +102,14 @@ router.get('/list.json', (req, res) => {
     DB.get('instances').find(q).then((instances) => {
 		instances.forEach((instance) => {
 			instance.uptime_str = (instance.uptime * 100).toFixed(3);
+
+            if(!instance.https_score) {
+                instance.https_score = 0;
+            }
+
+            if(!instance.obs_score) {
+                instance.obs_score = 0;
+            }
 
 			if(!strict) {
                 let score = 0;

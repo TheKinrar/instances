@@ -341,14 +341,30 @@
                                 return data + '%';
                             }
                         },
-                        { 'data': {
-                            _: 'https_rank',
-                            sort: 'https_score'
-                        } },
-                        { 'data': {
-                            _: 'obs_rank',
-                            sort: 'obs_score'
-                        } }
+                        {
+                            'data': 'https_score',
+                            'render': function (data, type, instance) {
+                                if(type === 'display')
+                                    return instance.https_rank;
+
+                                if(type === 'filter')
+                                    return 'https:' + instance.https_rank;
+
+                                return data;
+                            }
+                        },
+                        {
+                            'data': 'obs_score',
+                            'render': function (data, type, instance) {
+                                if(type === 'display')
+                                    return instance.obs_rank;
+
+                                if(type === 'filter')
+                                    return 'obs:' + instance.obs_rank;
+
+                                return data;
+                            }
+                        }
                     ],
                     'deferRender': true
                 });
