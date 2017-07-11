@@ -3,9 +3,6 @@
 {% block main %}
     <h3>
         {{ instance.name }}
-        {% if instance.upchecks > 1440 and not instance.blacklisted and not instance.dead and instance.uptime >= 0.99 and instance.https_score >= 80 and instance.obs_score >= 65 and instance.openRegistrations and instance.infos %}
-            <abbr title="This instance meets the requirements to be shown in the results of the wizard"><i class="fa fa-check" aria-hidden="true"></i></abbr>
-        {% endif %}
         <small class="text-muted">{{ instance.infos.theme if instance.infos and instance.infos.theme else 'Generalistic instance' }}</small>
     </h3>
 
@@ -28,52 +25,10 @@
 
     <div class="row">
         <div class="col-md-4">
-            <table class="table table-sm">
-                <thead>
-                    <tr>
-                        <th>Criteria</th>
-                        <th>Value</th>
-                        <th>Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Uptime</td>
-                        <td>{{ (instance.uptime * 100) | round(3) }}%</td>
-                        <td>{{ (instance.uptime * 50) | round(2) }}</td>
-                    </tr>
-                    <tr>
-                        <td>HTTPS</td>
-                        <td>{{ instance.https_rank }}</td>
-                        <td>{{ (instance.https_score / 5) | round(2) }}</td>
-                    </tr>
-                    <tr>
-                        <td>Observatory by Mozilla</td>
-                        <td>{{ instance.obs_rank }}</td>
-                        <td>{{ (instance.obs_score / 5) | round(2) }}</td>
-                    </tr>
-                    <tr>
-                        <td>IPv6</td>
-                        <td>{{ 'Yes' if instance.ipv6 else 'No' }}</td>
-                        <td>{{ 10 if instance.ipv6 else 0 }}</td>
-                    </tr>
-                    <tr>
-                        <td><b>TOTAL</b></td>
-                        <td></td>
-                        <td>{{ score.total | round(2) }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-4">
             <h4>{{ instance.users }} Users</h4>
 
             <p>
                 {{ (instance.users / networkStats.users * 100) | round(2) }}% of total ({{ networkStats.users }})<br />
-                Last week: {{ '+' if instance.users >= lastWeek.users }}{{ instance.users - lastWeek.users }} ({{ '+' if instance.users >= lastWeek.users }}{{ ((instance.users - lastWeek.users) / lastWeek.users * 100) | round(2) }}%)
             </p>
         </div>
         <div class="col-md-4">
@@ -81,7 +36,6 @@
 
             <p>
                 {{ (instance.statuses / networkStats.statuses * 100) | round(2) }}% of total ({{ networkStats.statuses }})<br />
-                Last week: {{ '+' if instance.statuses >= lastWeek.statuses }}{{ instance.statuses - lastWeek.statuses }} ({{ '+' if instance.statuses >= lastWeek.statuses }}{{ ((instance.statuses - lastWeek.statuses) / lastWeek.statuses * 100) | round(2) }}%)
             </p>
         </div>
         <div class="col-md-4">
@@ -89,7 +43,6 @@
 
             <p>
                 {{ (instance.connections / networkStats.connections * 100) | round(2) }}% of total ({{ networkStats.connections }})<br />
-                Last week: {{ '+' if instance.connections >= lastWeek.connections }}{{ instance.connections - lastWeek.connections }} ({{ '+' if instance.connections >= lastWeek.connections }}{{ ((instance.connections - lastWeek.connections) / lastWeek.connections * 100) | round(2) }}%)
             </p>
         </div>
     </div>
