@@ -32,9 +32,12 @@ router.get('/list.json', (req, res) => {
 		"blacklisted": {
 			"$ne": true
 		},
-		"dead": {
-			"$ne": true
-		},
+        "dead": {
+            "$ne": true
+        },
+        "up": {
+            "$eq": true
+        },
         "users": {
             "$exists": true
         },
