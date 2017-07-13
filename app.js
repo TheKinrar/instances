@@ -84,7 +84,7 @@ const session = Session({
 	cookie: {
 		httpOnly: true,
 		maxAge: 60 * 60 * 1000,
-		secure: false
+		secure: true
 	},
 	proxy: true,
 	secret: config.session_secret,
