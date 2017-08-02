@@ -1,0 +1,18 @@
+{% extends 'layout.njk' %}
+
+{% block main %}
+    <h3>Get an API token</h3>
+
+    <form action="/api/token" method="post">
+        <div class="form-group">
+            <label for="inputName">Application name</label>
+            <input type="text" class="form-control" id="inputName" name="name" placeholder="Application name" required>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail">Email address</label>
+            <input type="email" class="form-control" id="inputEmail" name="email" aria-describedby="emailHelp" placeholder="Email address" required>
+            <small id="emailHelp" class="form-text text-muted">Be sure this a valid address. Your API access may get suspended otherwise.</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}
