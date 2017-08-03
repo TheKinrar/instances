@@ -1,32 +1,18 @@
 const router = require('express').Router();
 const APIUtils = require('../../../../helpers/APIUtils');
 
+// https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
+RegExp.escape = function(s) {
+    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
+
 /**
  * @api {get} /instances/show Show instance information
  * @apiName ShowInstance
  * @apiGroup Instances
+ * @apiVersion 1.0.0
  *
  * @apiParam {String} name Instance name.
- *
- * @apiSuccess {String} firstname Firstname of the User.
- * @apiSuccess {String} lastname  Lastname of the User.
- *
- * @apiSuccessExample Success-Response:
- *     HTTP/1.1 200 OK
- *     {
- *       "firstname": "John",
- *       "lastname": "Doe"
- *     }
- *
- * @apiError InstanceNotFound No instance with this name could be found.
- *
- * @apiErrorExample Error-Response:
- *     HTTP/1.1 404 Not Found
- *     {
- *       "error": {
- *       	"message": "Instance not found."
- *       }
- *     }
  */
 router.get('/show', (req, res) => {
     let query;
@@ -40,34 +26,41 @@ router.get('/show', (req, res) => {
         return res.sendError(400, e.message);
     }
 
-	DB.get('instances').findOne({
-		name: query.name
-	}).then((instance) => {
+    DB.get('instances').findOne({
+        name: query.name
+    }).then((instance) => {
         if(!instance)
             return res.sendError(404, 'Instance not found.');
 
-		res.json(APIUtils.createInstanceJson(instance));
-	}).catch((err) => {
-		console.error(err);
-		res.sendStatus(500);
-	});
+        res.json(APIUtils.createInstanceJson(instance));
+    }).catch((err) => {
+        console.error(err);
+        res.sendStatus(500);
+    });
 });
 
+/**
+ * @api {get} /instances/list List instances
+ * @apiName ListInstances
+ * @apiGroup Instances
+ * @apiVersion 1.0.0
+ *
+ * @apiParam {Number} [count=20] Number of instances to get. **0 returns all instances**.
+ * @apiParam {Boolean} [include_dead=false] Include dead (down for at least two weeks) instances
+ * @apiParam {String} [min_id] Minimal ID of instances to retrieve. Use this to navigate through pages. The id of the first instance from next page is accessible through pagination.next_id.
+ */
 router.get('/list', (req, res) => {
     let query;
     try {
         query = APIUtils.checkQuery({
             count: {
                 type: 'int',
-                min: 1,
-				max: 100,
-				optional: true,
-				def: 20
-            }, page: {
-                type: 'int',
                 min: 0,
                 optional: true,
-                def: 0
+                def: 20
+            }, min_id: {
+                type: 'string',
+                optional: true
             }, include_dead: {
                 type: 'boolean',
                 optional: true,
@@ -79,40 +72,140 @@ router.get('/list', (req, res) => {
     }
 
     let q = {
-    	upchecks: {
-    		$gt: 0
-		},
+        upchecks: {
+            $gt: 0
+        },
         blacklisted: {
             $ne: true
         }
     };
 
     if(!query.include_dead)
-    	q.dead = {
+        q.dead = {
             $ne: true
         };
 
-    Promise.all([DB.get('instances').count(q), DB.get('instances').find(q, {
-        limit: query.count,
-        skip: query.page * query.count
-    })]).then(values => {
-    	let total = values[0];
-    	let instances = values[1];
+    if(query.min_id)
+        try {
+            q._id = {
+                $gte: require('monk').id(query.min_id)
+            };
+        } catch(e) {}
+
+    let limited = query.count > 0;
+    Promise.all([DB.get('instances').count(q), DB.get('instances').find(q, limited ? {
+        limit: query.count + 1
+    } : undefined)]).then(values => {
+        let total = values[0];
+        let instances = values[1];
 
         let jsons = [];
 
-        instances.forEach((instance) => {
+        instances.slice(0, limited ? query.count : undefined).forEach((instance) => {
             jsons.push(APIUtils.createInstanceJson(instance));
         });
 
-        res.json({
+        let res_json = {
             instances: jsons,
-			pagination: {
-            	total,
-				max_page: Math.ceil(total / query.count) - 1
-			}
+            pagination: {
+                total
+            }
+        };
+
+        if(limited && instances.length > query.count)
+            res_json.pagination.next_id = instances[query.count]._id;
+
+        res.json(res_json);
+    }).catch((err) => {
+        console.error(err);
+        res.sendStatus(500);
+    });
+});
+
+/**
+ * @api {get} /instances/search Search instances
+ * @apiName SearchInstances
+ * @apiGroup Instances
+ * @apiVersion 1.0.0
+ *
+ * @apiParam {Number} [count=20] Number of instances to get. **0 returns all instances**.
+ * @apiParam {String} q Query for searching through instance names, topics and descriptions.
+ */
+router.get('/search', (req, res) => {
+    let query;
+    try {
+        query = APIUtils.checkQuery({
+            count: {
+                type: 'int',
+                min: 0,
+                optional: true,
+                def: 20
+            }, q: {
+                type: 'string'
+            }
+        }, req.query);
+    } catch(e) {
+        return res.sendError(400, e.message);
+    }
+
+    let q = {
+        upchecks: {
+            $gt: 0
+        },
+        blacklisted: {
+            $ne: true
+        },
+        dead: {
+            $ne: true
+        },
+        $or: [{
+            name: {
+                $regex: RegExp.escape(query.q),
+                $options: 'i'
+            }
+        }, {
+            'infos.theme': {
+                $regex: RegExp.escape(query.q),
+                $options: 'i'
+            }
+        }, {
+            'infos.shortDescription': {
+                $regex: RegExp.escape(query.q),
+                $options: 'i'
+            }
+        }, {
+            'infos.fullDescription': {
+                $regex: RegExp.escape(query.q),
+                $options: 'i'
+            }
+        }]
+    };
+
+    let limited = query.count > 0;
+    Promise.all([DB.get('instances').count(q), DB.get('instances').find(q, limited ? {
+        limit: query.count + 1
+    } : undefined)]).then(values => {
+        let total = values[0];
+        let instances = values[1];
+
+        let jsons = [];
+
+        instances.slice(0, limited ? query.count : undefined).forEach((instance) => {
+            jsons.push(APIUtils.createInstanceJson(instance));
         });
-	}).catch((err) => {
+
+        let res_json = {
+            instances: jsons,
+            pagination: {
+                total
+            }
+        };
+
+        if(limited && instances.length > query.count)
+            res_json.pagination.next_id = instances[query.count]._id;
+
+        res.json(res_json);
+    }).catch((err) => {
         console.error(err);
         res.sendStatus(500);
     });

@@ -13,6 +13,7 @@
                     <th>Version</th>
                     <th>Instances</th>
                     <th>Instances (%)</th>
+                    <th>Users</th>
                     <th>Release date</th>
                 </tr>
                 </thead>
@@ -24,6 +25,7 @@
                         <td>{{ version.name }}</td>
                         <td>{{ version.instances }}</td>
                         <td>{{ (version.instances_ratio * 100) | round(2) }}</td>
+                        <td>{{ version.users }}</td>
                         <td>{{ version.publishedAt }}</td>
                     </tr>
                     {% set i = i + 1 %}

@@ -3,16 +3,32 @@
 {% block main %}
     <h3>Get an API token</h3>
 
-    <form action="/api/token" method="post">
-        <div class="form-group">
-            <label for="inputName">Application name</label>
-            <input type="text" class="form-control" id="inputName" name="name" placeholder="Application name" required>
-        </div>
-        <div class="form-group">
-            <label for="inputEmail">Email address</label>
-            <input type="email" class="form-control" id="inputEmail" name="email" aria-describedby="emailHelp" placeholder="Email address" required>
-            <small id="emailHelp" class="form-text text-muted">Be sure this a valid address. Your API access may get suspended otherwise.</small>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+    {% if token %}
+        <p>
+            <b>Application name: </b>{{ token.name }}<br />
+            <b>Application ID: </b>{{ token._id }}<br />
+            <b>Secret token: </b><small id="token-secret" style="display: none;">{{ token.secret }}</small><a href="#" onclick="$('#token-secret').show();$(this).hide();">Show</a><br />
+        </p>
+
+        <p>
+            If this API or website is useful to you, please consider donating if you can.<br />
+            Hosting the Mastodon instance, the instance list and the API represents some costs, and donating is also a way for showing your support ;)<br />
+            You may donate on <a href="https://liberapay.com/thekinrar">Liberapay</a> or <a href="https://patreon.com/thekinrar">Patreon</a>.
+            Contact <a href="https://mastodon.xyz/@TheKinrar">@TheKinrar@mastodon.xyz</a> for other methods.<br />
+            <i>Thanks!</i>
+        </p>
+    {% else %}
+        <form action="/api/token" method="post">
+            <div class="form-group">
+                <label for="inputName">Application name</label>
+                <input type="text" class="form-control" id="inputName" name="name" placeholder="Application name" required>
+            </div>
+            <div class="form-group">
+                <label for="inputEmail">Email address</label>
+                <input type="email" class="form-control" id="inputEmail" name="email" aria-describedby="emailHelp" placeholder="Email address" required>
+                <small id="emailHelp" class="form-text text-muted">Be sure this a valid address. Your API access may get suspended otherwise.</small>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    {% endif %}
 {% endblock %}

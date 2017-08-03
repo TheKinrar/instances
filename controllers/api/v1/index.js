@@ -17,13 +17,11 @@ router.use((req, res, next) => {
     if(auth) {
         let arr = auth.split(" ");
 
-        if(arr.length === 2 && arr[0] === 'Token') {
-            let token = arr[1];
-
+        if(arr.length === 2 && arr[0] === 'Bearer') {
             DB.get('api_tokens').findOne({
-                token
+                secret: arr[1]
             }).then((token) => {
-                if(token) {
+                if (token) {
                     next();
                 } else {
                     res.sendError(400, "Invalid token.");
@@ -41,6 +39,6 @@ router.use((req, res, next) => {
 });
 
 router.use('/instances', require('./instances'));
-router.use('/themes', require('./themes'));
+router.use('/versions', require('./versions'));
 
 module.exports = router;

@@ -8,6 +8,7 @@ const Session = require('express-session');
 const Languages = require('languages');
 const CountryLanguages = require('country-language');
 const MongoStore = require('connect-mongo')(Session);
+
 global.Request = require('request').defaults({
     headers: {
         'User-Agent': 'MastodonInstances/1.0.0 (https://instances.mastodon.xyz)'
@@ -91,7 +92,7 @@ const session = Session({
 	resave: false,
 	saveUninitialized: false,
 	store: new MongoStore({
-		url: 'mongodb://localhost/mastodon-instances'
+		url: 'mongodb://' + config.database
 	})
 });
 app.use(session);

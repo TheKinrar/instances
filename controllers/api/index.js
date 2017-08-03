@@ -33,12 +33,13 @@ router.post('/token', (req, res) => {
 
 		return await DB.get('api_tokens').insert({
 			_id: appId,
+			createdAt: new Date(),
 			name: req.body.name,
 			secret: randomstring.generate(128),
 			creator_ip: hash.digest('hex')
 		});
 	})().then((token) => {
-		console.log(token);
+		res.render('api/token', {token});
 	}).catch((e) => {
 		console.error(e);
 		res.sendStatus(500);

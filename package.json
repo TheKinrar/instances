@@ -22,10 +22,14 @@
     "request": "^2.81.0"
   },
   "apidoc": {
-    "name": "mastodon-instances",
+    "name": "Mastodon instances and network API",
     "version": "1.0.0",
-    "description": "apiDoc basic example",
-    "title": "Custom apiDoc browser title",
-    "url": "https://api.github.com/v1"
+    "description": "Documentation of instances.social API",
+    "title": "instances.social API",
+    "url": "https://instances.social/api/1.0",
+    "header": {
+      "title": "Using the API",
+      "filename": "views/api/doc/how-to.md"
+    }
   }
 }

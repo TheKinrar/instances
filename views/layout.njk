@@ -28,6 +28,15 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/admin">Admin space</a>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="/api/doc" id="api-dropdown-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                API
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="api-dropdown-link">
+                                <a class="dropdown-item" href="/api/doc">Documentation</a>
+                                <a class="dropdown-item" href="/api/token">Get a token</a>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -50,13 +59,6 @@
             <script type="text/javascript" src="/js/bootstrap.min.js"></script>
             <script type="text/javascript" src="/js/moment.min.js"></script>
             <script type="text/javascript" src="/js/bootstrap-sortable.js"></script>
-
-            <script type="text/javascript">
-                const _bftn_options = {
-                    disableGoogleAnalytics: true
-                };
-            </script>
-            <script src="/js/battleforthenet.js" async></script>
         {% endblock %}
     </body>
 </html>
