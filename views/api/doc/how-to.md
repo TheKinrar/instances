@@ -8,5 +8,5 @@ For example, if your token is *aaa*, your *Authorization* header will be "Bearer
 
 There are no rate limits.  
 However, you **need** to set a valid email address when you get your API token.
-In case of abuse or "bad usage" of the API, your token will be deleted without
+Otherwise, in case of abuse or "bad usage" of the API, your token will be deleted without
 warning and your IP address may get banned.
