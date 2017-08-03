@@ -351,6 +351,8 @@ router.get('/instances.json', (req, res) => {
 			json.statuses = instance.statuses;
 			json.connections = instance.connections;
 
+            json.info = instance.infos;
+
 			jsons.push(json);
 		});
 
