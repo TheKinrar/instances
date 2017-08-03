@@ -4965,7 +4965,7 @@ S2.define('select2/options',[
         console.warn(
           'Select2: The `data-select2-tags` attribute has been changed to ' +
           'use the `data-data` and `data-tags="true"` attributes and will be ' +
-          'removed in future versions of Select2.'
+          'removed in future network of Select2.'
         );
       }
 
@@ -4978,7 +4978,7 @@ S2.define('select2/options',[
         console.warn(
           'Select2: The `data-ajax-url` attribute has been changed to ' +
           '`data-ajax--url` and support for the old attribute will be removed' +
-          ' in future versions of Select2.'
+          ' in future network of Select2.'
         );
       }
 
@@ -5522,7 +5522,7 @@ S2.define('select2/core',[
     if (this.options.get('debug') && window.console && console.warn) {
       console.warn(
         'Select2: The `select2("enable")` method has been deprecated and will' +
-        ' be removed in later Select2 versions. Use $element.prop("disabled")' +
+        ' be removed in later Select2 network. Use $element.prop("disabled")' +
         ' instead.'
       );
     }
@@ -5558,7 +5558,7 @@ S2.define('select2/core',[
     if (this.options.get('debug') && window.console && console.warn) {
       console.warn(
         'Select2: The `select2("val")` method has been deprecated and will be' +
-        ' removed in later Select2 versions. Use $element.val() instead.'
+        ' removed in later Select2 network. Use $element.val() instead.'
       );
     }
 
@@ -5807,7 +5807,7 @@ S2.define('select2/compat/initSelection',[
         ' of a custom data adapter that overrides the `current` method. ' +
         'This method is now called multiple times instead of a single ' +
         'time when the instance is initialized. Support will be removed ' +
-        'for the `initSelection` option in future versions of Select2'
+        'for the `initSelection` option in future network of Select2'
       );
     }
 
@@ -6019,7 +6019,7 @@ S2.define('select2/compat/query',[
       console.warn(
         'Select2: The `query` option has been deprecated in favor of a ' +
         'custom data adapter that overrides the `query` method. Support ' +
-        'will be removed for the `query` option in future versions of ' +
+        'will be removed for the `query` option in future network of ' +
         'Select2.'
       );
     }

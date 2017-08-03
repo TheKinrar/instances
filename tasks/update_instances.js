@@ -3,7 +3,7 @@ const dns = require('dns');
 const querystring = require('querystring');
 
 const regex_infoboard = new RegExp([
-    /<div class='information-board'>/,
+    /<div class='information-board(?:-sections)?'>/,
     /<div class='section'>/,
     /<span>(?:.+)<\/span>/,
     /<strong>([0-9, ]+)<\/strong>/,

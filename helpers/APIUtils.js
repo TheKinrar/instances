@@ -1,5 +1,6 @@
 module.exports.checkQuery = checkQuery;
 module.exports.createInstanceJson = createInstanceJson;
+module.exports.createVersionJson = createVersionJson;
 
 function checkQuery(template, query) {
     let template_keys = Object.keys(template);
@@ -63,14 +64,15 @@ function checkQuery(template, query) {
 
 function createInstanceJson(instance) {
     let json = {
+        id: instance._id,
         name: instance.name,
+        added_at: instance.addedAt || null,
         updated_at: instance.updatedAt || null,
         checked_at: instance.checkedAt || null,
         uptime: ((instance.upchecks || 0) / ((instance.upchecks || 0) + (instance.downchecks || 0))) || null,
         up: instance.up || false,
         dead: instance.dead || false,
         version: instance.version || null,
-        https: instance.https || false,
         ipv6: instance.ipv6 || false,
         https_score: instance.https_score || null,
         https_rank: instance.https_rank || null,
@@ -89,14 +91,24 @@ function createInstanceJson(instance) {
         json.info = {
             short_description: info.shortDescription || null,
             full_description: info.fullDescription || null,
-            theme: info.theme || null,
+            topic: info.theme || null,
             languages: info.languages || null,
             other_languages_accepted: !info.noOtherLanguages,
             federates_with: info.federation || null,
-            bots_accepted: info.bots || null,
-            brands_accepted: info.brands || null
+            prohibited_content: info.prohibitedContent || []
         };
     }
 
     return json;
+}
+
+function createVersionJson(version) {
+    return {
+        id: version._id,
+        name: version.name,
+        published_at: version.publishedAt || null,
+        instances: version.instances || 0,
+        instances_proportion: version.instances_ratio || 0,
+        users: version.users || 0
+    };
 }

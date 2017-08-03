@@ -31,16 +31,23 @@ module.exports = () => {
                         });
                     }
 
-                    db_instances.count({
+                    db_instances.find({
                         version: version.name,
-                        up: true
-                    }).then((count) => {
+                        up: true,
+                        blacklisted: {$ne: true}
+                    }).then((instances) => {
+                        let users = 0;
+                        instances.forEach((instance) => {
+                            users += instance.users || 0;
+                        });
+
                         db_versions.update({
                             _id: version.id
                         }, {
                             $set: {
-                                instances: count,
-                                instances_ratio: count / total
+                                instances: instances.length,
+                                instances_ratio: instances.length / total,
+                                users: users
                             }
                         });
                     }).catch(console.error);
@@ -57,18 +64,25 @@ module.exports = () => {
                     });
                 }
 
-                db_instances.count({
+                db_instances.find({
                     version: {
                         $nin: version_names
                     },
-                    up: true
-                }).then((count) => {
+                    up: true,
+                    blacklisted: {$ne: true}
+                }).then((instances) => {
+                    let users = 0;
+                    instances.forEach((instance) => {
+                        users += instance.users || 0;
+                    });
+
                     db_versions.update({
                         _id: -1
                     }, {
                         $set: {
-                            instances: count,
-                            instances_ratio: count / total
+                            instances: instances.length,
+                            instances_ratio: instances.length / total,
+                            users: users
                         }
                     });
                 }).catch(console.error);
