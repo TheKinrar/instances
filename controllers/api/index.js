@@ -34,9 +34,10 @@ router.post('/token', (req, res) => {
 		return await DB.get('api_tokens').insert({
 			_id: appId,
 			createdAt: new Date(),
-			name: req.body.name,
 			secret: randomstring.generate(128),
-			creator_ip: hash.digest('hex')
+			creator_ip: hash.digest('hex'),
+            name: req.body.name,
+			email: req.body.email
 		});
 	})().then((token) => {
 		res.render('api/token', {token});
