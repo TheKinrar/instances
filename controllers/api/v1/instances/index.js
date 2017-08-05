@@ -130,6 +130,7 @@ router.get('/list', (req, res) => {
  *
  * @apiParam {Number} [count=20] Number of instances to get. **0 returns all instances**.
  * @apiParam {String} q Query for searching through instance names, topics and descriptions.
+ * @apiParam {Boolean} [name=false] Only search through names
  */
 router.get('/search', (req, res) => {
     let query;
@@ -142,28 +143,25 @@ router.get('/search', (req, res) => {
                 def: 20
             }, q: {
                 type: 'string'
+            }, name: {
+                type: 'boolean',
+                optional: true,
+                def: false
             }
         }, req.query);
     } catch(e) {
         return res.sendError(400, e.message);
     }
 
-    let q = {
-        upchecks: {
-            $gt: 0
-        },
-        blacklisted: {
-            $ne: true
-        },
-        dead: {
-            $ne: true
-        },
-        $or: [{
-            name: {
-                $regex: RegExp.escape(query.q),
-                $options: 'i'
-            }
-        }, {
+    let or = [{
+        name: {
+            $regex: RegExp.escape(query.q),
+            $options: 'i'
+        }
+    }];
+
+    if(!query.name) {
+        or.push({
             'infos.theme': {
                 $regex: RegExp.escape(query.q),
                 $options: 'i'
@@ -178,7 +176,20 @@ router.get('/search', (req, res) => {
                 $regex: RegExp.escape(query.q),
                 $options: 'i'
             }
-        }]
+        });
+    }
+
+    let q = {
+        upchecks: {
+            $gt: 0
+        },
+        blacklisted: {
+            $ne: true
+        },
+        dead: {
+            $ne: true
+        },
+        $or: or
     };
 
     let limited = query.count > 0;
