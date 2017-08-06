@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const CountryLanguages = require('country-language');
 const alParser = require('accept-language-parser');
+const morgan = require('../middlewares/morgan');
 
 router.use('/api', require('./api'));
 router.use('/admin', (req, res, next) => {
@@ -322,7 +323,7 @@ router.get('/network', (req, res) => {
 	});
 });
 
-router.get('/instances.json', (req, res) => {
+router.get('/instances.json', morgan.api, (req, res) => {
 	res.set('Access-Control-Allow-Origin', '*');
 	
 	DB.get('instances').find({

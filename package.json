@@ -16,10 +16,12 @@
     "mailgun-js": "^0.10.1",
     "mongoose": "^4.9.8",
     "monk": "^4.0.0",
+    "morgan": "^1.8.2",
     "nunjucks": "^3.0.0",
     "password-hash": "^1.2.2",
     "randomstring": "^1.1.5",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "rotating-file-stream": "^1.2.2"
   },
   "apidoc": {
     "name": "Mastodon instances and network API",

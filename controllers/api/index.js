@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const crypto = require('crypto');
 const randomstring = require('randomstring');
+const morgan = require('../../middlewares/morgan');
 
 router.use((req, res, next) => {
 	if(req.method === 'GET')
@@ -9,9 +10,9 @@ router.use((req, res, next) => {
 	next();
 });
 
-router.use('/1.0', require('./v1'));
+router.use('/1.0', morgan.api, require('./v1'));
 
-router.use('/instances', require('./instances'));
+router.use('/instances', morgan.api, require('./instances'));
 
 router.get('/token', (req, res) => {
     res.render('api/token');

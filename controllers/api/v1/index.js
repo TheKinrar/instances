@@ -22,6 +22,7 @@ router.use((req, res, next) => {
                 secret: arr[1]
             }).then((token) => {
                 if (token) {
+                    req.token = token;
                     next();
                 } else {
                     res.sendError(400, "Invalid token.");
