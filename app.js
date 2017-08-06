@@ -2,7 +2,6 @@ const express = require('express');
 const flash = require('connect-flash');
 const bodyParser = require('body-parser');
 const nunjucks = require('nunjucks');
-const Influx = require('influx');
 const fs = require('fs');
 const Session = require('express-session');
 const Languages = require('languages');
