@@ -41,7 +41,7 @@ router.get('/show', (req, res) => {
  * @apiGroup Versions
  * @apiVersion 1.0.0
  *
- * @apiParam {Number} [count=20] Number of versions to get. **0 returns all versions**.
+ * @apiParam {Number{0-10000}} [count=20] Number of versions to get. **0 returns all versions**.
  * @apiParam {Boolean} [include_specials=true] Include special versions which do not match any Mastodon release (e.g. Unknown and <1.3)
  * @apiParam {Boolean} [include_unused=true] Include versions which are not used by any instance
  * @apiParam {Number} [min_id] Minimal ID of versions to retrieve. Use this to navigate through pages. The id of the first version from next page is accessible through pagination.next_id.
@@ -53,6 +53,7 @@ router.get('/list', (req, res) => {
             count: {
                 type: 'int',
                 min: 0,
+                max: 10000,
                 optional: true,
                 def: 20
             }, min_id: {

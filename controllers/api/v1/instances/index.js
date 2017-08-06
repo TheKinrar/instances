@@ -45,7 +45,7 @@ router.get('/show', (req, res) => {
  * @apiGroup Instances
  * @apiVersion 1.0.0
  *
- * @apiParam {Number} [count=20] Number of instances to get. **0 returns all instances**.
+ * @apiParam {Number{0-10000}} [count=20] Number of instances to get. **0 returns all instances**.
  * @apiParam {Boolean} [include_dead=false] Include dead (down for at least two weeks) instances
  * @apiParam {String} [min_id] Minimal ID of instances to retrieve. Use this to navigate through pages. The id of the first instance from next page is accessible through pagination.next_id.
  */
@@ -56,6 +56,7 @@ router.get('/list', (req, res) => {
             count: {
                 type: 'int',
                 min: 0,
+                max: 10000,
                 optional: true,
                 def: 20
             }, min_id: {
@@ -192,7 +193,7 @@ router.get('/sample', (req, res) => {
  * @apiGroup Instances
  * @apiVersion 1.0.0
  *
- * @apiParam {Number} [count=20] Number of instances to get. **0 returns all instances**.
+ * @apiParam {Number{0-10000}} [count=20] Number of instances to get. **0 returns all instances**.
  * @apiParam {String} q Query for searching through instance names, topics and descriptions.
  * @apiParam {Boolean} [name=false] Only search through names
  */
@@ -203,6 +204,7 @@ router.get('/search', (req, res) => {
             count: {
                 type: 'int',
                 min: 0,
+                max: 10000,
                 optional: true,
                 def: 20
             }, q: {
