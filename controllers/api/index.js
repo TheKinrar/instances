@@ -3,16 +3,18 @@ const crypto = require('crypto');
 const randomstring = require('randomstring');
 const morgan = require('../../middlewares/morgan');
 
-router.use((req, res, next) => {
-	if(req.method === 'GET')
-		res.set('Access-Control-Allow-Origin', '*');
-	
-	next();
-});
+const allowOrigin = (req, res, next) => {
+    res.set('Access-Control-Allow-Origin', '*');
 
-router.use('/1.0', morgan.api, require('./v1'));
+    if(req.method === 'OPTIONS')
+        return res.status(204).send();
 
-router.use('/instances', morgan.api, require('./instances'));
+    next();
+};
+
+router.use('/1.0', morgan.api, allowOrigin, require('./v1'));
+
+router.use('/instances', morgan.api, allowOrigin, require('./instances'));
 
 router.get('/token', (req, res) => {
     res.render('api/token');
