@@ -348,26 +348,15 @@ function getStats(base_url, cb) {
 }
 
 function areRegistrationsOpened(url, cb) {
-    url = 'https://' + url;
-    try {
-        https.get(url + '/auth/sign_up', (res) => {
-            const statusCode = res.statusCode;
+    Request.post(`https://${url}/about`, (err, res, html) => {
+        if(err) return cb(false);
 
-            if (statusCode === 200) {
-                cb(true);
-            } else {
-                cb(false);
-            }
-
+        const statusCode = res.statusCode;
+        if (statusCode !== 200 || typeof html !== 'string') {
             res.resume();
+            return cb(false);
+        }
 
-            res.on('error', (e) => {
-                cb(false);
-            });
-        }).on('error', (e) => {
-            cb(false);
-        });
-    } catch(e) {
-        ch(false);
-    }
+        cb(!/<div class='closed-registrations-message'>/.test(html));
+    });
 }
