@@ -348,11 +348,15 @@ function getStats(base_url, cb) {
 }
 
 function areRegistrationsOpened(url, cb) {
-    Request.post(`https://${url}/about`, (err, res, html) => {
-        if(err) return cb(false);
+    Request.get(`https://${url}/about`, (err, res, html) => {
+        if(err) {
+            console.error('areRegistrationsOpened', url, err);
+            return cb(false);
+        }
 
         const statusCode = res.statusCode;
         if (statusCode !== 200 || typeof html !== 'string') {
+            console.error('areRegistrationsOpened', 'sc', url, statusCode, typeof html);
             res.resume();
             return cb(false);
         }
