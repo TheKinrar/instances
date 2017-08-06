@@ -123,6 +123,70 @@ router.get('/list', (req, res) => {
 });
 
 /**
+ * @api {get} /instances/sample Get an instances sample (random pick)
+ * @apiName GetInstancesSample
+ * @apiGroup Instances
+ * @apiVersion 1.0.0
+ *
+ * @apiParam {Number{1-100}} [count=20] Number of instances to get.
+ * @apiParam {Boolean} [include_dead=false] Include dead (down for at least two weeks) instances
+ */
+router.get('/sample', (req, res) => {
+    let query;
+    try {
+        query = APIUtils.checkQuery({
+            count: {
+                type: 'int',
+                min: 1,
+                max: 100,
+                optional: true,
+                def: 20
+            }, include_dead: {
+                type: 'boolean',
+                optional: true,
+                def: false
+            }
+        }, req.query);
+    } catch(e) {
+        return res.sendError(400, e.message);
+    }
+
+    let q = {
+        upchecks: {
+            $gt: 0
+        },
+        blacklisted: {
+            $ne: true
+        }
+    };
+
+    if(!query.include_dead)
+        q.dead = {
+            $ne: true
+        };
+
+    DB.get('instances').aggregate([
+        { $match : q },
+        { $sample: { size: query.count } }
+    ]).then(instances => {
+        let jsons = [];
+
+        instances.forEach((instance) => {
+            jsons.push(APIUtils.createInstanceJson(instance));
+        });
+
+        let res_json = {
+            instances: jsons
+        };
+
+        res.json(res_json);
+    }).catch((err) => {
+        console.error(err);
+        res.sendStatus(500);
+    });
+});
+
+/**
  * @api {get} /instances/search Search instances
  * @apiName SearchInstances
  * @apiGroup Instances
