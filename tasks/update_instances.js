@@ -71,8 +71,10 @@ module.exports = () => {
                             console.error(instance.name, 'Obs failed: ' + err.message);
 
                             if (!instance.obs_rank) {
-                                console.error(instance.name, 'No cached Observatory score. Cancelling update.');
-                                return;
+                                obs_rank = {
+                                    rank: null,
+                                    score: 0
+                                };
                             } else {
                                 obs_rank = {
                                     rank: instance.obs_rank,
