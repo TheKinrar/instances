@@ -37,7 +37,10 @@ async function checkDeadInstances() {
     console.log('Looking for dead instances. Dead date: ' + deadDate);
 
     let instances = await db_instances.find({
-        "up": false
+        "up": false,
+		"dead": {
+        	"$ne": true
+		}
     });
 
     for(let instance of instances) {
