@@ -66,13 +66,15 @@ module.exports = () => {
                         }
                     }
 
-                    getObsRank(instance.name, (err, obs_rank) => {
+                    getObsRank(instance, (err, obs_rank) => {
                         if (err) {
                             console.error(instance.name, 'Obs failed: ' + err.message);
 
                             if (!instance.obs_rank) {
-                                console.error(instance.name, 'No cached Observatory score. Cancelling update.');
-                                return;
+                                obs_rank = {
+                                    rank: null,
+                                    score: 0
+                                };
                             } else {
                                 obs_rank = {
                                     rank: instance.obs_rank,
@@ -87,23 +89,29 @@ module.exports = () => {
                                     return console.error(instance.name, 'GetStats failed: ' + err.message);
 
                                 areRegistrationsOpened(instance.name, (openRegistrations) => {
+                                    let _set = {
+                                        https_rank: rank.rank,
+                                        https_score: rank.score,
+                                        ipv6: is_ipv6,
+                                        users: stats.users,
+                                        statuses: stats.statuses,
+                                        connections: stats.connections,
+                                        version: stats.version.substring(0, 7),
+                                        version_score: stats.version_score,
+                                        openRegistrations,
+                                        updatedAt: new Date()
+                                    };
+
+                                    if(obs_rank) {
+                                        _set.obs_rank = obs_rank.rank;
+                                        _set.obs_score = obs_rank.score;
+                                        _set.obs_date = new Date();
+                                    }
+
                                     db_instances.update({
                                         _id: instance._id
                                     }, {
-                                        $set: {
-                                            https_rank: rank.rank,
-                                            https_score: rank.score,
-                                            obs_rank: obs_rank.rank,
-                                            obs_score: obs_rank.score,
-                                            ipv6: is_ipv6,
-                                            users: stats.users,
-                                            statuses: stats.statuses,
-                                            connections: stats.connections,
-                                            version: stats.version.substring(0, 7),
-                                            version_score: stats.version_score,
-                                            openRegistrations,
-                                            updatedAt: new Date()
-                                        }
+                                        $set: _set
                                     });
                                 });
                             });
@@ -195,7 +203,13 @@ function getHttpsRank(name, cb) {
     });
 }
 
-function getObsRank(name, cb) {
+function getObsRank(instance, cb) {
+    let name = instance.name;
+
+    if(instance.obs_date && new Date().getTime() - instance.obs_date.getTime() < 24 * 60 * 60 * 1000) {
+        return cb(null, null);
+    }
+
     Request.post('https://http-observatory.security.mozilla.org/api/v1/analyze?'+ querystring.stringify({
             host: name
         }), (err, res, raw) => {
