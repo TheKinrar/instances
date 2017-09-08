@@ -6,6 +6,7 @@ global.Request = require('request').defaults({
     headers: {
         'User-Agent': 'MastodonInstances/1.0.0 (https://instances.mastodon.xyz)'
     }
+
 });
 
 const checkInstances = require('./tasks/check_instances');

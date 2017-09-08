@@ -333,9 +333,9 @@ router.get('/instances.json', morgan.api, (req, res) => {
 		"blacklisted": {
 			"$ne": true
 		},
-                "dead": {
-                        "$ne": true
-                }
+        "dead": {
+                "$ne": true
+        }
 	}).then((instances) => {
 		let jsons = [];
 
