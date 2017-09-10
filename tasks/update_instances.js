@@ -167,7 +167,13 @@ function haveStatsChanged(a, b) {
 }
 
 function getHttpsRank(name, cb) {
-    https.get('https://tls.imirhil.fr/https/' + name + '.json', (res) => {
+    https.get({
+        hostname: 'tls.imirhil.fr',
+        path: '/https/' + name + '.json',
+        headers: {
+            'User-Agent': USER_AGENT
+        }
+    }, (res) => {
         const statusCode = res.statusCode;
         const contentType = res.headers['content-type'];
 
@@ -295,10 +301,13 @@ function checkIpv6(name, cb) {
 
 function getStats(base_url, cb) {
     try {
-        base_url = 'https://' + base_url;
-        const url = base_url + '/about/more';
-
-        https.get(url, (res) => {
+        https.get({
+            hostname: base_url,
+            path: '/about/more',
+            headers: {
+                'User-Agent': USER_AGENT
+            }
+        }, (res) => {
             const statusCode = res.statusCode;
             const contentType = res.headers['content-type'];
 
@@ -330,7 +339,13 @@ function getStats(base_url, cb) {
 
                         info = info.replace(/<br *\/?>/gi, '\n').replace(/<\/?(.+?)>/gi, '');
 
-                        https.get(base_url + '/api/v1/instance', (res) => {
+                        https.get({
+                            hostname: base_url,
+                            path: '/api/v1/instance',
+                            headers: {
+                                'User-Agent': USER_AGENT
+                            }
+                        }, (res) => {
                             const statusCode = res.statusCode;
                             const contentType = res.headers['content-type'];
 

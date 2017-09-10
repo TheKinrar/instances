@@ -38,7 +38,13 @@ module.exports = () => {
                 });
             };
 
-            https.get('https://' + instance.name + '/api/v1/instance', (res) => {
+            https.get({
+                hostname: instance.name,
+                path: '/api/v1/instance',
+                headers: {
+                    'User-Agent': USER_AGENT
+                }
+            }, (res) => {
                 const statusCode = res.statusCode;
                 const contentType = res.headers['content-type'];
 
