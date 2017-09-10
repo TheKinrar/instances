@@ -32,12 +32,21 @@ const regex_infoboard = new RegExp([
 ].map(r => r.source).join('\\n'));
 
 module.exports = () => {
-    console.log('wtf');
     const db_instances = DB.get('instances');
-    console.log('wtf');
 
-    db_instances.find().then((instances) => {
-        console.log(instances.length);
+    db_instances.find({
+        "upchecks": {
+            "$gt": 0
+        },
+        "blacklisted": {
+            "$ne": true
+        },
+        "dead": {
+            "$ne": true
+        }
+    }).then((instances) => {
+        console.log(`[INSTANCES_UPDATE] Found ${instances.length} instances`);
+
         instances.forEach((instance) => {
             if(instance.blacklisted)
                 return;
@@ -120,25 +129,27 @@ module.exports = () => {
                                         _id: instance._id
                                     }, {
                                         $set: _set
-                                    }).then(() => {
-                                        if(haveStatsChanged(instance, _set)) {
-                                            (async function(instance) {
-                                                let pgc = await pg.connect();
+                                    }).then(async function() {
+                                        let pgc = await pg.connect();
 
-                                                let pg_instance = await pgc.query('SELECT id FROM instances WHERE name=$1', [instance.name]);
+                                        let pg_instance = await pgc.query('SELECT id FROM instances WHERE name=$1', [instance.name]);
 
-                                                if(pg_instance.rows.length === 0) {
-                                                    pg_instance = await pgc.query('INSERT INTO instances(name) VALUES($1) RETURNING id', [instance.name]);
-                                                }
-
-                                                let job = queue.create('save_instance_history', {
-                                                    title: instance.name,
-                                                    instance: pg_instance.rows[0].id
-                                                }).ttl(60000);
-
-                                                await pify(job.save.bind(job))();
-                                            })(instance).catch(console.error);
+                                        if(pg_instance.rows.length === 0) {
+                                            pg_instance = await pgc.query('INSERT INTO instances(name) VALUES($1) RETURNING id', [instance.name]);
                                         }
+
+                                        console.log(`[INSTANCES_UPDATE/${instance.name}] Found matching pg ID ${pg_instance.rows[0].id}`);
+
+                                        console.log(`[INSTANCES_UPDATE/${instance.name}] Creating history saving job`);
+
+                                        let job = queue.create('save_instance_history', {
+                                            title: instance.name,
+                                            instance: pg_instance.rows[0].id
+                                        }).ttl(60000);
+
+                                        await pify(job.save.bind(job))();
+                                    }).catch((err) => {
+                                        console.error(`[INSTANCES_UPDATE/${instance.name}]`, err);
                                     });
                                 });
                             });

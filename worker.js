@@ -11,31 +11,29 @@ queue.process('save_instance_history', function(job, cb) {
     saveInstanceHistory(job.data.instance).then(cb).catch(cb);
 });
 
-async function saveInstanceHistory(instanceName) {
+async function saveInstanceHistory(id) {
+    let pgc = await pg.connect();
+    let pg_instance_res = await pgc.query('SELECT name FROM instances WHERE id=$1', [id]);
+
+    if(pg_instance_res.rows.length === 0) {
+        throw new Error(`Instance ${id} not found.`);
+    }
+
+    let pg_instance = pg_instance_res.rows[0];
+
     let instance = await DB.get('instances').findOne({
-        name: instanceName
+        name: pg_instance.name
     });
 
     if(!instance)
-        throw new Error("Instance not found.");
+        throw new Error(`MongoDB instance ${pg_instance.name} not found.`);
 
-    let pgc = await pg.connect();
+    try {
+        await pgc.query('BEGIN');
 
-    let pg_instance = await pgc.query('SELECT id FROM instances WHERE name=$1', [instance.name]);
-
-    if(pg_instance.rows.length === 0) {
-        pg_instance = await pgc.query('INSERT INTO instances(name) VALUES($1) RETURNING id', [instance.name]);
-    }
-
-    let old_res = await pgc.query('SELECT timestamp, users, connections, statuses FROM instances_history WHERE instance=$1', [pg_instance.rows[0].id]);
-    let old = old_res.rows[0];
-
-    if(!old || old.timestamp.getTime() - 24*60*60*1000 < new Date().getTime() || old.users !== instance.users || old.connections !== instance.connections || old.statuses !== instance.statuses) {
-        console.log(instance.name + ': saving history');
-
-        await pgc.query('INSERT INTO instances_history(instance, uptime_all, ipv6, https_score, obs_score, users, connections, statuses, ' +
-            'open_registrations, version) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [
-            pg_instance.rows[0].id,
+        let res = await pgc.query('INSERT INTO instances_history(instance, uptime_all, ipv6, https_score, obs_score, users, connections, statuses, ' +
+            'open_registrations, version) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING(timestamp)', [
+            id,
             instance.uptime || 0,
             instance.ipv6 || false,
             instance.https_score || 0,
@@ -46,9 +44,17 @@ async function saveInstanceHistory(instanceName) {
             instance.openRegistrations || false,
             instance.version || null
         ]);
-    } else {
-        console.log(instance.name + ': no history save needed');
-    }
 
-    await pgc.release();
+        await pgc.query('UPDATE instances SET latest_history_save=$1 WHERE id=$2', [
+            res.rows[0].timestamp,
+            id
+        ]);
+
+        await pgc.query('COMMIT');
+    } catch(e) {
+        await pgc.query('ROLLBACK');
+        throw e;
+    } finally {
+        await pgc.release();
+    }
 }
