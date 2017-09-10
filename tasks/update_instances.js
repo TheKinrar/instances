@@ -1,6 +1,14 @@
 const https = require('https');
 const dns = require('dns');
 const querystring = require('querystring');
+const config = require('../config.json');
+const kue = require('kue');
+const queue = kue.createQueue({
+    prefix: 'kue',
+    redis: config.redis
+});
+const pg = require('../pg');
+const pify = require('pify');
 
 const regex_infoboard = new RegExp([
     /<div class='information-board(?:-sections)?'>/,
@@ -112,6 +120,25 @@ module.exports = () => {
                                         _id: instance._id
                                     }, {
                                         $set: _set
+                                    }).then(() => {
+                                        if(haveStatsChanged(instance, _set)) {
+                                            (async function(instance) {
+                                                let pgc = await pg.connect();
+
+                                                let pg_instance = await pgc.query('SELECT id FROM instances WHERE name=$1', [instance.name]);
+
+                                                if(pg_instance.rows.length === 0) {
+                                                    pg_instance = await pgc.query('INSERT INTO instances(name) VALUES($1) RETURNING id', [instance.name]);
+                                                }
+
+                                                let job = queue.create('save_instance_history', {
+                                                    title: instance.name,
+                                                    instance: pg_instance.rows[0].id
+                                                }).ttl(60000);
+
+                                                await pify(job.save.bind(job))();
+                                            })(instance).catch(console.error);
+                                        }
                                     });
                                 });
                             });
@@ -122,6 +149,22 @@ module.exports = () => {
         });
     });
 };
+
+function haveStatsChanged(a, b) {
+    for(let k of [
+        'https_score',
+        'ipv6',
+        'users',
+        'statuses',
+        'connections',
+        'version',
+        'openRegistrations'
+    ]) {
+        if(a[k] !== b[k]) return true;
+    }
+
+    return false;
+}
 
 function getHttpsRank(name, cb) {
     https.get('https://tls.imirhil.fr/https/' + name + '.json', (res) => {

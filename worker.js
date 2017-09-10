@@ -1,25 +1,10 @@
 const config = require('./config.json');
 const DB = require('monk')(config.database);
 const pg = require('./pg');
-const pify = require('pify');
 const kue = require('kue');
 const queue = kue.createQueue({
     prefix: 'kue',
     redis: config.redis
-});
-const random = require("random-js")();
-
-queue.on('job promotion', (id) => {
-    kue.Job.get(id, (err, job) => {
-        if (err) return console.error(err);
-
-        let newJob = queue.create('save_instance_history', {
-            title: job.data.title,
-            instance: job.data.instance
-        }).delay(random.integer(0, 3600000)).ttl(60000).save((err) => {
-            if(err) console.error(err);
-        });
-    });
 });
 
 queue.process('save_instance_history', function(job, cb) {
@@ -49,7 +34,7 @@ async function saveInstanceHistory(instanceName) {
         console.log(instance.name + ': saving history');
 
         await pgc.query('INSERT INTO instances_history(instance, uptime_all, ipv6, https_score, obs_score, users, connections, statuses, ' +
-            'open_registrations) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)', [
+            'open_registrations, version) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [
             pg_instance.rows[0].id,
             instance.uptime || 0,
             instance.ipv6 || false,
@@ -58,7 +43,8 @@ async function saveInstanceHistory(instanceName) {
             instance.users || 0,
             instance.connections || 0,
             instance.statuses || 0,
-            instance.openRegistrations || false
+            instance.openRegistrations || false,
+            instance.version || null
         ]);
     } else {
         console.log(instance.name + ': no history save needed');

@@ -20,9 +20,5 @@ const clearInstances = require('./tasks/clear_instances');
 setInterval(clearInstances, 3600000);
 clearInstances();
 
-const saveHistory = require('./tasks/save_history');
-saveHistory();
-setInterval(saveHistory, 5 * 60 * 1000);
-
 const updateVersions = require('./tasks/update_versions');
 setInterval(updateVersions, 5 * 60 * 1000);
