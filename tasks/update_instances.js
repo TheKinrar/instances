@@ -132,22 +132,28 @@ module.exports = () => {
                                     }).then(async function() {
                                         let pgc = await pg.connect();
 
-                                        let pg_instance = await pgc.query('SELECT id FROM instances WHERE name=$1', [instance.name]);
+                                        try {
+                                            let pg_instance = await pgc.query('SELECT id FROM instances WHERE name=$1', [instance.name]);
 
-                                        if(pg_instance.rows.length === 0) {
-                                            pg_instance = await pgc.query('INSERT INTO instances(name) VALUES($1) RETURNING id', [instance.name]);
+                                            if(pg_instance.rows.length === 0) {
+                                                pg_instance = await pgc.query('INSERT INTO instances(name) VALUES($1) RETURNING id', [instance.name]);
+                                            }
+
+                                            console.log(`[INSTANCES_UPDATE/${instance.name}] Found matching pg ID ${pg_instance.rows[0].id}`);
+
+                                            console.log(`[INSTANCES_UPDATE/${instance.name}] Creating history saving job`);
+
+                                            let job = queue.create('save_instance_history', {
+                                                title: instance.name,
+                                                instance: pg_instance.rows[0].id
+                                            }).ttl(60000);
+
+                                            await pify(job.save.bind(job))();
+                                        } catch(e) {
+                                            throw e;
+                                        } finally {
+                                            await pgc.release();
                                         }
-
-                                        console.log(`[INSTANCES_UPDATE/${instance.name}] Found matching pg ID ${pg_instance.rows[0].id}`);
-
-                                        console.log(`[INSTANCES_UPDATE/${instance.name}] Creating history saving job`);
-
-                                        let job = queue.create('save_instance_history', {
-                                            title: instance.name,
-                                            instance: pg_instance.rows[0].id
-                                        }).ttl(60000);
-
-                                        await pify(job.save.bind(job))();
                                     }).catch((err) => {
                                         console.error(`[INSTANCES_UPDATE/${instance.name}]`, err);
                                     });
