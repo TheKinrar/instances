@@ -159,7 +159,7 @@ module.exports = () => {
                         });
                     });
                 });
-            }, ((instance.second * 5) + (Math.random() * 5)) * 1000);
+            }, instance.second * 1000);
         });
     });
 };

@@ -4,7 +4,7 @@ const querystring = require('querystring');
 
 module.exports = () => {
 	const db_instances = DB.get('instances');
-	const second = new Date().getSeconds();
+	const second = Math.floor(new Date().getSeconds() / 60);
 
 	db_instances.find({second,blacklisted:{$ne:true},dead:{$ne:true}}).then((instances) => {
 		instances.forEach((instance) => {
