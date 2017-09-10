@@ -48,11 +48,8 @@ module.exports = () => {
         console.log(`[INSTANCES_UPDATE] Found ${instances.length} instances`);
 
         instances.forEach((instance) => {
-            if(instance.blacklisted)
-                return;
-
             if(!instance.second) {
-                instance.second = Math.floor(Math.random() * 60);
+                instance.second = Math.floor(Math.random() * 3600);
 
                 db_instances.update({
                     _id: instance._id

@@ -15,7 +15,7 @@ const checkInstances = require('./tasks/check_instances');
 setInterval(checkInstances, 1000);
 
 const updateInstances = require('./tasks/update_instances');
-setInterval(updateInstances, 5 * 60 * 1000);
+setInterval(updateInstances, 60 * 60 * 1000);
 updateInstances();
 
 const clearInstances = require('./tasks/clear_instances');
