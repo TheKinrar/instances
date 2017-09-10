@@ -49,7 +49,7 @@ module.exports = () => {
 
         instances.forEach((instance) => {
             if(!instance.second) {
-                instance.second = Math.floor(Math.random() * 3600);
+                instance.second = Math.floor(Math.random() * 60);
 
                 db_instances.update({
                     _id: instance._id
@@ -60,6 +60,20 @@ module.exports = () => {
                 });
 
                 console.log(instance.name, instance.second);
+            }
+
+            if(!instance.second60) {
+                instance.second60 = Math.floor(Math.random() * 3600);
+
+                db_instances.update({
+                    _id: instance._id
+                }, {
+                    $set: {
+                        second60: instance.second60
+                    }
+                });
+
+                console.log(instance.name, '60', instance.second60);
             }
 
             setTimeout(() => {
@@ -159,7 +173,7 @@ module.exports = () => {
                         });
                     });
                 });
-            }, instance.second * 1000);
+            }, instance.second60 * 1000);
         });
     });
 };
