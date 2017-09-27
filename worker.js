@@ -46,7 +46,7 @@ async function saveInstanceHistory(id) {
         ]);
 
         await pgc.query('UPDATE instances SET latest_history_save=$1, uptime_all=$3, ipv6=$4, https_score=$5,' +
-            'obs_score=$6, users=$7, connections=$8, statuses=$9, open_registrations=$10, version=$11) WHERE id=$2', [
+            'obs_score=$6, users=$7, connections=$8, statuses=$9, open_registrations=$10, version=$11 WHERE id=$2', [
             res.rows[0].timestamp,
             id,
             instance.uptime || 0,
