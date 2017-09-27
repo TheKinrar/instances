@@ -1,0 +1,20 @@
+{% extends 'layout.njk' %}
+
+{% block main %}
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" href="/admin">Instance info</a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link{{ ' active' if tab == 'statistics' }}" href="/admin/statistics">Statistics</a>
+        </li>
+    </ul>
+
+    {% block tab %}
+    {% endblock tab %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}

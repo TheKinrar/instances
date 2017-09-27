@@ -1,7 +1,8 @@
-const router = require('express').Router();
+const router = require('express-promise-router')();
 const randomstring = require('randomstring');
 const passwordHash = require('password-hash');
 const Languages = require('languages');
+const pg = require('../../pg');
 
 router.use((req, res, next) => {
     res.set('Cache-Control', 'no-cache');
@@ -50,6 +51,31 @@ router.get('/', (req, res) => {
         console.error(e);
         res.sendStatus(500);
     });
+});
+
+router.get('/statistics', async (req, res) => {
+    if(!req.user) {
+        return res.render('admin/index');
+    }
+
+    let pgc = await pg.connect();
+
+    let token = await pgc.query('SELECT stats_token FROM instances WHERE name=$1', [
+        req.user.instance
+    ]);
+
+    if(!token.rows[0].stats_token) {
+        token = await pgc.query('UPDATE instances SET stats_token=$1 WHERE name=$2 RETURNING stats_token', [
+            randomstring.generate(64),
+            req.user.instance
+        ]);
+    }
+
+    res.render('admin/dashboard/statistics', {
+        token: token.rows[0].stats_token
+    });
+
+    await pgc.release();
 });
 
 router.post('/', (req, res) => {
