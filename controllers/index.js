@@ -3,6 +3,8 @@ const CountryLanguages = require('country-language');
 const alParser = require('accept-language-parser');
 const morgan = require('../middlewares/morgan');
 
+router.use('/instance_statistics', require('./instance_statistics'));
+
 router.use('/api', require('./api'));
 router.use('/admin', (req, res, next) => {
 	if(req.session.user) {

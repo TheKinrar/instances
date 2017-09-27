@@ -64,8 +64,8 @@ router.get('/statistics', async (req, res) => {
         req.user.instance
     ]);
 
-    if(token.rows.length === 0) {
-        token = await pgc.query('UPDATE instances SET stats_token=$1 WHERE name=$2', [
+    if(!token.rows[0].stats_token) {
+        token = await pgc.query('UPDATE instances SET stats_token=$1 WHERE name=$2 RETURNING stats_token', [
             randomstring.generate(64),
             req.user.instance
         ]);
