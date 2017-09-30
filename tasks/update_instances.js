@@ -35,9 +35,6 @@ module.exports = () => {
     const db_instances = DB.get('instances');
 
     db_instances.find({
-        "upchecks": {
-            "$gt": 0
-        },
         "blacklisted": {
             "$ne": true
         },
