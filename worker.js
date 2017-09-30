@@ -35,7 +35,7 @@ async function saveInstanceHistory(id) {
             'users, connections, statuses, open_registrations, version, ' +
             'active_users_30d, active_users_14d, active_users_7d, active_users_1d, active_users_1h, ' +
             'first_user_created_at) ' +
-            'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING(timestamp)', [
+            'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING(timestamp)', [
             id,
             instance.uptime || 0,
             instance.ipv6 || false,
