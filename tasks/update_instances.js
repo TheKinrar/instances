@@ -126,6 +126,8 @@ module.exports = () => {
                                         connections: stats.connections,
                                         version: stats.version.substring(0, 7),
                                         version_score: stats.version_score,
+                                        active_user_count: stats.active_user_count,
+                                        first_user_created_at: stats.first_user_created_at,
                                         openRegistrations,
                                         updatedAt: new Date()
                                     };
@@ -409,13 +411,23 @@ function getStats(base_url, cb) {
                                         version_score = (100 * version_a[0]) + (10 * version_a[1]) + (version_a.length == 3 ? version_a[2] : 0);
                                     }
 
+                                    let active_user_count = null;
+                                    let first_user_created_at = null;
+
+                                    if(data.stats) {
+                                        active_user_count = data.stats.active_user_count;
+                                        first_user_created_at = data.stats.first_user_created_at;
+                                    }
+
                                     cb(null, {
                                         users,
                                         statuses,
                                         connections,
                                         info,
                                         version,
-                                        version_score
+                                        version_score,
+                                        active_user_count,
+                                        first_user_created_at
                                     });
                                 } catch(e) {
                                     return cb(e);

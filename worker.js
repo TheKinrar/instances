@@ -31,8 +31,11 @@ async function saveInstanceHistory(id) {
     try {
         await pgc.query('BEGIN');
 
-        let res = await pgc.query('INSERT INTO instances_history(instance, uptime_all, ipv6, https_score, obs_score, users, connections, statuses, ' +
-            'open_registrations, version) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING(timestamp)', [
+        let res = await pgc.query('INSERT INTO instances_history(instance, uptime_all, ipv6, https_score, obs_score, ' +
+            'users, connections, statuses, open_registrations, version, ' +
+            'active_users_30d, active_users_14d, active_users_7d, active_users_1d, active_users_1h, ' +
+            'first_user_created_at) ' +
+            'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING(timestamp)', [
             id,
             instance.uptime || 0,
             instance.ipv6 || false,
@@ -42,11 +45,19 @@ async function saveInstanceHistory(id) {
             instance.connections || 0,
             instance.statuses || 0,
             instance.openRegistrations || false,
-            instance.version || null
+            instance.version || null,
+            instance.active_user_count ? (instance.active_user_count['30d'] || null) : null,
+            instance.active_user_count ? (instance.active_user_count['14d'] || null) : null,
+            instance.active_user_count ? (instance.active_user_count['7d'] || null) : null,
+            instance.active_user_count ? (instance.active_user_count['1d'] || null) : null,
+            instance.active_user_count ? (instance.active_user_count['1h'] || null) : null,
+            instance.first_user_created_at || null
         ]);
 
         await pgc.query('UPDATE instances SET latest_history_save=$1, uptime_all=$3, ipv6=$4, https_score=$5,' +
-            'obs_score=$6, users=$7, connections=$8, statuses=$9, open_registrations=$10, version=$11 WHERE id=$2', [
+            'obs_score=$6, users=$7, connections=$8, statuses=$9, open_registrations=$10, version=$11, ' +
+            'active_users_30d=$12, active_users_14d=$13, active_users_7d=$14, active_users_1d=$15, ' +
+            'active_users_1h=$16, first_user_created_at=$17 WHERE id=$2', [
             res.rows[0].timestamp,
             id,
             instance.uptime || 0,
@@ -57,7 +68,13 @@ async function saveInstanceHistory(id) {
             instance.connections || 0,
             instance.statuses || 0,
             instance.openRegistrations || false,
-            instance.version || null
+            instance.version || null,
+            instance.active_user_count ? (instance.active_user_count['30d'] || null) : null,
+            instance.active_user_count ? (instance.active_user_count['14d'] || null) : null,
+            instance.active_user_count ? (instance.active_user_count['7d'] || null) : null,
+            instance.active_user_count ? (instance.active_user_count['1d'] || null) : null,
+            instance.active_user_count ? (instance.active_user_count['1h'] || null) : null,
+            instance.first_user_created_at || null
         ]);
 
         await pgc.query('COMMIT');
