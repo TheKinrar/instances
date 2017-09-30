@@ -2,7 +2,7 @@ module.exports = () => {
 	const db_instances = DB.get('instances');
 
 	const delete_date = new Date();
-	delete_date.setTime(delete_date.getTime() - (1000 * 60 * 60));
+	delete_date.setTime(delete_date.getTime() - (1000 * 60 * 60 * 24));
 
 	db_instances.remove({
 	    "upchecks": 0,
@@ -29,6 +29,8 @@ module.exports = () => {
 };
 
 async function checkDeadInstances() {
+	return; // TODO: Fix this to use new PG history instead of Mongo
+
     const db_instances = DB.get('instances');
     const db_history = DB.get('history');
 
