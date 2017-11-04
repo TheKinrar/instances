@@ -66,6 +66,26 @@ router.get('/list', (req, res) => {
                 type: 'boolean',
                 optional: true,
                 def: false
+            }, sort_by: {
+                type: 'string',
+                optional: true,
+                values: [
+                    'name',
+                    'uptime',
+                    'https_score',
+                    'obs_score',
+                    'users',
+                    'statuses',
+                    'connections'
+                ]
+            }, sort_order: {
+                type: 'string',
+                optional: true,
+                def: 'asc',
+                values: [
+                    'asc',
+                    'desc'
+                ]
             }
         }, req.query);
     } catch(e) {
@@ -93,10 +113,21 @@ router.get('/list', (req, res) => {
             };
         } catch(e) {}
 
+
     let limited = query.count > 0;
-    Promise.all([DB.get('instances').count(q), DB.get('instances').find(q, limited ? {
-        limit: query.count + 1
-    } : undefined)]).then(values => {
+
+    let q_options = {};
+
+    if(limited)
+        q_options.limit = query.count + 1;
+
+    if(query.sort_order) {
+
+    }
+
+    Promise
+    .all([DB.get('instances').count(q), DB.get('instances').find(q, q_options)])
+    .then(values => {
         let total = values[0];
         let instances = values[1];
 

@@ -30,6 +30,11 @@ function checkQuery(template, query) {
             continue;
         }
 
+        if(key_template.values) {
+            if(!key_template.values.contains(key_value))
+                throw new Error(`Parameter "${key}" value "${key_value}" is not allowed.`);
+        }
+
         if(key_template.type) {
             if(key_template.type === 'int') {
                 if(/^[0-9]+$/.test(key_value)) {
