@@ -125,6 +125,7 @@ module.exports = () => {
                                         version_score: stats.version_score,
                                         active_user_count: stats.active_user_count,
                                         first_user_created_at: stats.first_user_created_at,
+                                        thumbnail: stats.thumbnail,
                                         openRegistrations,
                                         updatedAt: new Date()
                                     };
@@ -416,6 +417,7 @@ function getStats(base_url, cb) {
                                         first_user_created_at = data.stats.first_user_created_at;
                                     }
 
+
                                     cb(null, {
                                         users,
                                         statuses,
@@ -424,7 +426,8 @@ function getStats(base_url, cb) {
                                         version,
                                         version_score,
                                         active_user_count,
-                                        first_user_created_at
+                                        first_user_created_at,
+                                        thumbnail: data.thumbnail
                                     });
                                 } catch(e) {
                                     return cb(e);
