@@ -87,7 +87,8 @@ function createInstanceJson(instance) {
         statuses: instance.statuses || 0,
         connections: instance.connections || 0,
         open_registrations: instance.openRegistrations || false,
-        info: null
+        info: null,
+        thumbnail: instance.thumbnail || null
     };
 
     if(instance.infos) {
