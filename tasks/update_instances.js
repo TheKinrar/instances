@@ -155,7 +155,7 @@ module.exports = () => {
                                             if(stats.clacks) {
                                                 console.log(`[INSTANCES_UPDATE/${instance.name}] Saving X-Clacks-Overhead header`);
 
-                                                await pgc.query('UPDATE instances SET clacks=$1 WHERE id=$2', [stats.clacks, instance.name]);
+                                                await pgc.query('UPDATE instances SET clacks=$1 WHERE id=$2', [stats.clacks, pg_instance.rows[0].id]);
                                             }
 
                                             console.log(`[INSTANCES_UPDATE/${instance.name}] Creating history saving job`);
