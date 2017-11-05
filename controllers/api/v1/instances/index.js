@@ -55,6 +55,7 @@ router.get('/show', (req, res) => {
  */
 router.get('/list', (req, res) => {
     let query;
+
     try {
         query = APIUtils.checkQuery({
             count: {

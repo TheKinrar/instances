@@ -152,6 +152,12 @@ module.exports = () => {
 
                                             console.log(`[INSTANCES_UPDATE/${instance.name}] Found matching pg ID ${pg_instance.rows[0].id}`);
 
+                                            if(stats.clacks) {
+                                                console.log(`[INSTANCES_UPDATE/${instance.name}] Saving X-Clacks-Overhead header`);
+
+                                                await pgc.query('UPDATE instances SET clacks=$1 WHERE id=$2', [stats.clacks, instance.name]);
+                                            }
+
                                             console.log(`[INSTANCES_UPDATE/${instance.name}] Creating history saving job`);
 
                                             let job = queue.create('save_instance_history', {
@@ -367,6 +373,8 @@ function getStats(base_url, cb) {
 
                         info = info.replace(/<br *\/?>/gi, '\n').replace(/<\/?(.+?)>/gi, '');
 
+                        let clacks = res.headers['x-clacks-overhead'];
+
                         https.get({
                             hostname: base_url,
                             path: '/api/v1/instance',
@@ -427,7 +435,8 @@ function getStats(base_url, cb) {
                                         version_score,
                                         active_user_count,
                                         first_user_created_at,
-                                        thumbnail: data.thumbnail
+                                        thumbnail: data.thumbnail,
+                                        clacks
                                     });
                                 } catch(e) {
                                     return cb(e);
