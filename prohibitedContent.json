@@ -3,12 +3,8 @@
 	"nudity_all": "Nudity with NSFW tag",
 	"pornography_nocw": "Pornography without NSFW tag",
 	"pornography_all": "Pornography with NSFW tag",
-	"sexism": "Sexism",
-	"racism": "Racism",
 	"illegalContentLinks": "Links to illegal content",
 	"spam": "Spam",
 	"advertising": "Advertising",
-	"hateSpeeches": "Hate speeches",
-	"harrassment": "Harassment",
 	"spoilers_nocw": "Spoilers without content warning"
 }
