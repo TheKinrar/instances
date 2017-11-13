@@ -49,6 +49,7 @@ router.get('/show', (req, res) => {
  * @apiParam {Boolean} [include_dead=false] Include dead (down for at least two weeks) instances
  * @apiParam {Boolean} [include_down=true] Include down instances
  * @apiParam {Boolean} [include_closed=true] Include instances with closed registrations
+ * @apiParam {String="mstdn_custom_emojis"} [supported_features] Comma-separated list of features returned instances have to support
  * @apiParam {String} [min_id] Minimal ID of instances to retrieve. Use this to navigate through pages. The id of the first instance from next page is accessible through pagination.next_id.
  * @apiParam {String="name","uptime","https_score","obs_score","users","statuses","connections"} [sort_by] Field to sort instances by. By default, instances are not sorted and their order is not guaranteed to be consistent.
  * @apiParam {String="asc","desc"} [sort_order="asc"] Sort order, if *sort_by* is used.
@@ -79,6 +80,12 @@ router.get('/list', (req, res) => {
                 type: 'boolean',
                 optional: true,
                 def: true
+            }, supported_features: {
+                type: 'string',
+                optional: true,
+                values: [
+                    'mstdn_custom_emojis'
+                ]
             }, sort_by: {
                 type: 'string',
                 optional: true,
@@ -127,6 +134,11 @@ router.get('/list', (req, res) => {
     if(!query.include_closed)
         q.openRegistrations = {
             $ne: false
+        };
+
+    if(query.supported_features === 'mstdn_custom_emojis')
+        q.version_score = {
+            $gte: 200
         };
 
     if(query.min_id)
