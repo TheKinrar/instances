@@ -14,17 +14,17 @@ const regex_infoboard = new RegExp([
     /<div class='information-board(?:-sections)?'>/,
     /<div class='section'>/,
     /<span>(?:.+)<\/span>/,
-    /<strong>([0-9, ]+)<\/strong>/,
+    /<strong>([0-9, \.]+)<\/strong>/,
     /<span>(?:.+)<\/span>/,
     /<\/div>/,
     /<div class='section'>/,
     /<span>(?:.+)<\/span>/,
-    /<strong>([0-9, ]+)<\/strong>/,
+    /<strong>([0-9, \.]+)<\/strong>/,
     /<span>(?:.+)<\/span>/,
     /<\/div>/,
     /<div class='section'>/,
     /<span>(?:.+)<\/span>/,
-    /<strong>([0-9, ]+)<\/strong>/,
+    /<strong>([0-9, \.]+)<\/strong>/,
     /<span>(?:.+)<\/span>/,
     /<\/div>/,
     /<\/div>/,
@@ -363,9 +363,9 @@ function getStats(base_url, cb) {
 
                 if(res_infoboard && res_infoboard[1]) {
                     try {
-                        let users = parseInt(res_infoboard[1].replace(/,| /g, ''));
-                        let statuses = parseInt(res_infoboard[2].replace(/,| /g, ''));
-                        let connections = parseInt(res_infoboard[3].replace(/,| /g, ''));
+                        let users = parseInt(res_infoboard[1].replace(/,| |\./g, ''));
+                        let statuses = parseInt(res_infoboard[2].replace(/,| |\./g, ''));
+                        let connections = parseInt(res_infoboard[3].replace(/,| |\./g, ''));
                         let info = res_infoboard[4];
 
                         if(!info)
