@@ -159,6 +159,10 @@ router.post('/sign_up', (req, res) => {
         req.body.instance = req.body.instance.toLowerCase();
 
         let instanceJson = JSON.parse(body);
+        
+        if(!instanceJson.email) {
+            return res.sendStatus(400);
+        }
 
         DB.get('admins').findOne({
             instance: req.body.instance
