@@ -408,7 +408,7 @@ function getStats(base_url, cb) {
                                     if(data.version)
                                         version = data.version;
 
-                                    let version_norc = version.replace(/\.rc[0-9]/, '');
+                                    let version_norc = version.replace(/\.?rc[0-9]/, '');
 
                                     if(version === 'Mastodon::Version') {
                                         version = '1.3';
