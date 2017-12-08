@@ -32,7 +32,13 @@ module.exports = () => {
                     }
 
                     db_instances.find({
-                        version: version.name,
+                        $or: [
+                            {
+                                version: version.name.replace('rc', '.rc')
+                            }, {
+                                version: version.name
+                            }
+                        ],
                         up: true,
                         blacklisted: {$ne: true}
                     }).then((instances) => {
