@@ -121,7 +121,7 @@ module.exports = () => {
                                         users: stats.users,
                                         statuses: stats.statuses,
                                         connections: stats.connections,
-                                        version: stats.version.substring(0, 7),
+                                        version: stats.version,
                                         version_score: stats.version_score,
                                         active_user_count: stats.active_user_count,
                                         first_user_created_at: stats.first_user_created_at,
@@ -408,13 +408,17 @@ function getStats(base_url, cb) {
                                     if(data.version)
                                         version = data.version;
 
+                                    let version_norc = version.replace(/\.rc[0-9]/, '');
+
                                     if(version === 'Mastodon::Version') {
                                         version = '1.3';
                                         version_score = 130;
-                                    } else if(/^[0-9]\.[0-9](\.[0-9])?$/.test(version)) {
-                                        let version_a = version.split('.').map((e) => {return parseInt(e);});
+                                    } else if(/^[0-9]\.[0-9](\.[0-9])?$/.test(version_norc)) {
+                                        let version_a = version_norc.split('.').map((e) => {return parseInt(e);});
 
-                                        version_score = (100 * version_a[0]) + (10 * version_a[1]) + (version_a.length == 3 ? version_a[2] : 0);
+                                        version_score = (100 * version_a[0]) + (10 * version_a[1]) + (version_a.length === 3 ? version_a[2] : 0);
+                                    } else {
+                                        version = "";
                                     }
 
                                     let active_user_count = null;
