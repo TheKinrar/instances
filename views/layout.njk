@@ -2,6 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         {% block css %}
             <link rel="stylesheet" href="/css/bootstrap.min.css">
             <link rel="stylesheet" href="/css/sticky-footer.css">
@@ -14,34 +15,32 @@
     </head>
     <body>
         <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
-            <div class="container">
-                <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <a class="navbar-brand" href="/">Mastodon instances</a>
+            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/">Mastodon instances</a>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/">Wizard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/list">List</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin">Admin space</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="/api/doc" id="api-dropdown-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                API
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="api-dropdown-link">
-                                <a class="dropdown-item" href="/api/doc">Documentation</a>
-                                <a class="dropdown-item" href="/api/token">Get a token</a>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Wizard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/list">List</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">Admin space</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="/api/doc" id="api-dropdown-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            API
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="api-dropdown-link">
+                            <a class="dropdown-item" href="/api/doc">Documentation</a>
+                            <a class="dropdown-item" href="/api/token">Get a token</a>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </nav>
 

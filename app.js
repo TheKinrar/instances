@@ -35,6 +35,9 @@ app.locals.ProhibitedContent = ProhibitedContent;
 app.locals.Languages = Languages;
 app.locals.langs = CountryLanguages.getLanguages()
     .filter((a)=>{return a.nativeName[0] !== ""})
+    .filter(a => {
+        return a.iso639_1;
+    })
     .sort((a,b)=>{return a.name[0].localeCompare(b.name[0])});
 app.locals.langCodes = app.locals.langs.map(l => l.iso639_1);
 app.locals.countries = CountryLanguages.getCountries()

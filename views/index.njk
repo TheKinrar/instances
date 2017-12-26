@@ -58,28 +58,26 @@
 
 		<div id="collapse-moderation" class="collapse hide text-center" role="tabpanel">
 			<h4 style="margin-top: 100px;">Any specific moderation rules?</h4>
-			<table style="margin: auto;" class="mb-3">
-				<tbody>
-                	{% for content in ProhibitedContent.array %}
-						<tr style="text-align: center">
-							<td style="padding-right: 10px">{{ content.name }}</td>
-                            <td>
-                                <div class="btn-group" data-toggle="buttons">
-                                    <a class="btn btn-secondary">
-                                        <input type="radio" class="form-check-input" name="{{ content.code }}" autocomplete="off" value="not_moderated"/>Allowed
-                                    </a>
-                                    <a class="btn btn-secondary active">
-                                        <input type="radio" class="form-check-input" name="{{ content.code }}" autocomplete="off" value="no_matters" checked/>Don't care
-                                    </a>
-                                    <a class="btn btn-secondary">
-                                        <input type="radio" class="form-check-input" name="{{ content.code }}" autocomplete="off" value="moderated"/>Forbidden
-                                    </a>
-                                </div>
-                            </td>
-						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
+            <div class="moderation-options">
+                {% for content in ProhibitedContent.array %}
+                    <div class="moderation-option">
+                        <div class="moderation-option__label">{{ content.name }}</div>
+                        <div class="moderation-option__fields">
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-secondary">
+                                    <input type="radio" class="form-check-input" name="{{ content.code }}" autocomplete="off" value="not_moderated"/>Allowed
+                                </label>
+                                <label class="btn btn-secondary active">
+                                    <input type="radio" class="form-check-input" name="{{ content.code }}" autocomplete="off" value="no_matters" checked/>Don't care
+                                </label>
+                                <label class="btn btn-secondary">
+                                    <input type="radio" class="form-check-input" name="{{ content.code }}" autocomplete="off" value="moderated"/>Forbidden
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
 
             <button onclick="collapse('user-count');" type="button" class="btn btn-outline-secondary">Back</button>
 			<button id="btn-next-moderation" type="button" class="btn btn-primary">Next</button>
@@ -103,13 +101,12 @@
 	{{ super() }}
 
     <script type="text/javascript" src="/js/select2.full.min.js"></script>
-
 	<script type="text/javascript">
+		let query = {};
+
         $("#selectLanguages").select2({
             width: 'resolve'
         }).select2('val', ['{{ acceptsLanguage }}']);
-
-		let query = {};
 
         $('#btn-start').click(function() {
             collapse('languages');
@@ -128,8 +125,9 @@
         });
 
         function userCount(count) {
-            if(count)
+            if(count) {
             	query.users = count;
+            }
 
             collapse('moderation');
         }
@@ -139,11 +137,12 @@
             query.prohibited = [];
 
             $('#collapse-moderation').find(":checked").each(function() {
-                if($(this).val() == "moderated"){
+                if ($(this).val() == "moderated"){
                     query.prohibited.push($(this).attr("name"));
 				}
-				else if($(this).val() == "not_moderated")
+				else if ($(this).val() == "not_moderated") {
 				    query.allowed.push($(this).attr("name"));
+                }
             });
 
             query.allowed = query.allowed.join(',');
@@ -173,7 +172,7 @@
 		    id = 'collapse-' + id;
 
 		    $('#collapse-parent').children().each(function(i, e) {
-		        if(e.id !== id) {
+		        if (e.id !== id) {
                     $(e).collapse('hide');
                 } else {
                     $(e).collapse('show');

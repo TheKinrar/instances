@@ -3,11 +3,12 @@ Development
 
 These instructions are tested on a Mac:
 
-1. Make sure MongoDB is installed and running.
+1. Make sure MongoDB and Redis are installed and running.
    ```sh
    brew update
-   brew install mongodb
+   brew install mongodb redis
    mongod --config /usr/local/etc/mongod.conf  # Run in its own Terminal window.
+   redis-server # Run in its own Terminal window.
    ```
 
 2. Make sure Node.js and dependencies are installed.

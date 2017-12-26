@@ -1,3 +1,17 @@
 nav.navbar {
     margin-bottom: 5px;
 }
+
+@media (min-width: 991px) { 
+    .moderation-option {
+        display: flex;
+        justify-content: center;
+    }
+
+    .moderation-option__label {
+        padding-top: 7px;
+        margin-right: 15px;
+        text-align: right;
+        width: 250px;
+    }
+}
