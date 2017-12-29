@@ -31,7 +31,7 @@ function checkQuery(template, query) {
         }
 
         if(key_template.values) {
-            if(!key_template.values.contains(key_value))
+            if(!key_template.values.includes(key_value))
                 throw new Error(`Parameter "${key}" value "${key_value}" is not allowed.`);
         }
 

@@ -14,17 +14,17 @@ const regex_infoboard = new RegExp([
     /<div class='information-board(?:-sections)?'>/,
     /<div class='section'>/,
     /<span>(?:.+)<\/span>/,
-    /<strong>([0-9, ]+)<\/strong>/,
+    /<strong>([0-9, \.]+)<\/strong>/,
     /<span>(?:.+)<\/span>/,
     /<\/div>/,
     /<div class='section'>/,
     /<span>(?:.+)<\/span>/,
-    /<strong>([0-9, ]+)<\/strong>/,
+    /<strong>([0-9, \.]+)<\/strong>/,
     /<span>(?:.+)<\/span>/,
     /<\/div>/,
     /<div class='section'>/,
     /<span>(?:.+)<\/span>/,
-    /<strong>([0-9, ]+)<\/strong>/,
+    /<strong>([0-9, \.]+)<\/strong>/,
     /<span>(?:.+)<\/span>/,
     /<\/div>/,
     /<\/div>/,
@@ -121,7 +121,7 @@ module.exports = () => {
                                         users: stats.users,
                                         statuses: stats.statuses,
                                         connections: stats.connections,
-                                        version: stats.version.substring(0, 7),
+                                        version: stats.version,
                                         version_score: stats.version_score,
                                         active_user_count: stats.active_user_count,
                                         first_user_created_at: stats.first_user_created_at,
@@ -151,6 +151,12 @@ module.exports = () => {
                                             }
 
                                             console.log(`[INSTANCES_UPDATE/${instance.name}] Found matching pg ID ${pg_instance.rows[0].id}`);
+
+                                            if(stats.clacks) {
+                                                console.log(`[INSTANCES_UPDATE/${instance.name}] Saving X-Clacks-Overhead header`);
+
+                                                await pgc.query('UPDATE instances SET clacks=$1 WHERE id=$2', [stats.clacks, pg_instance.rows[0].id]);
+                                            }
 
                                             console.log(`[INSTANCES_UPDATE/${instance.name}] Creating history saving job`);
 
@@ -357,15 +363,17 @@ function getStats(base_url, cb) {
 
                 if(res_infoboard && res_infoboard[1]) {
                     try {
-                        let users = parseInt(res_infoboard[1].replace(/,| /g, ''));
-                        let statuses = parseInt(res_infoboard[2].replace(/,| /g, ''));
-                        let connections = parseInt(res_infoboard[3].replace(/,| /g, ''));
+                        let users = parseInt(res_infoboard[1].replace(/,| |\./g, ''));
+                        let statuses = parseInt(res_infoboard[2].replace(/,| |\./g, ''));
+                        let connections = parseInt(res_infoboard[3].replace(/,| |\./g, ''));
                         let info = res_infoboard[4];
 
                         if(!info)
                             info = '';
 
                         info = info.replace(/<br *\/?>/gi, '\n').replace(/<\/?(.+?)>/gi, '');
+
+                        let clacks = res.headers['x-clacks-overhead'];
 
                         https.get({
                             hostname: base_url,
@@ -400,13 +408,17 @@ function getStats(base_url, cb) {
                                     if(data.version)
                                         version = data.version;
 
+                                    let version_norc = version.replace(/\.?rc[0-9]/, '');
+
                                     if(version === 'Mastodon::Version') {
                                         version = '1.3';
                                         version_score = 130;
-                                    } else if(/^[0-9]\.[0-9](\.[0-9])?$/.test(version)) {
-                                        let version_a = version.split('.').map((e) => {return parseInt(e);});
+                                    } else if(/^[0-9]\.[0-9](\.[0-9])?$/.test(version_norc)) {
+                                        let version_a = version_norc.split('.').map((e) => {return parseInt(e);});
 
-                                        version_score = (100 * version_a[0]) + (10 * version_a[1]) + (version_a.length == 3 ? version_a[2] : 0);
+                                        version_score = (100 * version_a[0]) + (10 * version_a[1]) + (version_a.length === 3 ? version_a[2] : 0);
+                                    } else {
+                                        version = "";
                                     }
 
                                     let active_user_count = null;
@@ -427,7 +439,8 @@ function getStats(base_url, cb) {
                                         version_score,
                                         active_user_count,
                                         first_user_created_at,
-                                        thumbnail: data.thumbnail
+                                        thumbnail: data.thumbnail,
+                                        clacks
                                     });
                                 } catch(e) {
                                     return cb(e);
