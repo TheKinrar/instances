@@ -6,9 +6,19 @@ const queue = kue.createQueue({
     prefix: 'kue',
     redis: config.redis
 });
+const request = require('request-promise-native').defaults({
+    headers: {
+        'User-Agent': 'MastodonInstances (https://instances.social)'
+    }
+});
+const pgFormat = require('pg-format');
 
 queue.process('save_instance_history', function(job, cb) {
     saveInstanceHistory(job.data.instance).then(cb).catch(cb);
+});
+
+queue.process('fetch_instance_ap', function(job, cb) {
+    fetchInstanceAP(job.data.instance).then(cb).catch(cb);
 });
 
 async function saveInstanceHistory(id) {
@@ -84,4 +94,43 @@ async function saveInstanceHistory(id) {
     } finally {
         await pgc.release();
     }
+}
+
+async function fetchInstanceAP(id) {
+    let pg_instance_res = await pg.query('SELECT name FROM instances WHERE id=$1', [id]);
+
+    if(pg_instance_res.rows.length === 0) {
+        throw new Error(`Instance ${id} not found.`);
+    }
+
+    let pg_instance = pg_instance_res.rows[0];
+
+    let instance = await DB.get('instances').findOne({
+        name: pg_instance.name
+    });
+
+    if(!instance)
+        throw new Error(`MongoDB instance ${pg_instance.name} not found.`);
+
+    await DB.get('instances').update({
+        name: pg_instance.name
+    }, {
+        $set: {
+            apUpdatedAt: new Date()
+        }
+    });
+
+    let peers = await request({
+        url: `https://${instance.name}/api/v1/instance/peers`,
+        json: true
+    });
+
+    let newInstances = await pg.query(pgFormat('INSERT INTO instances(name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', peers.map(p => [p])));
+
+    await DB.get('instances').insert(newInstances.rows.map(i => ({
+        addedAt: new Date(),
+        name: i.name,
+        downchecks: 0,
+        upchecks: 0
+    })));
 }
