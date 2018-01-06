@@ -120,10 +120,16 @@ async function fetchInstanceAP(id) {
         }
     });
 
-    let peers = await request({
-        url: `https://${instance.name}/api/v1/instance/peers`,
-        json: true
-    });
+    let peers;
+
+    try {
+        peers = await request({
+            url: `https://${instance.name}/api/v1/instance/peers`,
+            json: true
+        });
+    } catch(e) {
+        return;
+    }
 
     let newInstances = await pg.query(pgFormat('INSERT INTO instances(name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', peers.map(p => [p])));
 
