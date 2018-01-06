@@ -163,7 +163,7 @@ module.exports = () => {
                                             let job = queue.create('save_instance_history', {
                                                 title: instance.name,
                                                 instance: pg_instance.rows[0].id
-                                            }).ttl(60000);
+                                            }).ttl(60000).removeOnComplete(true);
 
                                             await pify(job.save.bind(job))();
                                         } catch(e) {
