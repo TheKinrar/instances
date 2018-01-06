@@ -406,7 +406,7 @@ function getStats(base_url, cb) {
                                     let version_score = 0;
 
                                     if(data.version)
-                                        version = data.version;
+                                        version = data.version.replace(/\.$/, '');
 
                                     let version_norc = version.replace(/\.?rc[0-9]/, '');
 
