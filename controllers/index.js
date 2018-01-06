@@ -43,6 +43,9 @@ router.get('/list.json', (req, res) => {
         },
         "version": {
             "$exists": true
+        },
+        "infos.optOut": {
+            "$ne": true
         }
 	};
 
