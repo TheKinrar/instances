@@ -131,7 +131,7 @@ async function fetchInstanceAP(id) {
         return;
     }
 
-    let newInstances = await pg.query(pgFormat('INSERT INTO instances(name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', peers.map(p => [p])));
+    let newInstances = await pg.query(pgFormat('INSERT INTO instances(name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', peers.map(p => [p.toLowerCase()])));
 
     await DB.get('instances').insert(newInstances.rows.map(i => ({
         addedAt: new Date(),
