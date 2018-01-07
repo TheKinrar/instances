@@ -321,6 +321,16 @@ router.get('/network', (req, res) => {
 	}, {sort:{
         instances: -1
     }}).then((versions) => {
+        let totalUsers = 0;
+
+        versions.forEach((version) => {
+            totalUsers += version.users;
+        });
+
+        versions.forEach((version) => {
+            version.users_ratio = version.users / totalUsers;
+        });
+
 		res.render('network', {versions});
 	}).catch((e) => {
 		res.sendStatus(500);

@@ -5,41 +5,39 @@
     <h3>Versions</h3>
 
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <table class="table table-sm sortable">
                 <thead>
                 <tr>
-                    <th></th>
                     <th>Version</th>
                     <th>Instances</th>
                     <th>Instances (%)</th>
                     <th>Users</th>
+                    <th>Users (%)</th>
                     <th>Release date</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% set i = 1 %}
                 {% for version in versions %}
                     <tr>
-                        <td data-value="{{ i }}">#{{ i }}</td>
                         <td>{{ version.name }}</td>
                         <td>{{ version.instances }}</td>
                         <td>{{ (version.instances_ratio * 100) | round(2) }}</td>
                         <td>{{ version.users }}</td>
+                        <td>{{ (version.users_ratio * 100) | round(2) }}</td>
                         <td>{{ version.publishedAt }}</td>
                     </tr>
-                    {% set i = i + 1 %}
                 {% endfor %}
                 </tbody>
             </table>
         </div>
-        <div class="col-md-3">
+        {#<div class="col-md-3">
             <canvas id="versionsChart"></canvas>
-        </div>
+        </div>#}
     </div>
 {% endblock %}
 
-{% block scripts %}
+{#{% block scripts %}
     {{ super() }}
 
     <script src="/js/Chart.bundle.min.js"></script>
@@ -64,4 +62,4 @@
             }
         });
     </script>
-{% endblock %}
+{% endblock %}#}
