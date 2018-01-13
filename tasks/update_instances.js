@@ -42,7 +42,7 @@ module.exports = () => {
             "$ne": true
         }
     }).then((instances) => {
-        console.log(`[INSTANCES_UPDATE] Found ${instances.length} instances`);
+        //console.log(`[INSTANCES_UPDATE] Found ${instances.length} instances`);
 
         instances.forEach((instance) => {
             if(!instance.second) {
@@ -56,7 +56,7 @@ module.exports = () => {
                     }
                 });
 
-                console.log(instance.name, instance.second);
+                //console.log(instance.name, instance.second);
             }
 
             if(!instance.second60) {
@@ -70,11 +70,11 @@ module.exports = () => {
                     }
                 });
 
-                console.log(instance.name, '60', instance.second60);
+                //console.log(instance.name, '60', instance.second60);
             }
 
             setTimeout(() => {
-                console.log('Updating ' + instance.name);
+                //console.log('Updating ' + instance.name);
 
                 getHttpsRank(instance.name, (err, rank) => {
                     if (err) {
@@ -163,9 +163,20 @@ module.exports = () => {
                                             let job = queue.create('save_instance_history', {
                                                 title: instance.name,
                                                 instance: pg_instance.rows[0].id
-                                            }).ttl(60000);
+                                            }).ttl(60000).removeOnComplete(true);
 
                                             await pify(job.save.bind(job))();
+
+                                            if(!instance.apUpdatedAt || (new Date()).getTime() - instance.apUpdatedAt.getTime() > 7 * 24 * 60 * 60 * 1000) {
+                                                console.log(`[INSTANCES_UPDATE/${instance.name}] Creating AP fetching job. Last update: ${instance.apUpdatedAt || 'none'}`);
+
+                                                let job = queue.create('fetch_instance_ap', {
+                                                    title: instance.name,
+                                                    instance: pg_instance.rows[0].id
+                                                }).ttl(60000).removeOnComplete(true);
+
+                                                await pify(job.save.bind(job))();
+                                            }
                                         } catch(e) {
                                             throw e;
                                         } finally {
@@ -406,7 +417,7 @@ function getStats(base_url, cb) {
                                     let version_score = 0;
 
                                     if(data.version)
-                                        version = data.version;
+                                        version = data.version.replace(/\.$/, '');
 
                                     let version_norc = version.replace(/\.?rc[0-9]/, '');
 

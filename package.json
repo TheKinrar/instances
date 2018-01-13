@@ -24,10 +24,12 @@
     "nunjucks": "^3.0.0",
     "password-hash": "^1.2.2",
     "pg": "^7.2.0",
+    "pg-format": "^1.0.4",
     "pify": "^3.0.0",
     "random-js": "^1.0.8",
     "randomstring": "^1.1.5",
     "request": "^2.81.0",
+    "request-promise-native": "^1.0.5",
     "rotating-file-stream": "^1.2.2"
   },
   "apidoc": {
