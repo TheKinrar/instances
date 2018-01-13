@@ -25,8 +25,15 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/">Wizard</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/list">List</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="/list" id="list-dropdown-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                List
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="list-dropdown-link">
+                                <a class="dropdown-item" href="/list">Simple</a>
+                                <a class="dropdown-item" href="/list/advanced">Advanced</a>
+                                <a class="dropdown-item" href="/list/old">Legacy</a>
+                            </div>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/admin">Admin space</a>
