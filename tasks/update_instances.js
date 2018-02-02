@@ -440,7 +440,6 @@ function getStats(base_url, cb) {
                                         first_user_created_at = data.stats.first_user_created_at;
                                     }
 
-
                                     cb(null, {
                                         users,
                                         statuses,
