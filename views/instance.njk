@@ -42,7 +42,7 @@
             <h4>{{ instance.connections }} Connections</h4>
 
             <p>
-                {{ (instance.connections / networkStats.connections * 100) | round(2) }}% of total ({{ networkStats.connections }})<br />
+                {{ (instance.connections / networkStats.instances * 100) | round(2) }}% of instances ({{ networkStats.instances }})<br />
             </p>
         </div>
     </div>

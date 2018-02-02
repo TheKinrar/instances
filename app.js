@@ -58,8 +58,11 @@ function updateNetworkStats() {
 		let users = 0,
 			statuses = 0,
 			connections = 0;
+let instancesCount = 0;
 
 		instances.forEach((instance) => {
+		instancesCount++;
+
             if(instance.users)
                 users += instance.users;
 
@@ -73,7 +76,8 @@ function updateNetworkStats() {
 		global.networkStats = app.locals.networkStats = {
 			users,
 			statuses,
-            connections
+            connections,
+	instances:instancesCount
 		};
 	}).catch(console.error);
 }
