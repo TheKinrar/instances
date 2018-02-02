@@ -31,6 +31,7 @@
                 {{ (instance.users / networkStats.users * 100) | round(2) }}% of total ({{ networkStats.users }})<br />
             </p>
         </div>
+
         <div class="col-md-4">
             <h4>{{ instance.statuses }} Statuses</h4>
 
@@ -38,11 +39,22 @@
                 {{ (instance.statuses / networkStats.statuses * 100) | round(2) }}% of total ({{ networkStats.statuses }})<br />
             </p>
         </div>
+
         <div class="col-md-4">
             <h4>{{ instance.connections }} Connections</h4>
 
             <p>
                 {{ (instance.connections / networkStats.instances * 100) | round(2) }}% of instances ({{ networkStats.instances }})<br />
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                Last check: {{ instance.checkedAt }}<br>
+                Last update: {{ instance.updatedAt }}<br>
+                Last Observatory update: {{ instance.obs_date }}<br>
             </p>
         </div>
     </div>

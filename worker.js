@@ -120,11 +120,16 @@ async function fetchInstanceAP(id) {
         }
     });
 
-    let peers;
+    let peers, activity;
 
     try {
         peers = await request({
             url: `https://${instance.name}/api/v1/instance/peers`,
+            json: true
+        });
+
+        activity = await request({
+            url: `https://${instance.name}/api/v1/instance/activity`,
             json: true
         });
     } catch(e) {
@@ -139,4 +144,17 @@ async function fetchInstanceAP(id) {
         downchecks: 0,
         upchecks: 0
     })));
+
+    for(let activity_w of activity) {
+        await pg.query('INSERT INTO instances_activity(instance, week, statuses, logins, registrations) ' +
+            'VALUES($1, $2, $3, $4, $5) ON CONFLICT (instance, week) ' +
+            'DO UPDATE SET statuses=EXCLUDED.statuses, logins=EXCLUDED.logins, registrations=EXCLUDED.registrations ' +
+            'WHERE instances_activity.instance=EXCLUDED.instance AND instances_activity.week=EXCLUDED.week', [
+            id,
+            new Date(parseInt(activity_w.week) * 1000),
+            activity_w.statuses,
+            activity_w.logins,
+            activity_w.registrations
+        ]);
+    }
 }
