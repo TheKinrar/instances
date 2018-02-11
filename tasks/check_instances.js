@@ -5,7 +5,13 @@ const querystring = require('querystring');
 module.exports = () => {
 	const db_instances = DB.get('instances');
 
-	for(let i = 0; i < 5 * 60; ++i) {
+	let i = 0;
+	let interval = setInterval(() => {
+	    if(i === 5 * 60)
+	        return clearInterval(interval);
+
+	    ++i;
+
         db_instances.find({second5: i, blacklisted: {$ne: true}, dead: {$ne: true}}).then((instances) => {
             instances.forEach((instance) => {
                 console.log(i + ': Checking ' + instance.name);
@@ -48,5 +54,5 @@ module.exports = () => {
                 });
             });
         });
-    }
+    }, 1000);
 };
