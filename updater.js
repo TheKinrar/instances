@@ -13,6 +13,7 @@ global.Request = require('request').defaults({
 
 const checkInstances = require('./tasks/check_instances');
 setInterval(checkInstances, 5 * 60 * 1000);
+checkInstances();
 
 const updateInstances = require('./tasks/update_instances');
 setInterval(updateInstances, 60 * 60 * 1000);
