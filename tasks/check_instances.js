@@ -38,24 +38,13 @@ module.exports = () => {
                 });
             };
 
-            https.get({
-                hostname: instance.name,
-                path: '/api/v1/instance',
-                headers: {
-                    'User-Agent': USER_AGENT
-                }
-            }, (res) => {
-                const statusCode = res.statusCode;
-                const contentType = res.headers['content-type'];
-
-                res.resume();
-
-                if (statusCode !== 200)
+            Request({
+                uri: instance.name + '/api/v1/instance'
+            }, (err, res) => {
+                if(err || res.statusCode !== 200)
                     return down();
 
                 up();
-            }).on('error', (e) => {
-                down();
             });
 		});
 	});
