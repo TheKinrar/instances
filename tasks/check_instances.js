@@ -8,7 +8,7 @@ module.exports = () => {
 	for(let i = 0; i < 5 * 60; ++i) {
         db_instances.find({second5: i, blacklisted: {$ne: true}, dead: {$ne: true}}).then((instances) => {
             instances.forEach((instance) => {
-                console.log(second + ': Checking ' + instance.name);
+                console.log(i + ': Checking ' + instance.name);
 
                 const up = () => {
                     db_instances.update({
