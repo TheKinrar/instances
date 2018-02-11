@@ -7,8 +7,8 @@ global.DB = require('monk')(config.database);
 global.Request = require('request').defaults({
     headers: {
         'User-Agent': USER_AGENT
-    }
-
+    },
+    timeout: 60000
 });
 
 const checkInstances = require('./tasks/check_instances');

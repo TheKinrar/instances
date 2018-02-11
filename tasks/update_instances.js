@@ -73,6 +73,20 @@ module.exports = () => {
                 //console.log(instance.name, '60', instance.second60);
             }
 
+            if(!instance.second5) {
+                instance.second5 = Math.floor(Math.random() * 5 * 60);
+
+                db_instances.update({
+                    _id: instance._id
+                }, {
+                    $set: {
+                        second5: instance.second5
+                    }
+                });
+
+                //console.log(instance.name, '60', instance.second60);
+            }
+
             setTimeout(() => {
                 //console.log('Updating ' + instance.name);
 
@@ -217,7 +231,8 @@ function getHttpsRank(name, cb) {
         path: '/https/' + name + '.json',
         headers: {
             'User-Agent': USER_AGENT
-        }
+        },
+        timeout: 60000
     }, (res) => {
         const statusCode = res.statusCode;
         const contentType = res.headers['content-type'];
@@ -351,7 +366,8 @@ function getStats(base_url, cb) {
             path: '/about/more',
             headers: {
                 'User-Agent': USER_AGENT
-            }
+            },
+            timeout: 60000
         }, (res) => {
             const statusCode = res.statusCode;
             const contentType = res.headers['content-type'];
@@ -391,7 +407,8 @@ function getStats(base_url, cb) {
                             path: '/api/v1/instance',
                             headers: {
                                 'User-Agent': USER_AGENT
-                            }
+                            },
+                            timeout: 60000
                         }, (res) => {
                             const statusCode = res.statusCode;
                             const contentType = res.headers['content-type'];
