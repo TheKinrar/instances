@@ -23,6 +23,7 @@ ProhibitedContent.array = Object.keys(ProhibitedContent).map((code) => {
 	};
 });
 global.InstanceCategories = JSON.parse(fs.readFileSync('categories.json', 'utf8'));
+InstanceCategories.sort();
 
 global.Mailgun = require('mailgun-js')({
     apiKey: config.mailgun.key,
