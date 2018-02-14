@@ -22,6 +22,7 @@ ProhibitedContent.array = Object.keys(ProhibitedContent).map((code) => {
 		name: ProhibitedContent[code]
 	};
 });
+global.InstanceCategories = JSON.parse(fs.readFileSync('categories.json', 'utf8'));
 
 global.Mailgun = require('mailgun-js')({
     apiKey: config.mailgun.key,
@@ -32,6 +33,7 @@ global.DB = require('monk')(config.database);
 const app = express();
 
 app.locals.ProhibitedContent = ProhibitedContent;
+app.locals.InstanceCategories = InstanceCategories;
 app.locals.Languages = Languages;
 app.locals.langs = CountryLanguages.getLanguages()
     .filter((a)=>{return a.nativeName[0] !== ""})

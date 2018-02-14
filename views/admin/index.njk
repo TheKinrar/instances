@@ -3,17 +3,23 @@
 {% block main %}
     <p><strong>This section concerns instance owners only.</strong></p>
 
-    {% if messages.adminRegistered %}
+    {% for message in messages.info %}
         <div class="alert alert-success" role="alert">
-          <strong>Activation successful.</strong> You may now sign in using the form on the right.
+            {% if message == 'adminRegistered' %}
+                <strong>Activation successful.</strong> You may now sign in using the form on the right.
+            {% endif %}
         </div>
-    {% endif %}
+    {% endfor %}
 
-    {% if messages.loginError %}
+    {% for message in messages.error %}
         <div class="alert alert-danger" role="alert">
-          <strong>Login failed.</strong> {{ messages.loginError }}
+            {% if message == 'invalidInstance' %}
+                <strong>Login failed.</strong> Invalid instance name.
+            {% elseif message == 'invalidPassword' %}
+                <strong>Login failed.</strong> Invalid password.
+            {% endif %}
         </div>
-    {% endif %}
+    {% endfor %}
 
     <div class="row">
         <div class="col-md-8">
@@ -23,7 +29,7 @@
                 If you own a Mastodon instance and want to make it appear on this website, sign up here.
             </p>
 
-            <form>
+            <form action="#">
                 <noscript><strong>Please enable JavaScript.</strong></noscript>
                 <div id="signup-name" style="display: none;">
                     <div class="form-group">
@@ -93,6 +99,8 @@
             }).fail(function() {
                 signupBtn.attr('disabled', false);
                 signupBtn.text('Sign up');
+
+                alert("Something went wrong. Check the instance name is valid and a contact email is set in the site settings of Mastodon. Contact @TheKinrar@mastodon.xyz if you need help.");
             });
         });
     </script>

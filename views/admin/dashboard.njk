@@ -6,9 +6,9 @@
         Informations are not currently shown but will be in the next days. Instances with no information set won't be shown.
     </p>
 
-    {% if messages.validationError %}
+    {% if messages.validationError.length > 0 %}
         <div class="alert alert-danger" role="alert">
-          <strong>Could not save info:</strong>&nbsp;{{ messages.validationError }}
+          <strong>Could not save info:</strong>&nbsp;{{ messages.validationError[0] }}
         </div>
     {% endif %}
 
@@ -16,25 +16,41 @@
       <div class="form-check">
         <label class="form-check-label">
           <input type="checkbox" class="form-check-input" name="optOut"{{ ' checked' if instance.infos.optOut }}>
-          Hide this instance from the instances selection
+          Hide this instance from instance pickers (e.g. wizard, simple list and joinmastodon.org)
         </label>
       </div>
+
       <div class="form-group">
         <label for="inputShortdesc">Short description</label>
-        <textarea class="form-control" name="shortDescription" rows="2" maxlength="150">{{ instance.infos.shortDescription }}</textarea>
-        <small class="form-text text-muted">At most 150 characters. This will be shown with your instance name. Use it to briefly describe the specificities of your instance, if any.</small>      </div>
+        <textarea class="form-control" name="shortDescription" rows="2" maxlength="150" required>{{ instance.infos.shortDescription }}</textarea>
+        <small class="form-text text-muted">At most 150 characters. This will be shown with your instance name. Use it to briefly describe the specificities of your instance, if any.</small>
+      </div>
+
       <div class="form-group">
         <label for="inputFulldesc">Full description</label>
-        <textarea class="form-control" name="fullDescription" rows="5">{{ instance.infos.fullDescription }}</textarea>
+        <textarea class="form-control" name="fullDescription" rows="5" required>{{ instance.infos.fullDescription }}</textarea>
         <small class="form-text text-muted">This is the extended description of your instance, like what's shown on the <i>/about/more</i> page of your instance.</small>
       </div>
+
       <div class="form-group">
         <label for="inputTheme">Topic</label>
         <input type="text" class="form-control" id="inputTheme" name="theme" value="{{ instance.infos.theme }}">
         <small class="form-text text-muted">Leave empty for a generalistic instance.</small>
       </div>
+
       <div class="form-group">
-        <label for="selectContent">Main languages</label>
+        <label for="selectCategories">Categories</label>
+        <select multiple class="form-control" id="selectCategories" name="categories" style="height: 300px;">
+            {% for category in InstanceCategories %}
+              <option value="{{ category }}"{{ ' selected="selected"' if instance.infos.categories and instance.infos.categories.includes(category) }}>{{ category }}</option>
+            {% endfor %}
+        </select>
+        <small class="form-text text-muted">Use Control key to select multiple at once and to unselect items.</small>
+        <small class="form-text text-muted">Select none for a generalistic instance.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="selectLanguages">Main languages</label>
         <select multiple class="form-control" id="selectLanguages" name="languages" style="height: 300px;">
           {% for lang in langs %}
             <option value="{{ lang.code }}"{{ ' selected="selected"' if instance.infos.languages.includes(lang.code) }}>{{ lang.name }} ({{ lang.nativeName }})</option>
@@ -42,12 +58,14 @@
         </select>
         <small class="form-text text-muted">Use Control key to select multiple at once and to unselect items.</small>
       </div>
+
       <div class="form-check">
         <label class="form-check-label">
           <input type="checkbox" class="form-check-input" name="noOtherLanguages"{{ ' checked' if instance.infos.noOtherLanguages }}>
           Other languages are not accepted
         </label>
       </div>
+
       <div class="form-group">
         <label for="selectContent">Prohibited content</label>
         <select multiple class="form-control" name="prohibitedContent" style="height: 300px;">
@@ -57,12 +75,14 @@
         </select>
         <small class="form-text text-muted">Use Control key to select multiple at once and to unselect items.</small>
       </div>
+
       <div class="form-group">
         <label for="inputOtherProhibited">Other prohibited content</label>
         <input type="text" class="form-control" name="otherProhibitedContent" value="{{ otherProhibitedContent }}">
         <small class="form-text text-muted">Please use a comma-separated list.</small>
       </div>
-      <fieldset class="form-group">
+
+      {#<fieldset class="form-group">
         <legend>Federation</legend>
         <div class="form-check">
           <label class="form-check-label">
@@ -76,7 +96,8 @@
             Federates with some instances
           </label>
         </div>
-      </fieldset>
+      </fieldset>#}
+
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 {% endblock %}

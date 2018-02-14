@@ -13,7 +13,12 @@ router.use('/admin', require('./admin'));
 
 router.get('/', (req, res) => {
     if(!req.user) {
-        return res.render('admin/index');
+        return res.render('admin/index', {
+            messages: {
+                info: req.flash('info'),
+                error: req.flash('error')
+            }
+        });
     }
 
     DB.get('instances').findOne({
@@ -24,6 +29,7 @@ router.get('/', (req, res) => {
               shortDescription: '',
               fullDescription: '',
               theme: '',
+              categories: [],
               languages: [],
               noOtherLanguages: false,
               prohibitedContent:
@@ -45,7 +51,10 @@ router.get('/', (req, res) => {
             }).sort(function(a, b) {
                 return a.name.localeCompare(b.name);
             }),
-            otherProhibitedContent: instance.infos.otherProhibitedContent.join(', ')
+            otherProhibitedContent: instance.infos.otherProhibitedContent.join(', '),
+            messages: {
+                validationError: req.flash('validationError')
+            }
         });
     }).catch((e) => {
         console.error(e);
@@ -99,6 +108,10 @@ router.post('/', (req, res) => {
     if(!isNonEmptyString(theme))
         theme = null;
 
+    let categories = stringOrArrayToArray(req.body.categories);
+    if(!categories)
+        categories = [];
+
     let languages = stringOrArrayToArray(req.body.languages);
     if(!languages)
         languages = [];
@@ -117,20 +130,21 @@ router.post('/', (req, res) => {
     if(!otherProhibitedContent)
         otherProhibitedContent = [];
 
-    let federation = req.body.federation;
+    /*let federation = req.body.federation;
     if(!isNonEmptyString(federation) || !['all', 'some'].includes(federation))
-        return error('Missing federation policy.');
+        return error('Missing federation policy.');*/
 
     let infos = {
         optOut,
         shortDescription: req.body.shortDescription,
         fullDescription: req.body.fullDescription,
         theme,
+        categories,
         languages,
         noOtherLanguages,
         prohibitedContent,
         otherProhibitedContent,
-        federation
+        //federation
     };
 
     console.log(req.body);
@@ -257,7 +271,7 @@ router.post('/activate', (req, res) => {
                     })
                 }
             }).then(() => {
-                req.flash('adminRegistered', true);
+                req.flash('info', 'adminRegistered');
                 res.redirect('/admin');
             }).catch((e) => {
                 console.error(e);
@@ -282,12 +296,12 @@ router.post('/login', (req, res) => {
         instance: req.body.instance
     }).then((admin) => {
         if(!admin) {
-            req.flash('loginError', 'Invalid instance name.');
+            req.flash('error', 'invalidInstance');
             return res.redirect('/admin');
         }
 
         if(!passwordHash.verify(req.body.password, admin.password)) {
-            req.flash('loginError', 'Invalid password.');
+            req.flash('error', 'invalidPassword');
             return res.redirect('/admin');
         }
 
