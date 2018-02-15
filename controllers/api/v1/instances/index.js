@@ -52,7 +52,7 @@ router.get('/show', (req, res) => {
  * @apiParam {Boolean} [include_closed=true] Include instances with closed registrations
  *
  * @apiParam {String="mstdn_custom_emojis"} [supported_features] Comma-separated list of features returned instances have to support
- * @apiParam {String} [min_version] Minimal Mastodon version returned instances must be running. Format must be "a.b.c" with a, b, c being integers.
+ * @apiParam {String} [min_version] Minimal Mastodon version returned instances must be running. Format must be "a.b.c" (".b" and ".c" can be omitted) with a, b, c being integers.
  *
  * @apiParam {Number{0-}} [min_active_users] Minimal active users per week returned instances must have. **This will filter out instances running Mastodon versions older than 2.1.2.**
  *
