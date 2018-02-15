@@ -61,7 +61,7 @@ router.get('/show', (req, res) => {
  *
  * @apiParam {String} [min_id] Minimal ID of instances to retrieve. Use this to navigate through pages. The id of the first instance from next page is accessible through pagination.next_id.
  *
- * @apiParam {String="name","uptime","https_score","obs_score","users","statuses","connections"} [sort_by] Field to sort instances by. By default, instances are not sorted and their order is not guaranteed to be consistent.
+ * @apiParam {String="name","uptime","https_score","obs_score","users","statuses","connections","active_users"} [sort_by] Field to sort instances by. By default, instances are not sorted and their order is not guaranteed to be consistent.
  * @apiParam {String="asc","desc"} [sort_order="asc"] Sort order, if *sort_by* is used.
  */
 router.get('/list', (req, res) => {
@@ -121,7 +121,8 @@ router.get('/list', (req, res) => {
                     'obs_score',
                     'users',
                     'statuses',
-                    'connections'
+                    'connections',
+                    'active_users'
                 ]
             }, sort_order: {
                 type: 'string',
@@ -210,8 +211,10 @@ router.get('/list', (req, res) => {
         q_options.limit = query.count + 1;
 
     if(query.sort_by) {
-        q_options.sort = {};
+        if(query.sort_by === 'active_users')
+            query.sort_by = 'instance.activity_prevw.logins';
 
+        q_options.sort = {};
         q_options.sort[query.sort_by] = query.sort_order === 'asc' ? 1 : -1;
     }
     Promise
