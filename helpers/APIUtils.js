@@ -1,3 +1,10 @@
+const config = require('../config');
+const camo = require('camo-url')({
+    host: 'https://camo.instances.social',
+    key: config.camo_key,
+    type: 'path'
+});
+
 module.exports.checkQuery = checkQuery;
 module.exports.createInstanceJson = createInstanceJson;
 module.exports.createVersionJson = createVersionJson;
@@ -94,6 +101,7 @@ function createInstanceJson(instance) {
         open_registrations: instance.openRegistrations || false,
         info: null,
         thumbnail: instance.thumbnail || null,
+        thumbnail_proxy: instance.thumbnail ? camo(instance.thumbnail) : null,
         active_users: instance.activity_prevw ? instance.activity_prevw.logins || null : null
     };
 

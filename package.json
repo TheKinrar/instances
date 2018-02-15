@@ -4,6 +4,7 @@
     "apicache": "^0.8.4",
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.1",
+    "camo-url": "^0.2.0",
     "connect-flash": "^0.1.1",
     "connect-mongo": "^1.3.2",
     "country-language": "^0.1.7",
