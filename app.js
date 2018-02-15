@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const nunjucks = require('nunjucks');
 const fs = require('fs');
 const Session = require('express-session');
-const Languages = require('languages');
+const Languages = global.Languages = require('languages');
 const CountryLanguages = require('country-language');
 const MongoStore = require('connect-mongo')(Session);
 

@@ -13,4 +13,6 @@ const logstream_api = rfs('access.log', {
     path: '/var/log/instances-api'
 });
 
-module.exports.api = morgan(':remote-addr - :api-token [:date[clf]] ":method :url HTTP/:http-version" :response-time :status :res[content-length] ":referrer" ":user-agent"', {stream: logstream_api});
+module.exports.api = morgan(':remote-addr - :api-token [:date[clf]] ":method :url HTTP/:http-version" :response-time :status :res[content-length] ":referrer" ":user-agent"', {
+    stream: process.env.NODE_ENV !== 'development' ? logstream_api : undefined
+});

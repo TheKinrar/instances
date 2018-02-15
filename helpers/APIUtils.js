@@ -60,6 +60,11 @@ function checkQuery(template, query) {
                 } else {
                     throw new Error(`Parameter "${key}" is not a boolean.`);
                 }
+            } else if(key_template.type === 'string') {
+                if(key_template.regex) {
+                    if(!key_template.regex.test(key_value))
+                        throw new Error(`Parameter "${key}" must match ${key_template.regex}.`);
+                }
             }
         }
     }
@@ -88,7 +93,8 @@ function createInstanceJson(instance) {
         connections: instance.connections || 0,
         open_registrations: instance.openRegistrations || false,
         info: null,
-        thumbnail: instance.thumbnail || null
+        thumbnail: instance.thumbnail || null,
+        active_users: instance.activity_prevw ? instance.activity_prevw.logins || null : null
     };
 
     if(instance.infos) {
@@ -101,7 +107,8 @@ function createInstanceJson(instance) {
             languages: info.languages || null,
             other_languages_accepted: !info.noOtherLanguages,
             federates_with: info.federation || null,
-            prohibited_content: info.prohibitedContent || []
+            prohibited_content: info.prohibitedContent || [],
+            categories: info.categories || []
         };
     }
 

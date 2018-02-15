@@ -181,7 +181,7 @@ module.exports = () => {
 
                                             await pify(job.save.bind(job))();
 
-                                            if(!instance.apUpdatedAt || (new Date()).getTime() - instance.apUpdatedAt.getTime() > 7 * 24 * 60 * 60 * 1000) {
+                                            if(!instance.apUpdatedAt || (new Date()).getTime() - instance.apUpdatedAt.getTime() > 24 * 60 * 60 * 1000) {
                                                 console.log(`[INSTANCES_UPDATE/${instance.name}] Creating AP fetching job. Last update: ${instance.apUpdatedAt || 'none'}`);
 
                                                 let job = queue.create('fetch_instance_ap', {

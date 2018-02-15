@@ -157,4 +157,16 @@ async function fetchInstanceAP(id) {
             activity_w.registrations
         ]);
     }
+
+    await DB.get('instances').update({
+        name: pg_instance.name
+    }, {
+        $set: {
+            activity_prevw: {
+                statuses: parseInt(activity[1].statuses),
+                logins: parseInt(activity[1].logins),
+                registrations: parseInt(activity[1].registrations)
+            }
+        }
+    });
 }

@@ -46,11 +46,21 @@ router.get('/show', (req, res) => {
  * @apiVersion 1.0.0
  *
  * @apiParam {Number{0-10000}} [count=20] Number of instances to get. **0 returns all instances**.
+ *
  * @apiParam {Boolean} [include_dead=false] Include dead (down for at least two weeks) instances
  * @apiParam {Boolean} [include_down=true] Include down instances
  * @apiParam {Boolean} [include_closed=true] Include instances with closed registrations
+ *
  * @apiParam {String="mstdn_custom_emojis"} [supported_features] Comma-separated list of features returned instances have to support
+ * @apiParam {String} [min_version] Minimal Mastodon version returned instances must be running. Format must be "a.b.c" with a, b, c being integers.
+ *
+ * @apiParam {Number{0-}} [min_active_users] Minimal active users per week returned instances must have. **This will filter out instances running Mastodon versions older than 2.1.2.**
+ *
+ * @apiParam {String} [category] Category instances must be in to be returned. Value *general* will return instances in no category.
+ * @apiParam {String} [language] Language instances must have as main language to be returned.
+ *
  * @apiParam {String} [min_id] Minimal ID of instances to retrieve. Use this to navigate through pages. The id of the first instance from next page is accessible through pagination.next_id.
+ *
  * @apiParam {String="name","uptime","https_score","obs_score","users","statuses","connections"} [sort_by] Field to sort instances by. By default, instances are not sorted and their order is not guaranteed to be consistent.
  * @apiParam {String="asc","desc"} [sort_order="asc"] Sort order, if *sort_by* is used.
  */
@@ -86,6 +96,21 @@ router.get('/list', (req, res) => {
                 values: [
                     'mstdn_custom_emojis'
                 ]
+            }, min_version: {
+                type: 'string',
+                optional: true,
+                regex: /^(?:[0-9]+\.){0,2}[0-9]+$/
+            }, min_active_users: {
+                type: 'int',
+                min: 0,
+                optional: true
+            }, category: {
+                type: 'string',
+                optional: true
+            }, language: {
+                type: 'language',
+                optional: true,
+                values: Languages.getAllLanguageCode()
             }, sort_by: {
                 type: 'string',
                 optional: true,
@@ -140,6 +165,34 @@ router.get('/list', (req, res) => {
         q.version_score = {
             $gte: 200
         };
+
+    if(query.min_version) {
+        let min_version_a = query.min_version.split('.').map((e) => {return parseInt(e);});
+
+        q.version_score = {
+            $gte: (100 * min_version_a[0]) + (min_version_a.length > 2 ? 10 * min_version_a[1] : 0) + (min_version_a.length > 2 ? min_version_a[2] : 0)
+        };
+    }
+
+    if(query.min_active_users) {
+        q['activity_prevw.logins'] = {
+            $gte: query.min_active_users
+        };
+    }
+
+    if(query.category) {
+        if(query.category === 'general') {
+            q['infos.categories'] = {
+                $in: [[], null]
+            };
+        } else {
+            q['infos.categories'] = query.category;
+        }
+    }
+
+    if(query.language) {
+        q['infos.languages'] = query.language;
+    }
 
     if(query.min_id)
         try {
