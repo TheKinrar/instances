@@ -135,6 +135,7 @@ module.exports = () => {
                                         users: stats.users,
                                         statuses: stats.statuses,
                                         connections: stats.connections,
+                                        raw_version: stats.raw_version,
                                         version: stats.version,
                                         version_score: stats.version_score,
                                         active_user_count: stats.active_user_count,
@@ -432,9 +433,10 @@ function getStats(base_url, cb) {
 
                                     let version = '<1.3';
                                     let version_score = 0;
+                                    let raw_version = null;
 
                                     if(data.version)
-                                        version = data.version.replace(/\.$/, '');
+                                        version = raw_version = data.version.replace(/\.$/, '');
 
                                     let version_norc = version.replace(/\.?rc[0-9]/, '');
 
@@ -462,6 +464,7 @@ function getStats(base_url, cb) {
                                         statuses,
                                         connections,
                                         info,
+                                        raw_version,
                                         version,
                                         version_score,
                                         active_user_count,
