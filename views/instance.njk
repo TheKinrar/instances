@@ -15,7 +15,7 @@
             Main languages: {{ instance.infos.languages | join(', ') }}<br />
             <i>Other languages {{ 'are not' if instance.infos.noOtherLanguages else 'are' }} accepted.</i><br />
             Prohibited content:{% set comma = joiner() %}{% for content in instance.infos.prohibitedContent %}{{ comma() }} {{ ProhibitedContent[content] }}{% endfor %}<br />
-            Federates with <b>{{ 'all' if instance.infos.federation else 'some' }} instances.</b>
+            {#Federates with <b>{{ 'all' if instance.infos.federation else 'some' }} instances.</b>#}
         </p>
     {% else %}
         <p>
