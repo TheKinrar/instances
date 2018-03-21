@@ -9,8 +9,6 @@ router.use((req, res, next) => {
     next();
 });
 
-router.use('/admin', require('./admin'));
-
 router.get('/', (req, res) => {
     if(!req.user) {
         return res.render('admin/index', {
