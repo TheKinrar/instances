@@ -321,8 +321,8 @@ function getObsRank(instance, cb) {
     }
 
     Request.post('https://http-observatory.security.mozilla.org/api/v1/analyze?'+ querystring.stringify({
-            host: name
-        }), (err, res, raw) => {
+        host: name
+    }), (err, res, raw) => {
         if(err) return cb(err);
 
         const statusCode = res.statusCode;
@@ -361,6 +361,111 @@ function checkIpv6(name, cb) {
 }
 
 function getStats(base_url, cb) {
+    https.get({
+        hostname: base_url,
+        path: '/api/v1/instance',
+        headers: {
+            'User-Agent': USER_AGENT
+        },
+        timeout: 60000
+    }, (res) => {
+        const statusCode = res.statusCode;
+        const contentType = res.headers['content-type'];
+
+        if (statusCode !== 200) {
+            res.resume();
+            return cb(new Error(`Status Code: ${statusCode}, expected 200`));
+        }
+
+        if (!/^application\/json/.test(contentType)) {
+            res.resume();
+            return cb(new Error(`Content type: ${contentType}, expected application/json`));
+        }
+
+        res.setEncoding('utf8');
+        let rawData = '';
+        res.on('data', (chunk) => rawData += chunk);
+        res.on('end', () => {
+            try {
+                let data = JSON.parse(rawData);
+
+                let version = '<1.3';
+                let version_score = 0;
+                let raw_version = null;
+
+                if(data.version)
+                    version = raw_version = data.version.replace(/\.$/, '');
+
+                let version_norc = version.replace(/\.?rc[0-9]/, '');
+
+                if(version === 'Mastodon::Version') {
+                    version = '1.3';
+                    version_score = 130;
+                } else if(/^[0-9]\.[0-9](\.[0-9])?$/.test(version_norc)) {
+                    let version_a = version_norc.split('.').map((e) => {return parseInt(e);});
+
+                    version_score = (100 * version_a[0]) + (10 * version_a[1]) + (version_a.length === 3 ? version_a[2] : 0);
+                } else {
+                    version = "";
+                }
+
+                let active_user_count = null;
+                let first_user_created_at = null;
+
+                let users = null;
+                let statuses = null;
+                let connections = null;
+
+                let return_cb = () => {
+                    cb(null, {
+                        users,
+                        statuses,
+                        connections,
+                        raw_version,
+                        version,
+                        version_score,
+                        active_user_count,
+                        first_user_created_at,
+                        thumbnail: data.thumbnail
+                    });
+                };
+
+                if(data.stats) {
+                    active_user_count = data.stats.active_user_count;
+                    first_user_created_at = data.stats.first_user_created_at;
+
+                    users = data.stats.user_count;
+                    statuses = data.stats.status_count;
+                    connections = data.stats.domain_count;
+
+                    return_cb();
+                } else {
+                    parseInfoboard(base_url, (err, infoboard_data) => {
+                        if(!err) {
+                            users = infoboard_data.users;
+                            statuses = infoboard_data.statuses;
+                            connections = infoboard_data.connections;
+                        } else {
+                            console.error(base_url, 'infoboard failed', err)
+                        }
+
+                        return_cb();
+                    });
+                }
+            } catch(e) {
+                return cb(e);
+            }
+        });
+
+        res.on('error', (e) => {
+            return cb(e);
+        });
+    }).on('error', (e) => {
+        return cb(e);
+    });
+}
+
+function parseInfoboard(base_url, cb) {
     try {
         https.get({
             hostname: base_url,
@@ -401,87 +506,11 @@ function getStats(base_url, cb) {
 
                         info = info.replace(/<br *\/?>/gi, '\n').replace(/<\/?(.+?)>/gi, '');
 
-                        let clacks = res.headers['x-clacks-overhead'];
-
-                        https.get({
-                            hostname: base_url,
-                            path: '/api/v1/instance',
-                            headers: {
-                                'User-Agent': USER_AGENT
-                            },
-                            timeout: 60000
-                        }, (res) => {
-                            const statusCode = res.statusCode;
-                            const contentType = res.headers['content-type'];
-
-                            if (statusCode !== 200) {
-                                res.resume();
-                                return cb(new Error(`Status Code: ${statusCode}, expected 200`));
-                            }
-
-                            if (!/^application\/json/.test(contentType)) {
-                                res.resume();
-                                return cb(new Error(`Content type: ${contentType}, expected application/json`));
-                            }
-
-                            res.setEncoding('utf8');
-                            let rawData = '';
-                            res.on('data', (chunk) => rawData += chunk);
-                            res.on('end', () => {
-                                try {
-                                    let data = JSON.parse(rawData);
-
-                                    let version = '<1.3';
-                                    let version_score = 0;
-                                    let raw_version = null;
-
-                                    if(data.version)
-                                        version = raw_version = data.version.replace(/\.$/, '');
-
-                                    let version_norc = version.replace(/\.?rc[0-9]/, '');
-
-                                    if(version === 'Mastodon::Version') {
-                                        version = '1.3';
-                                        version_score = 130;
-                                    } else if(/^[0-9]\.[0-9](\.[0-9])?$/.test(version_norc)) {
-                                        let version_a = version_norc.split('.').map((e) => {return parseInt(e);});
-
-                                        version_score = (100 * version_a[0]) + (10 * version_a[1]) + (version_a.length === 3 ? version_a[2] : 0);
-                                    } else {
-                                        version = "";
-                                    }
-
-                                    let active_user_count = null;
-                                    let first_user_created_at = null;
-
-                                    if(data.stats) {
-                                        active_user_count = data.stats.active_user_count;
-                                        first_user_created_at = data.stats.first_user_created_at;
-                                    }
-
-                                    cb(null, {
-                                        users,
-                                        statuses,
-                                        connections,
-                                        info,
-                                        raw_version,
-                                        version,
-                                        version_score,
-                                        active_user_count,
-                                        first_user_created_at,
-                                        thumbnail: data.thumbnail,
-                                        clacks
-                                    });
-                                } catch(e) {
-                                    return cb(e);
-                                }
-                            });
-
-                            res.on('error', (e) => {
-                                cb(e);
-                            });
-                        }).on('error', (e) => {
-                            cb(e);
+                        cb(null, {
+                            users,
+                            statuses,
+                            connections,
+                            info
                         });
                     } catch(e) {
                         return cb(e);
