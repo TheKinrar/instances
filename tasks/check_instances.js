@@ -1,6 +1,7 @@
 const https = require('https');
 const dns = require('dns');
 const querystring = require('querystring');
+const InstancesLog = require('../helpers/InstancesLog');
 
 module.exports = () => {
 	const db_instances = DB.get('instances');
@@ -14,7 +15,7 @@ module.exports = () => {
 
         db_instances.find({second5: i, blacklisted: {$ne: true}, dead: {$ne: true}}).then((instances) => {
             instances.forEach((instance) => {
-                console.log(i + ': Checking ' + instance.name);
+                //console.log(i + ': Checking ' + instance.name);
 
                 const up = () => {
                     db_instances.update({
@@ -47,8 +48,13 @@ module.exports = () => {
                 Request({
                     uri: instance.name + '/api/v1/instance'
                 }, (err, res) => {
-                    if (err || res.statusCode !== 200)
+                    if(err) {
+                        InstancesLog.error(instance.name, 'Instance is down: "' + err.message + '".').catch(console.error);
                         return down();
+                    } else if(res.statusCode !== 200) {
+                        InstancesLog.error(instance.name, 'Instance is down. Got status code ' + res.statusCode + '.').catch(console.error);
+                        return down();
+                    }
 
                     up();
                 });

@@ -93,10 +93,10 @@ module.exports = () => {
 
                 getHttpsRank(instance.name, (err, rank) => {
                     if (err) {
-                        console.error(instance.name, 'CryptCheck failed: ' + err.message);
+                        InstancesLog.warning(instance.name, 'Could not get instance HTTPS score: "' + err.message + '".').catch(console.error);
 
                         if (!instance.https_rank) {
-                            console.error(instance.name, 'No cached HTTPS score. Cancelling update.');
+                            InstancesLog.error(instance.name, 'No cached HTTPS score. Instance update cannot continue.').catch(console.error);
                             return;
                         } else {
                             rank = {
@@ -108,9 +108,10 @@ module.exports = () => {
 
                     getObsRank(instance, (err, obs_rank) => {
                         if (err) {
-                            console.error(instance.name, 'Obs failed: ' + err.message);
+                            InstancesLog.warning(instance.name, 'Could not get instance Observatory score: "' + err.message + '".').catch(console.error);
 
                             if (!instance.obs_rank) {
+                                InstancesLog.warning(instance.name, 'No cached Observatory score. Score is set to 0.').catch(console.error);
                                 obs_rank = {
                                     rank: null,
                                     score: 0
@@ -126,7 +127,7 @@ module.exports = () => {
                         checkIpv6(instance.name, (is_ipv6) => {
                             getStats(instance.name, (err, stats) => {
                                 if (err)
-                                    return InstancesLog.error(instance.name, 'Could not get instance statistics: "' + err.message + '".');
+                                    return InstancesLog.error(instance.name, 'Could not get instance statistics: "' + err.message + '".').catch(console.error);
 
                                 areRegistrationsOpened(instance.name, (openRegistrations) => {
                                     let _set = {
@@ -166,15 +167,9 @@ module.exports = () => {
                                                 pg_instance = await pgc.query('INSERT INTO instances(name) VALUES($1) RETURNING id', [instance.name]);
                                             }
 
-                                            console.log(`[INSTANCES_UPDATE/${instance.name}] Found matching pg ID ${pg_instance.rows[0].id}`);
+                                            //console.log(`[INSTANCES_UPDATE/${instance.name}] Found matching pg ID ${pg_instance.rows[0].id}`);
 
-                                            if(stats.clacks) {
-                                                console.log(`[INSTANCES_UPDATE/${instance.name}] Saving X-Clacks-Overhead header`);
-
-                                                await pgc.query('UPDATE instances SET clacks=$1 WHERE id=$2', [stats.clacks, pg_instance.rows[0].id]);
-                                            }
-
-                                            console.log(`[INSTANCES_UPDATE/${instance.name}] Creating history saving job`);
+                                            //console.log(`[INSTANCES_UPDATE/${instance.name}] Creating history saving job`);
 
                                             let job = queue.create('save_instance_history', {
                                                 title: instance.name,
@@ -184,7 +179,7 @@ module.exports = () => {
                                             await pify(job.save.bind(job))();
 
                                             if(!instance.apUpdatedAt || (new Date()).getTime() - instance.apUpdatedAt.getTime() > 24 * 60 * 60 * 1000) {
-                                                console.log(`[INSTANCES_UPDATE/${instance.name}] Creating AP fetching job. Last update: ${instance.apUpdatedAt || 'none'}`);
+                                                //console.log(`[INSTANCES_UPDATE/${instance.name}] Creating AP fetching job. Last update: ${instance.apUpdatedAt || 'none'}`);
 
                                                 let job = queue.create('fetch_instance_ap', {
                                                     title: instance.name,
@@ -199,7 +194,7 @@ module.exports = () => {
                                             await pgc.release();
                                         }
                                     }).catch((err) => {
-                                        console.error(`[INSTANCES_UPDATE/${instance.name}]`, err);
+                                        InstancesLog.error(instance.name, 'Error in post-update tasks: "' + err.message + '".').catch(console.error);
                                     });
                                 });
                             });
@@ -535,13 +530,13 @@ function parseInfoboard(base_url, cb) {
 function areRegistrationsOpened(url, cb) {
     Request.get(`https://${url}/about`, (err, res, html) => {
         if(err) {
-            console.error('areRegistrationsOpened', url, err);
+            InstancesLog.error(url, 'Could not detect registrations status: "' + err.message + '". Defaulting to closed.').catch(console.error);
             return cb(false);
         }
 
         const statusCode = res.statusCode;
         if (statusCode !== 200 || typeof html !== 'string') {
-            console.error('areRegistrationsOpened', 'sc', url, statusCode, typeof html);
+            //console.error('areRegistrationsOpened', 'sc', url, statusCode, typeof html);
             res.resume();
             return cb(false);
         }
