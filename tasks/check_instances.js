@@ -46,7 +46,7 @@ module.exports = () => {
                 };
 
                 Request({
-                    uri: instance.name + '/api/v1/instance'
+                    uri: 'https://' + instance.name + '/api/v1/instance'
                 }, (err, res) => {
                     if(err) {
                         InstancesLog.error(instance.name, 'Instance is down: "' + err.message + '".').catch(console.error);
