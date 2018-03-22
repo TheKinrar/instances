@@ -49,11 +49,15 @@ module.exports = () => {
                     uri: 'https://' + instance.name + '/api/v1/instance'
                 }, (err, res) => {
                     if(err) {
-                        InstancesLog.error(instance.name, 'Instance is down: "' + err.message + '".').catch(console.error);
+                        if(instance.up)
+                            InstancesLog.error(instance.name, 'Instance is down: "' + err.message + '".').catch(console.error);
                         return down();
                     } else if(res.statusCode !== 200) {
-                        InstancesLog.error(instance.name, 'Instance is down. Got status code ' + res.statusCode + '.').catch(console.error);
+                        if(instance.up)
+                            InstancesLog.error(instance.name, 'Instance is down. Got status code ' + res.statusCode + '.').catch(console.error);
                         return down();
+                    } else if(!instance.up) {
+                        InstancesLog.info(instance.name, 'Instance is up.').catch(console.error);
                     }
 
                     up();
