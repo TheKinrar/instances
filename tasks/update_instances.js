@@ -9,6 +9,7 @@ const queue = kue.createQueue({
 });
 const pg = require('../pg');
 const pify = require('pify');
+const InstancesLog = require('../helpers/InstancesLog');
 
 const regex_infoboard = new RegExp([
     /<div class='information-board(?:-sections)?'>/,
@@ -125,7 +126,7 @@ module.exports = () => {
                         checkIpv6(instance.name, (is_ipv6) => {
                             getStats(instance.name, (err, stats) => {
                                 if (err)
-                                    return console.error(instance.name, 'GetStats failed: ' + err.message);
+                                    return InstancesLog.error(instance.name, 'Could not get instance statistics: "' + err.message + '".');
 
                                 areRegistrationsOpened(instance.name, (openRegistrations) => {
                                     let _set = {
