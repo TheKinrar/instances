@@ -389,7 +389,7 @@ router.get('/:instance', (req, res) => {
                 return res.sendStatus(500);
             }
 
-            pg.query('SELECT * FROM instances_log_entries WHERE instance=$1 ORDER BY id ASC', [
+            pg.query('SELECT * FROM instances_log_entries WHERE instance=$1 ORDER BY id DESC', [
                 pg_res.rows[0].id
             ]).then((pg_res_log) => {
                 res.render('instance', {

@@ -73,7 +73,7 @@
                 <div id="collapseLog" class="collapse hide">
                     <div class="card-body">
                         <samp>
-                            <i>({{ log_entries.length }} lines, from oldest to newest)</i><br>
+                            <i>({{ log_entries.length }} lines, from newest to oldest)</i><br>
                             {% for log_entry in log_entries %}
                                 <span{% if log_entry.level === 1 %}
                                     class="text-warning"
