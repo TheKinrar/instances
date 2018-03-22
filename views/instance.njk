@@ -58,4 +58,37 @@
             </p>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseLog" aria-expanded="false" aria-controls="collapseLog">
+                            Instance log
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseLog" class="collapse hide">
+                    <div class="card-body">
+                        <samp>
+                            <i>({{ log_entries.length }} lines, from oldest to newest)</i><br>
+                            {% for log_entry in log_entries %}
+                                <span{% if log_entry.level === 1 %}
+                                    class="text-warning"
+                                {% elseif log_entry.level === 2 %}
+                                    class="text-danger"
+                                {% else %}
+                                    class="text-info"
+                                {% endif %}>
+                                [{{ log_entry.date_str }}] [{{ log_entry.level_str }}] {{ log_entry.content }}<br>
+                                </span>
+                            {% endfor %}
+                        </samp>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
