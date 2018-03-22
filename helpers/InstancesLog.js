@@ -35,5 +35,5 @@ async function warning(instance, content) {
 }
 
 async function error(instance, content) {
-    await log(instance, 1, content);
+    await log(instance, 2, content);
 }
