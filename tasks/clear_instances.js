@@ -1,3 +1,5 @@
+const pg = require('../pg');
+
 module.exports = () => {
 	const db_instances = DB.get('instances');
 
@@ -29,6 +31,18 @@ module.exports = () => {
 };
 
 async function checkDeadInstances() {
+    /* Delete old log entries (keeping the 100 newest) */
+
+    for(let row of (await pg.query('SELECT DISTINCT ON (instance) instance FROM instances_log_entries;')).rows) {
+        let old_log_entries = pg.query('SELECT * FROM instances_log_entries WHERE instance=$1 ORDER BY id DESC OFFSET 100 ROWS', [
+            row.instance
+        ]);
+
+        for(let entry of old_log_entries.rows) {
+            await pg.query('DELETE FROM instances_log_entries WHERE id=$1', [entry.id]);
+        }
+	}
+
 	return; // TODO: Fix this to use new PG history instead of Mongo
 
     const db_instances = DB.get('instances');

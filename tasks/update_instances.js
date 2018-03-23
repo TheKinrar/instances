@@ -188,16 +188,6 @@ module.exports = () => {
 
                                                 await pify(job.save.bind(job))();
                                             }
-
-                                            /* Delete old log entries (keeping the 100 newest) */
-
-                                            let old_log_entries = pgc.query('SELECT * FROM instances_log_entries WHERE instance=$1 OFFSET 100 ROWS', [
-                                                pg_instance.rows[0].id
-                                            ]);
-
-                                            for(let entry of old_log_entries.rows) {
-                                                await pgc.query('DELETE FROM instances_log_entries WHERE id=$1', [entry.id]);
-                                            }
                                         } catch(e) {
                                             throw e;
                                         } finally {
