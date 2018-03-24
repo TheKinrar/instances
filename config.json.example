@@ -1,8 +1,9 @@
 {
-    "mailgun": {
-        "key": "MAILGUN API KEY",
-        "domain": "MAILGUN DOMAIN"
-    },
-    "session_secret": "RANDOM THING HERE",
-    "database": "localhost/mastodon-instances"
+  "mailgun": {
+    "key": "",
+    "domain": ""
+  },
+  "session_secret": "",
+  "database": "",
+  "redis": ""
 }
