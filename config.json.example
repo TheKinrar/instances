@@ -3,7 +3,18 @@
     "key": "",
     "domain": ""
   },
+
   "session_secret": "",
+
   "database": "",
-  "redis": ""
+
+  "redis": "",
+
+  "postgresql": {
+    "host": "",
+    "port": 5432,
+    "database": "",
+    "username": "",
+    "password": ""
+  }
 }
