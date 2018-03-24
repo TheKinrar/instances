@@ -2,6 +2,7 @@
 
 const Sequelize = require('sequelize');
 const sequelize = require('.');
+const queue = require('../queue');
 
 const Instance = sequelize.define('instance', {
     name: {
@@ -38,5 +39,23 @@ const Instance = sequelize.define('instance', {
     createdAt: 'created_at',
     updatedAt: false
 });
+
+Instance.prototype.queueHistorySaving = async () => {
+    const job = queue.create('save_instance_history', {
+        title: this.name,
+        instance: this.id
+    }).ttl(60000).removeOnComplete(true);
+
+    await job.saveAsync();
+};
+
+Instance.prototype.queueAPFetch = async () => {
+    const job = queue.create('fetch_instance_ap', {
+        title: this.name,
+        instance: this.id
+    }).ttl(60000).removeOnComplete(true);
+
+    await job.saveAsync();
+};
 
 module.exports = Instance;

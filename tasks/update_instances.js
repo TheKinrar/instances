@@ -166,20 +166,10 @@ module.exports = () => {
                                             }
                                         });
 
-                                        let job = queue.create('save_instance_history', {
-                                            title: instance.name,
-                                            instance: p_instance.id
-                                        }).ttl(60000).removeOnComplete(true);
-
-                                        await pify(job.save.bind(job))();
+                                        await p_instance.queueHistorySaving();
 
                                         if(!instance.apUpdatedAt || (new Date()).getTime() - instance.apUpdatedAt.getTime() > 24 * 60 * 60 * 1000) {
-                                            let job = queue.create('fetch_instance_ap', {
-                                                title: instance.name,
-                                                instance: p_instance.id
-                                            }).ttl(60000).removeOnComplete(true);
-
-                                            await pify(job.save.bind(job))();
+                                            await p_instance.queueAPFetch();
                                         }
                                     }).catch((err) => {
                                         InstancesLog.error(instance.name, 'Error in post-update tasks: "' + err.message + '".').catch(console.error);
