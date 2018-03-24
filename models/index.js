@@ -12,7 +12,9 @@ const sequelize = new Sequelize({
 
     dialect: 'postgres',
 
-    operatorsAliases: false
+    operatorsAliases: false,
+
+    logging: false
 });
 
 module.exports = sequelize;
