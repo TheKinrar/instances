@@ -11,6 +11,8 @@ const pg = require('../pg');
 const pify = require('pify');
 const InstancesLog = require('../helpers/InstancesLog');
 
+const Instance = require('../models/instance');
+
 const regex_infoboard = new RegExp([
     /<div class='information-board(?:-sections)?'>/,
     /<div class='section'>/,
@@ -158,40 +160,26 @@ module.exports = () => {
                                     }, {
                                         $set: _set
                                     }).then(async function() {
-                                        let pgc = await pg.connect();
-
-                                        try {
-                                            let pg_instance = await pgc.query('SELECT id FROM instances WHERE name=$1', [instance.name]);
-
-                                            if(pg_instance.rows.length === 0) {
-                                                pg_instance = await pgc.query('INSERT INTO instances(name) VALUES($1) RETURNING id', [instance.name]);
+                                        const [p_instance] = await Instance.findOrCreate({
+                                            where: {
+                                                name: instance.name
                                             }
+                                        });
 
-                                            //console.log(`[INSTANCES_UPDATE/${instance.name}] Found matching pg ID ${pg_instance.rows[0].id}`);
+                                        let job = queue.create('save_instance_history', {
+                                            title: instance.name,
+                                            instance: p_instance.id
+                                        }).ttl(60000).removeOnComplete(true);
 
-                                            //console.log(`[INSTANCES_UPDATE/${instance.name}] Creating history saving job`);
+                                        await pify(job.save.bind(job))();
 
-                                            let job = queue.create('save_instance_history', {
+                                        if(!instance.apUpdatedAt || (new Date()).getTime() - instance.apUpdatedAt.getTime() > 24 * 60 * 60 * 1000) {
+                                            let job = queue.create('fetch_instance_ap', {
                                                 title: instance.name,
-                                                instance: pg_instance.rows[0].id
+                                                instance: p_instance.id
                                             }).ttl(60000).removeOnComplete(true);
 
                                             await pify(job.save.bind(job))();
-
-                                            if(!instance.apUpdatedAt || (new Date()).getTime() - instance.apUpdatedAt.getTime() > 24 * 60 * 60 * 1000) {
-                                                //console.log(`[INSTANCES_UPDATE/${instance.name}] Creating AP fetching job. Last update: ${instance.apUpdatedAt || 'none'}`);
-
-                                                let job = queue.create('fetch_instance_ap', {
-                                                    title: instance.name,
-                                                    instance: pg_instance.rows[0].id
-                                                }).ttl(60000).removeOnComplete(true);
-
-                                                await pify(job.save.bind(job))();
-                                            }
-                                        } catch(e) {
-                                            throw e;
-                                        } finally {
-                                            await pgc.release();
                                         }
                                     }).catch((err) => {
                                         InstancesLog.error(instance.name, 'Error in post-update tasks: "' + err.message + '".').catch(console.error);
