@@ -41,13 +41,14 @@ async function saveInstanceHistory(id) {
     try {
         await pgc.query('BEGIN');
 
-        let res = await pgc.query('INSERT INTO instances_history(instance, uptime_all, ipv6, https_score, obs_score, ' +
+        let res = await pgc.query('INSERT INTO instances_history(instance, uptime_all, up, ipv6, https_score, obs_score, ' +
             'users, connections, statuses, open_registrations, version, ' +
             'active_users_30d, active_users_14d, active_users_7d, active_users_1d, active_users_1h, ' +
             'first_user_created_at) ' +
-            'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING(timestamp)', [
+            'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING(timestamp)', [
             id,
             instance.uptime || 0,
+            instance.up || false,
             instance.ipv6 || false,
             instance.https_score || 0,
             instance.obs_score || 0,
@@ -67,7 +68,7 @@ async function saveInstanceHistory(id) {
         await pgc.query('UPDATE instances SET latest_history_save=$1, uptime_all=$3, ipv6=$4, https_score=$5,' +
             'obs_score=$6, users=$7, connections=$8, statuses=$9, open_registrations=$10, version=$11, ' +
             'active_users_30d=$12, active_users_14d=$13, active_users_7d=$14, active_users_1d=$15, ' +
-            'active_users_1h=$16, first_user_created_at=$17 WHERE id=$2', [
+            'active_users_1h=$16, first_user_created_at=$17, up=$18 WHERE id=$2', [
             res.rows[0].timestamp,
             id,
             instance.uptime || 0,
@@ -84,7 +85,8 @@ async function saveInstanceHistory(id) {
             instance.active_user_count ? (instance.active_user_count['7d'] || null) : null,
             instance.active_user_count ? (instance.active_user_count['1d'] || null) : null,
             instance.active_user_count ? (instance.active_user_count['1h'] || null) : null,
-            instance.first_user_created_at || null
+            instance.first_user_created_at || null,
+            instance.up || false
         ]);
 
         await pgc.query('COMMIT');
