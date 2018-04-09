@@ -40,7 +40,7 @@ const Instance = sequelize.define('instance', {
     updatedAt: false
 });
 
-Instance.prototype.queueHistorySaving = async () => {
+Instance.prototype.queueHistorySaving = async function() {
     const job = queue.create('save_instance_history', {
         title: this.name,
         instance: this.id
@@ -49,7 +49,7 @@ Instance.prototype.queueHistorySaving = async () => {
     await job.saveAsync();
 };
 
-Instance.prototype.queueAPFetch = async () => {
+Instance.prototype.queueAPFetch = async function() {
     const job = queue.create('fetch_instance_ap', {
         title: this.name,
         instance: this.id
