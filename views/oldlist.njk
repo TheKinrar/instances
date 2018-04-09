@@ -8,7 +8,7 @@
     </p>
 
     <p>
-        There {{ 'are' if instances|length > 1 else 'is' }} currently <strong>{{ instances|length }}</strong> instance{{ 's' if instances|length > 1 else '' }} being tracked, with a total of <strong>{{ totalUsers }}</strong> users.
+        There {{ 'are' if instances|length > 1 else 'is' }} currently <strong>{{ instances|length }} ({{ totalUp }} up)</strong> instance{{ 's' if instances|length > 1 else '' }} being tracked, with a total of <strong>{{ totalUsers }} ({{ totalUpUsers }})</strong> users.
     </p>
 
     {% include 'instancesDisplay.njk' %}

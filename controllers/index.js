@@ -231,6 +231,8 @@ router.get('/list/old', (req, res) => {
 
     DB.get('instances').find(q).then((instances) => {
         let totalUsers = 0;
+        let totalUpUsers = 0;
+        let totalUp = 0;
 
         instances.forEach((instance) => {
             instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
@@ -250,8 +252,15 @@ router.get('/list/old', (req, res) => {
             if(instance.ipv6)
                 instance.score += 10;
 
-            if(instance.users)
+            if(instance.up)
+                ++totalUp;
+
+            if(instance.users) {
                 totalUsers += instance.users;
+
+                if(instance.up)
+                    totalUpUsers += instance.users;
+            }
         });
 
         instances.sort((b, a) => {
@@ -260,7 +269,9 @@ router.get('/list/old', (req, res) => {
 
         res.render('oldlist', {
             instances,
-            totalUsers
+            totalUsers,
+            totalUpUsers,
+            totalUp
         });
     });
 });
