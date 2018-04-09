@@ -122,53 +122,51 @@ async function fetchInstanceAP(id) {
         }
     });
 
-    let peers, activity;
-
     try {
-        peers = await request({
+        let peers = await request({
             url: `https://${instance.name}/api/v1/instance/peers`,
             json: true
         });
 
-        activity = await request({
+        let newInstances = await pg.query(pgFormat('INSERT INTO instances(name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', peers.map(p => [p.toLowerCase()])));
+
+        await DB.get('instances').insert(newInstances.rows.map(i => ({
+            addedAt: new Date(),
+            name: i.name,
+            downchecks: 0,
+            upchecks: 0
+        })));
+    } catch(e) {}
+
+    try {
+        let activity = await request({
             url: `https://${instance.name}/api/v1/instance/activity`,
             json: true
         });
-    } catch(e) {
-        return;
-    }
 
-    let newInstances = await pg.query(pgFormat('INSERT INTO instances(name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', peers.map(p => [p.toLowerCase()])));
-
-    await DB.get('instances').insert(newInstances.rows.map(i => ({
-        addedAt: new Date(),
-        name: i.name,
-        downchecks: 0,
-        upchecks: 0
-    })));
-
-    for(let activity_w of activity) {
-        await pg.query('INSERT INTO instances_activity(instance, week, statuses, logins, registrations) ' +
-            'VALUES($1, $2, $3, $4, $5) ON CONFLICT (instance, week) ' +
-            'DO UPDATE SET statuses=EXCLUDED.statuses, logins=EXCLUDED.logins, registrations=EXCLUDED.registrations ' +
-            'WHERE instances_activity.instance=EXCLUDED.instance AND instances_activity.week=EXCLUDED.week', [
-            id,
-            new Date(parseInt(activity_w.week) * 1000),
-            activity_w.statuses,
-            activity_w.logins,
-            activity_w.registrations
-        ]);
-    }
-
-    await DB.get('instances').update({
-        name: pg_instance.name
-    }, {
-        $set: {
-            activity_prevw: {
-                statuses: parseInt(activity[1].statuses),
-                logins: parseInt(activity[1].logins),
-                registrations: parseInt(activity[1].registrations)
-            }
+        for(let activity_w of activity) {
+            await pg.query('INSERT INTO instances_activity(instance, week, statuses, logins, registrations) ' +
+                'VALUES($1, $2, $3, $4, $5) ON CONFLICT (instance, week) ' +
+                'DO UPDATE SET statuses=EXCLUDED.statuses, logins=EXCLUDED.logins, registrations=EXCLUDED.registrations ' +
+                'WHERE instances_activity.instance=EXCLUDED.instance AND instances_activity.week=EXCLUDED.week', [
+                id,
+                new Date(parseInt(activity_w.week) * 1000),
+                activity_w.statuses,
+                activity_w.logins,
+                activity_w.registrations
+            ]);
         }
-    });
+
+        await DB.get('instances').update({
+            name: pg_instance.name
+        }, {
+            $set: {
+                activity_prevw: {
+                    statuses: parseInt(activity[1].statuses),
+                    logins: parseInt(activity[1].logins),
+                    registrations: parseInt(activity[1].registrations)
+                }
+            }
+        });
+    } catch(e) {}
 }
