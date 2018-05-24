@@ -27,12 +27,12 @@
             <td>{{ instance.statuses }}</td>
             <td>{{ instance.connections }}</td>
             {% if not instance.openRegistrations %}<td class="table-danger">No{% else %}<td class="table-success">Yes{% endif %}</td>
-            {% if instance.uptime >= 99 %}
-            <td class="table-success" data-value="{{ instance.uptime}}">
-                {% elif instance.uptime >= 97 %}
-            <td class="table-warning" data-value="{{ instance.uptime}}">
+            {% if instance.uptime_all >= 0.99 %}
+            <td class="table-success" data-value="{{ instance.uptime_all}}">
+                {% elif instance.uptime_all >= 0.97 %}
+            <td class="table-warning" data-value="{{ instance.uptime_all}}">
         {% else %}
-            <td class="table-danger" data-value="{{ instance.uptime}}">
+            <td class="table-danger" data-value="{{ instance.uptime_all}}">
                 {% endif %}
                 {{ instance.uptime_str }}%</td>
             {% if instance.https_score %}

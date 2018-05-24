@@ -60,6 +60,11 @@ async function checkDeadInstances() {
     });
 
     for(let instance of instances) {
+    	let history = await pg.query('SELECT FROM instances_history ' +
+			'WHERE instance=(SELECT id FROM instances WHERE name=$1) ' +
+			'AND  ' +
+			'LIMIT 1;');
+
 		let history = await db_history.findOne({
             "name": instance.name,
             "up": true,
@@ -71,13 +76,13 @@ async function checkDeadInstances() {
 		if(!history) {
             console.log(instance.name + ' is dead.');
 
-            await db_instances.update({
+            /*await db_instances.update({
 				_id: instance._id
 			}, {
             	$set: {
             		dead: true
 				}
-			});
+			});*/
 		}
 	}
 }

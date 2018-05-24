@@ -217,7 +217,6 @@ router.get('/list', (req, res) => {
         q_options.sort = {};
         q_options.sort[query.sort_by] = query.sort_order === 'asc' ? 1 : -1;
     }
-    console.log(q, q_options);
 
     Promise
     .all([DB.get('instances').count(q), DB.get('instances').find(q, q_options)])

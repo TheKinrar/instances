@@ -1,25 +1,37 @@
+const tls = require('tls');
+tls.DEFAULT_ECDH_CURVE = 'auto'; // Fix that should not be needed but is because Node is stupid
+
 const config = require('./config.json');
 const DB = require('monk')(config.database);
 const pg = require('./pg');
-const kue = require('kue');
-const queue = kue.createQueue({
-    prefix: 'kue',
-    redis: config.redis
-});
-const request = require('request-promise-native').defaults({
-    headers: {
-        'User-Agent': 'MastodonInstances (https://instances.social)'
-    }
-});
+const queue = require('./queue');
+const request = require('./helpers/request');
 const pgFormat = require('pg-format');
 
-queue.process('save_instance_history', function(job, cb) {
-    saveInstanceHistory(job.data.instance).then(cb).catch(cb);
+/*queue.process('save_instance_history', function(job, cb) {
+    cb();// TODO
+    // saveInstanceHistory(job.data.instance).then(cb).catch(cb);
 });
 
 queue.process('fetch_instance_ap', function(job, cb) {
-    fetchInstanceAP(job.data.instance).then(cb).catch(cb);
-});
+    cb(); // TODO
+    //fetchInstanceAP(job.data.instance).then(cb).catch(cb);
+});*/
+
+process('check_instance',
+    require('./jobs/check_instance'));
+
+process('check_instance_https',
+    require('./jobs/check_instance_https'));
+
+process('check_instance_obs',
+    require('./jobs/check_instance_obs'));
+
+function process(job, fn) {
+    queue.process(job, (job, cb) => {
+        fn(job.data).then(cb).catch(cb);
+    });
+}
 
 async function saveInstanceHistory(id) {
     let pgc = await pg.connect();

@@ -14,7 +14,7 @@ const sequelize = new Sequelize({
 
     operatorsAliases: false,
 
-    logging: false
+    logging: process.env.NODE_ENV === 'development' ? console.log : false
 });
 
 module.exports = sequelize;
