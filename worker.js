@@ -9,19 +9,19 @@ const request = require('./helpers/request');
 const pgFormat = require('pg-format');
 const Instance = require('./models/instance');
 
-process('check_instance', 5,
+process('check_instance', 10,
     require('./jobs/check_instance'));
 
-process('check_instance_https', 5,
+process('check_instance_https', 10,
     require('./jobs/check_instance_https'));
 
-process('check_instance_obs', 5,
+process('check_instance_obs', 10,
     require('./jobs/check_instance_obs'));
 
 process('save_instance_history', 10,
     saveInstanceHistory);
 
-process('fetch_instance_ap', 5,
+process('fetch_instance_ap', 10,
     fetchInstanceAP);
 
 function process(job, n, fn) {
