@@ -14,8 +14,7 @@ const Instance = require('./models/instance');
                     [Op.eq]: null
                 }
             }
-        },
-        limit: 5
+        }
     });
 
     console.log(`${instances.length} instances to check`);
