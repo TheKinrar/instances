@@ -80,6 +80,8 @@ async function checkInstance(options) {
         }
     }
 
+    await instance.save();
+
     if(!instance.latest_https_check || instance.latest_https_check.getTime() < new Date().getTime() - 24*60*60*1000) {
         await instance.queueHttpsCheck();
     }
@@ -93,8 +95,6 @@ async function checkInstance(options) {
 
     if(instance.software && instance.software.id === 1 && (!instance.latest_ap_check || instance.latest_ap_check.getTime() < new Date().getTime() - 24*60*60*1000))
         await instance.queueAPFetch();
-
-    await instance.save();
 }
 
 module.exports = checkInstance;
