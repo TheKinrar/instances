@@ -241,7 +241,7 @@ Instance.prototype.queueJob = function(job_name) {
     const job = queue.create(job_name, {
         title: this.name,
         instance: this.id
-    }).ttl(60000).removeOnComplete(true);
+    }).ttl(10 * 60 * 1000).removeOnComplete(true);
 
     return job.saveAsync();
 };
