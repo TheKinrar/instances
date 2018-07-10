@@ -30,7 +30,9 @@ function process(job, n, fn) {
     });
 }
 
-async function saveInstanceHistory(id) {
+async function saveInstanceHistory(options) {
+    let id = options.instance;
+
     let pg_instance = await Instance.findById(id);
 
     if(!pg_instance) {
@@ -66,7 +68,9 @@ async function saveInstanceHistory(id) {
     ]);
 }
 
-async function fetchInstanceAP(id) {
+async function fetchInstanceAP(options) {
+    let id = options.instance;
+
     let pg_instance = await Instance.findById(id);
 
     if(!pg_instance) {
