@@ -70,7 +70,7 @@ const Instance = sequelize.define('instance', {
 });
 
 Instance.hook('beforeSave', async (instance) => {
-    if (instance.up && !instance.first_uptime) {
+    if (instance.up && !instance.first_uptime)
             instance.first_uptime = new Date();
 
     if(instance.changed('up')) {
