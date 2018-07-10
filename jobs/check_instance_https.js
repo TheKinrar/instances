@@ -23,43 +23,45 @@ async function checkInstanceHttps(options) {
     let score = 0;
 
     let n = 0;
-    for(let host of res.hosts) {
-        if(host.grade) {
-            n++;
+    if(res.hosts) {
+        for (let host of res.hosts) {
+            if (host.grade) {
+                n++;
 
-            switch(host.grade.rank) {
-                case 'A+':
-                    score += 100;
-                    break;
-                case 'A':
-                    score += 80;
-                    break;
-                case 'B':
-                    score += 60;
-                    break;
-                case 'C':
-                    score += 40;
-                    break;
-                case 'D':
-                    score += 20;
-                    break;
-                case 'E':
-                    score += 10;
-                    break;
-                case 'F':
-                    score += 5;
-                    break;
-            }
+                switch (host.grade.rank) {
+                    case 'A+':
+                        score += 100;
+                        break;
+                    case 'A':
+                        score += 80;
+                        break;
+                    case 'B':
+                        score += 60;
+                        break;
+                    case 'C':
+                        score += 40;
+                        break;
+                    case 'D':
+                        score += 20;
+                        break;
+                    case 'E':
+                        score += 10;
+                        break;
+                    case 'F':
+                        score += 5;
+                        break;
+                }
 
-            if(!grade) {
-                grade = host.grade.rank;
-            } else if(grade !== host.grade.rank){
-                grade += ', ' + host.grade.rank;
+                if (!grade) {
+                    grade = host.grade.rank;
+                } else if (grade !== host.grade.rank) {
+                    grade += ', ' + host.grade.rank;
+                }
             }
         }
-    }
 
-    score /= n;
+        score /= n;
+    }
 
     instance.https_score = score || null;
     instance.https_rank = grade || null;
