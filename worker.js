@@ -9,23 +9,23 @@ const request = require('./helpers/request');
 const pgFormat = require('pg-format');
 const Instance = require('./models/instance');
 
-process('check_instance',
+process('check_instance', 5,
     require('./jobs/check_instance'));
 
-process('check_instance_https',
+process('check_instance_https', 5,
     require('./jobs/check_instance_https'));
 
-process('check_instance_obs',
+process('check_instance_obs', 5,
     require('./jobs/check_instance_obs'));
 
-process('save_instance_history',
+process('save_instance_history', 10,
     saveInstanceHistory);
 
-process('fetch_instance_ap',
+process('fetch_instance_ap', 5,
     fetchInstanceAP);
 
-function process(job, fn) {
-    queue.process(job, (job, cb) => {
+function process(job, n, fn) {
+    queue.process(job, n, (job, cb) => {
         fn(job.data).then(cb).catch(cb);
     });
 }
