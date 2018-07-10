@@ -3,6 +3,7 @@ const randomstring = require('randomstring');
 const passwordHash = require('password-hash');
 const Languages = require('languages');
 const pg = require('../../pg');
+const Instance = require('../../models/instance');
 
 router.use((req, res, next) => {
     res.set('Cache-Control', 'no-cache');
@@ -185,7 +186,11 @@ router.post('/sign_up', (req, res) => {
                 name: req.body.instance,
                 downchecks: 0,
                 upchecks: 0
-            }).catch((e) => {});
+            }).catch(() => {});
+
+            Instance.create({
+                name: req.body.instance,
+            }).catch(() => {});
 
             DB.get('admins').insert({
                 createdAt: new Date(),
@@ -196,9 +201,9 @@ router.post('/sign_up', (req, res) => {
                     from: 'Mastodon Instances <no-reply@mastodon.xyz>',
                     to: instanceJson.email,
                     subject: 'Mastodon instances list sign up',
-                    text: `You or someone else tried to sign up on https://instances.mastodon.xyz as admin of the instance ${instanceJson.uri}.
+                    text: `You or someone else tried to sign up on https://instances.social as admin of the instance ${instanceJson.uri}.
 
-Confirm your registration here: https://instances.mastodon.xyz/admin/activate?token=${activation_token}
+Confirm your registration here: https://instances.social/admin/activate?token=${activation_token}
 
 If you did not request this e-mail, you may just ignore it, or confirm registration anyway if you want your instance to appear in the list.`
                 }, () => {

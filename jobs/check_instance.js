@@ -88,6 +88,12 @@ async function checkInstance(options) {
         await instance.queueObsCheck();
     }
 
+    if(!instance.latest_history_save || instance.latest_history_save.getTime() < new Date().getTime() - 60*60*1000)
+        await instance.queueHistorySaving();
+
+    if(instance.software && instance.software.id === 1 && (!instance.latest_ap_check || instance.latest_ap_check.getTime() < new Date().getTime() - 24*60*60*1000))
+        await instance.queueAPFetch();
+
     await instance.save();
 }
 

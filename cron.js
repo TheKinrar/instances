@@ -14,14 +14,16 @@ const Instance = require('./models/instance');
                     [Op.eq]: null
                 }
             }
-        }
+        },
+        limit: 5
     });
 
     console.log(`${instances.length} instances to check`);
 
-    for(let instance of instances) {
-        console.log(instance.name);
-    }
+    await Promise.all(instances.map(i => {
+        console.log(i.name);
+        return i.queueCheck();
+    }));
 
     process.exit(0);
 })().catch(console.error);

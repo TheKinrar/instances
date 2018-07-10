@@ -22,6 +22,7 @@ const Instance = sequelize.define('instance', {
     latest_check: Sequelize.DataTypes.DATE,
     latest_https_check: Sequelize.DataTypes.DATE,
     latest_obs_check: Sequelize.DataTypes.DATE,
+    latest_ap_check: Sequelize.DataTypes.DATE,
 
     up: Sequelize.DataTypes.BOOLEAN,
     dead: Sequelize.DataTypes.BOOLEAN,
@@ -64,7 +65,8 @@ const Instance = sequelize.define('instance', {
     first_user_created_at: Sequelize.DataTypes.DATE
 }, {
     createdAt: 'created_at',
-    updatedAt: false
+    updatedAt: false,
+    paranoid: true
 });
 
 Instance.hook('beforeSave', async (instance) => {
@@ -97,58 +99,59 @@ Instance.hook('beforeSave', async (instance) => {
 });
 
 Instance.hook('afterSave', async (instance) => {
-    if(instance.software.id === 1) {
-        let version = '<1.3';
-        let version_score = 0;
-        let raw_version = null;
+    let version = '<1.3';
+    let version_score = 0;
+    let raw_version = null;
 
-        if(instance.raw_version)
-            version = raw_version = instance.raw_version.replace(/\.$/, '');
+    if(instance.raw_version)
+        version = raw_version = instance.raw_version.replace(/\.$/, '');
 
-        let version_norc = version.replace(/\.?rc[0-9]/, '');
+    let version_norc = version.replace(/\.?rc[0-9]/, '');
 
-        if(version === 'Mastodon::Version') {
-            version = '1.3';
-            version_score = 130;
-        } else if(/^[0-9]\.[0-9](\.[0-9])?$/.test(version_norc)) {
-            let version_a = version_norc.split('.').map((e) => {return parseInt(e);});
+    if(version === 'Mastodon::Version') {
+        version = '1.3';
+        version_score = 130;
+    } else if(/^[0-9]\.[0-9](\.[0-9])?$/.test(version_norc)) {
+        let version_a = version_norc.split('.').map((e) => {return parseInt(e);});
 
-            version_score = (100 * version_a[0]) + (10 * version_a[1]) + (version_a.length === 3 ? version_a[2] : 0);
-        } else {
-            version = "";
-        }
-
-        await DB.get('instances').update({
-            name: instance.name
-        }, {
-            $set: {
-                up: instance.up,
-                ipv6: instance.ipv6,
-                users: instance.users,
-                connections: instance.connections,
-                statuses: instance.statuses,
-                uptime: instance.uptime_all,
-
-                https_score: instance.https_score,
-                https_rank: instance.https_rank,
-                obs_score: instance.obs_score,
-                obs_rank: instance.obs_rank,
-
-                obs_date: instance.latest_obs_check,
-
-                openRegistrations: instance.open_registrations,
-
-                // TODO: dead
-                // TODO: (updated,checked)At
-
-                version,
-                version_score,
-                raw_version,
-
-                mastodon: true // Because we don't want Pleroma in MongoDB (in the API)
-            }
-        });
+        version_score = (100 * version_a[0]) + (10 * version_a[1]) + (version_a.length === 3 ? version_a[2] : 0);
+    } else {
+        version = "";
     }
+
+    await DB.get('instances').update({
+        name: instance.name
+    }, {
+        $set: {
+            up: instance.up,
+            ipv6: instance.ipv6,
+            users: instance.users,
+            connections: instance.connections,
+            statuses: instance.statuses,
+            uptime: instance.uptime_all,
+
+            https_score: instance.https_score,
+            https_rank: instance.https_rank,
+            obs_score: instance.obs_score,
+            obs_rank: instance.obs_rank,
+
+            obs_date: instance.latest_obs_check,
+
+            openRegistrations: instance.open_registrations,
+
+            dead: instance.dead,
+
+            updatedAt: instance.latest_check,
+            checkedAt: instance.latest_check,
+            apUpdatedAt: instance.latest_ap_check,
+
+            version,
+            version_score,
+            raw_version,
+
+            mastodon: instance.software.id === 1
+        }
+    });
 });
 
 Instance.prototype.calculateUptime = async function() {
@@ -216,6 +219,10 @@ Instance.prototype.queueHttpsCheck = function() {
 
 Instance.prototype.queueObsCheck = function() {
     return this.queueJob('check_instance_obs');
+};
+
+Instance.prototype.queueCheck = function() {
+    return this.queueJob('check_instance');
 };
 
 Instance.prototype.queueJob = function(job_name) {

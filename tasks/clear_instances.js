@@ -3,7 +3,8 @@ const pg = require('../pg');
 module.exports = () => {
 	const db_instances = DB.get('instances');
 
-	const delete_date = new Date();
+	// TODO new PG way of clearing never-up instances
+	/*const delete_date = new Date();
 	delete_date.setTime(delete_date.getTime() - (1000 * 60 * 60 * 24));
 
 	db_instances.remove({
@@ -23,7 +24,7 @@ module.exports = () => {
 	            }
 	        }
 	    ]
-	});
+	});*/
 
 	checkDeadInstances().then(() => {
 		console.log('Cleared dead instances.');
