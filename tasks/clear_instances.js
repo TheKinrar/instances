@@ -3,7 +3,8 @@ const pg = require('../pg');
 module.exports = () => {
 	const db_instances = DB.get('instances');
 
-	const delete_date = new Date();
+	// TODO new PG way of clearing never-up instances
+	/*const delete_date = new Date();
 	delete_date.setTime(delete_date.getTime() - (1000 * 60 * 60 * 24));
 
 	db_instances.remove({
@@ -23,7 +24,7 @@ module.exports = () => {
 	            }
 	        }
 	    ]
-	});
+	});*/
 
 	checkDeadInstances().then(() => {
 		console.log('Cleared dead instances.');
@@ -60,6 +61,11 @@ async function checkDeadInstances() {
     });
 
     for(let instance of instances) {
+    	let history = await pg.query('SELECT FROM instances_history ' +
+			'WHERE instance=(SELECT id FROM instances WHERE name=$1) ' +
+			'AND  ' +
+			'LIMIT 1;');
+
 		let history = await db_history.findOne({
             "name": instance.name,
             "up": true,
@@ -71,13 +77,13 @@ async function checkDeadInstances() {
 		if(!history) {
             console.log(instance.name + ' is dead.');
 
-            await db_instances.update({
+            /*await db_instances.update({
 				_id: instance._id
 			}, {
             	$set: {
             		dead: true
 				}
-			});
+			});*/
 		}
 	}
 }

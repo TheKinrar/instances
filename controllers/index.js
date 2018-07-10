@@ -1,10 +1,12 @@
-const router = require('express').Router();
+const router = require('express-promise-router')();
 const CountryLanguages = require('country-language');
 const alParser = require('accept-language-parser');
 const morgan = require('../middlewares/morgan');
 const pg = require('../pg');
 
-router.use('/instance_statistics', require('./instance_statistics'));
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+const Instance = require('../models/instance');
 
 router.use('/api', require('./api'));
 router.use('/admin', (req, res, next) => {
@@ -216,112 +218,56 @@ router.get('/list/advanced', (req, res) => {
     });
 });
 
-router.get('/list/old', (req, res) => {
-    let q = {
-        "upchecks": {
-            "$gt": 0
-        },
-        "blacklisted": {
-            "$ne": true
-        },
-        "dead": {
-            "$ne": true
+router.get('/list/old', async (req, res) => {
+    let instances = await Instance.findAll({
+        where: {
+            uptime_all: {
+                [Op.gt]: 0
+            },
+            dead: {
+                [Op.ne]: true
+            }
         }
-    };
+    });
 
-    DB.get('instances').find(q).then((instances) => {
-        let totalUsers = 0;
-        let totalUpUsers = 0;
-        let totalUp = 0;
+    let totalUsers = 0;
+    let totalUpUsers = 0;
+    let totalUp = 0;
 
-        instances.forEach((instance) => {
-            instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
-            instance.uptime_str = instance.uptime.toFixed(3);
+    for(let instance of instances) {
+        instance.uptime_str = (instance.uptime_all * 100).toFixed(3);
 
-            instance.score = 0.5 * instance.uptime * Math.min(1, instance.upchecks / 1440);
+        instance.score = 50 * instance.uptime_all;
 
-            /*if(instance.version_score)
-             instance.score += instance.version_score / 10;*/
+        if(instance.https_score)
+            instance.score += instance.https_score / 5;
 
-            if(instance.https_score)
-                instance.score += instance.https_score / 5;
+        if(instance.obs_score)
+            instance.score += instance.obs_score / 5;
 
-            if(instance.obs_score)
-                instance.score += instance.obs_score / 5;
+        if(instance.ipv6)
+            instance.score += 10;
 
-            if(instance.ipv6)
-                instance.score += 10;
+        if(instance.up)
+            ++totalUp;
+
+        if(instance.users) {
+            totalUsers += instance.users;
 
             if(instance.up)
-                ++totalUp;
-
-            if(instance.users) {
-                totalUsers += instance.users;
-
-                if(instance.up)
-                    totalUpUsers += instance.users;
-            }
-        });
-
-        instances.sort((b, a) => {
-            return a.score - b.score;
-        });
-
-        res.render('oldlist', {
-            instances,
-            totalUsers,
-            totalUpUsers,
-            totalUp
-        });
-    });
-});
-
-router.get('/list/old', (req, res) => {
-    let q = {
-        "upchecks": {
-            "$gt": 0
-        },
-        "blacklisted": {
-            "$ne": true
-        },
-        "dead": {
-            "$ne": true
+                totalUpUsers += instance.users;
         }
-    };
+    }
 
-    DB.get('instances').find(q).then((instances) => {
-        let totalUsers = 0;
+    instances.sort((b, a) => {
+        return a.score - b.score;
+    });
 
-        instances.forEach((instance) => {
-            instance.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
-            instance.uptime_str = instance.uptime.toFixed(3);
-
-            instance.score = 0.5 * instance.uptime * Math.min(1, instance.upchecks / 1440);
-
-            /*if(instance.version_score)
-             instance.score += instance.version_score / 10;*/
-
-            if(instance.https_score)
-                instance.score += instance.https_score / 5;
-
-            if(instance.obs_score)
-                instance.score += instance.obs_score / 5;
-
-            if(instance.ipv6)
-                instance.score += 10;
-
-            if(instance.users)
-                totalUsers += instance.users;
-        });
-
-        instances.sort((b, a) => {
-            return a.score - b.score;
-        });
-
-        res.render('oldlist', {
-            instances,
-            totalUsers
-        });
+    res.render('oldlist', {
+        instances,
+        totalUsers,
+        totalUpUsers,
+        totalUp
     });
 });
 

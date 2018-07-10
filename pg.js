@@ -4,7 +4,7 @@ const pool = new Pool({
     user: 'instances',
     host: 'localhost',
     database: 'instances',
-    password: 'Sho9gaixoNg0Thie1Ahba4ohy7ohqu5oot5caehia4eithei3koop0iot7oothie',
+    password: 'yeNgie0oochievoep2eiku6riadaecoh5ejohfeixiejah6queide1thahpahhie',
     port: 6432
 });
 
