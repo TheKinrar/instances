@@ -61,8 +61,8 @@ async function checkInstanceHttps(options) {
 
     score /= n;
 
-    instance.https_score = score;
-    instance.https_rank = grade;
+    instance.https_score = score || null;
+    instance.https_rank = grade || null;
 
     await instance.save();
 }
