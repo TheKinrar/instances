@@ -224,8 +224,9 @@ router.get('/list/old', async (req, res) => {
             uptime_all: {
                 [Op.gt]: 0
             },
-            dead: {
-                [Op.ne]: true
+            dead: false,
+            first_uptime: {
+                [Op.ne]: null
             }
         }
     });
