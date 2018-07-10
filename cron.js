@@ -13,7 +13,8 @@ const Instance = require('./models/instance');
                     [Op.lt]: fiveMinutesBefore,
                     [Op.eq]: null
                 }
-            }
+            },
+            dead: false
         }
     });
 
