@@ -119,6 +119,19 @@ Instance.hook('afterSave', async (instance) => {
         version = "";
     }
 
+    let instance_mongo = await DB.get('instances').findOne({
+        name: instance.name
+    });
+
+    if(!instance_mongo) {
+        await DB.get('instances').insert({
+            addedAt: new Date(),
+            name: instance.name,
+            downchecks: 0,
+            upchecks: 0
+        }).catch(() => {});
+    }
+
     await DB.get('instances').update({
         name: instance.name
     }, {
