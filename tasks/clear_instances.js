@@ -83,7 +83,7 @@ async function checkDeadInstances() {
             	$set: {
             		dead: true
 				}
-			});*/
+			});* /
 		}
 	}*/
 }
