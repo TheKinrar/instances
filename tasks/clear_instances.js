@@ -46,7 +46,7 @@ async function checkDeadInstances() {
 
 	return; // TODO: Fix this to use new PG history instead of Mongo
 
-    const db_instances = DB.get('instances');
+    /*const db_instances = DB.get('instances');
     const db_history = DB.get('history');
 
     const deadDate = new Date(new Date().getTime() - (7 * 24 * 60 * 60 * 1000));
@@ -85,5 +85,5 @@ async function checkDeadInstances() {
 				}
 			});*/
 		}
-	}
+	}*/
 }
