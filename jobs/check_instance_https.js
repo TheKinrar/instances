@@ -52,11 +52,7 @@ async function checkInstanceHttps(options) {
                         break;
                 }
 
-                if (!grade) {
-                    grade = host.grade.rank;
-                } else if (grade !== host.grade.rank) {
-                    grade += ', ' + host.grade.rank;
-                }
+                grade = host.grade.rank;
             }
         }
 
