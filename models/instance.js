@@ -149,7 +149,7 @@ Instance.hook('afterSave', async (instance) => {
             version_score,
             raw_version,
 
-            mastodon: instance.software.id === 1
+            mastodon: instance.software && instance.software.id === 1
         }
     });
 });
