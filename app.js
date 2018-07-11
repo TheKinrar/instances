@@ -70,7 +70,7 @@ let instancesCount = 0;
                 users += instance.users;
 
             if(instance.statuses)
-                statuses += instance.statuses;
+                statuses += parseInt(instance.statuses);
 
             if(instance.connections)
                 connections += instance.connections;
