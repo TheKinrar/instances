@@ -9,21 +9,21 @@ const request = require('./helpers/request');
 const pgFormat = require('pg-format');
 const Instance = require('./models/instance');
 
-queue.setMaxListeners(51);
+queue.setMaxListeners(501);
 
-process('check_instance', 10,
+process('check_instance', 100,
     require('./jobs/check_instance'));
 
-process('check_instance_https', 10,
+process('check_instance_https', 100,
     require('./jobs/check_instance_https'));
 
-process('check_instance_obs', 10,
+process('check_instance_obs', 100,
     require('./jobs/check_instance_obs'));
 
-process('save_instance_history', 10,
+process('save_instance_history', 100,
     saveInstanceHistory);
 
-process('fetch_instance_ap', 10,
+process('fetch_instance_ap', 100,
     fetchInstanceAP);
 
 function process(job, n, fn) {
