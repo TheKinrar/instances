@@ -1,6 +1,3 @@
-// Prevent DNS requests from timing out
-process.env.UV_THREADPOOL_SIZE = 128;
-
 const tls = require('tls');
 tls.DEFAULT_ECDH_CURVE = 'auto'; // Fix that should not be needed but is because Node is stupid
 
