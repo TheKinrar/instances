@@ -9,6 +9,8 @@ const request = require('./helpers/request');
 const pgFormat = require('pg-format');
 const Instance = require('./models/instance');
 
+queue.setMaxListeners(51);
+
 process('check_instance', 10,
     require('./jobs/check_instance'));
 
