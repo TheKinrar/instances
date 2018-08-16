@@ -62,7 +62,7 @@ async function checkInstance(options) {
         instance.ipv6 = false;
     }
 
-    if(instance.software.id === 1) { // Mastodon
+    if(instance.software === 1) { // Mastodon
         try {
             let aboutPage = await request(`https://${instance.name}/about`);
 
@@ -70,7 +70,7 @@ async function checkInstance(options) {
         } catch(e) {
             instance.open_registrations = false;
         }
-    } else if(instance.software.id === 2) { // Pleroma
+    } else if(instance.software === 2) { // Pleroma
         try {
             let statusNetConfig = await instance.getStatusNetInstanceConfig();
 
@@ -93,7 +93,7 @@ async function checkInstance(options) {
     if(!instance.latest_history_save || instance.latest_history_save.getTime() < new Date().getTime() - 60*60*1000)
         await instance.queueHistorySaving();
 
-    if(instance.software && instance.software.id === 1 && (!instance.latest_ap_check || instance.latest_ap_check.getTime() < new Date().getTime() - 24*60*60*1000))
+    if(instance.software === 1 && (!instance.latest_ap_check || instance.latest_ap_check.getTime() < new Date().getTime() - 24*60*60*1000))
         await instance.queueAPFetch();
 }
 
