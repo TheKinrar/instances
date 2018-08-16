@@ -139,7 +139,7 @@ router.get('/list', (req, res) => {
     }
 
     let q = {
-        upchecks: {
+        uptime: {
             $gt: 0
         },
         blacklisted: {
@@ -277,7 +277,7 @@ router.get('/sample', (req, res) => {
     }
 
     let q = {
-        upchecks: {
+        uptime: {
             $gt: 0
         },
         blacklisted: {
@@ -370,7 +370,7 @@ router.get('/search', (req, res) => {
     }
 
     let q = {
-        upchecks: {
+        uptime: {
             $gt: 0
         },
         blacklisted: {
