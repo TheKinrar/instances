@@ -53,6 +53,7 @@ async function checkInstance(options) {
 
     instance.thumbnail = instanceInfo.thumbnail;
     instance.raw_version = instanceInfo.version;
+    instance.version = instanceInfo.version.substr(0, 7);
 
     try {
         let addresses = await resolve6(instance.name);
