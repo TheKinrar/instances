@@ -161,6 +161,8 @@ Instance.hook('afterSave', async (instance) => {
             version_score,
             raw_version,
 
+            thumbnail: instance.thumbnail,
+
             mastodon: instance.software === 1
         }
     });
