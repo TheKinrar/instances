@@ -8,7 +8,7 @@ const DB = require('monk')(config.database);
         infos: {
             $ne: null
         },
-        "upchecks": {
+        "uptime": {
             "$gt": 0
         },
         "blacklisted": {

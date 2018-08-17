@@ -48,7 +48,7 @@ setInterval(updateNetworkStats, 5 * 60 * 1000);
 
 function updateNetworkStats() {
 	DB.get('instances').find({
-        "upchecks": {
+        "uptime": {
             "$gt": 0
         },
         "blacklisted": {

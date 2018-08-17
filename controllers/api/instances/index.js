@@ -20,7 +20,7 @@ router.get(/^\/history(?:\.json)?$/, (req, res) => {
 
 	DB.get('instances').findOne({
 		name: req.query.instance,
-		"upchecks": {
+		"uptime": {
 			"$gt": 0
 		},
 		"blacklisted": {
@@ -72,7 +72,7 @@ router.get(/^\/(.+?)(?:\.json)?$/, (req, res) => {
 
 	DB.get('instances').findOne({
 		name,
-		"upchecks": {
+		"uptime": {
 			"$gt": 0
 		},
 		"blacklisted": {

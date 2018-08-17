@@ -32,7 +32,7 @@ router.get('/', (req, res) => {
 
 router.get('/list.json', (req, res) => {
 	let q = {
-		"upchecks": {
+		"uptime": {
 			"$gt": 0
 		},
 		"blacklisted": {
@@ -301,7 +301,7 @@ router.get('/instances.json', morgan.api, (req, res) => {
 	res.set('Access-Control-Allow-Origin', '*');
 	
 	DB.get('instances').find({
-		"upchecks": {
+		"uptime": {
 			"$gt": 0
 		},
 		"blacklisted": {
@@ -316,7 +316,7 @@ router.get('/instances.json', morgan.api, (req, res) => {
 		instances.forEach((instance) => {
 			let json = {};
 			json.name = instance.name;
-			json.uptime = (100 * (instance.upchecks / (instance.upchecks + instance.downchecks)));
+			json.uptime = instance.uptime;
 			json.up = instance.up;
 			json.https_score = instance.https_score;
 			json.https_rank = instance.https_rank;
