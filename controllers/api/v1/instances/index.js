@@ -90,6 +90,10 @@ router.get('/list', (req, res) => {
                 type: 'boolean',
                 optional: true,
                 def: true
+            }, include_opt_out: {
+                type: 'boolean',
+                optional: true,
+                def: true
             }, supported_features: {
                 type: 'string',
                 optional: true,
@@ -160,6 +164,11 @@ router.get('/list', (req, res) => {
     if(!query.include_closed)
         q.openRegistrations = {
             $ne: false
+        };
+
+    if(!query.include_opt_out)
+        q['infos.optOut'] = {
+            $ne: true
         };
 
     if(query.supported_features === 'mstdn_custom_emojis')
