@@ -87,10 +87,19 @@ Instance.hook('beforeSave', async (instance) => {
                 await downtime.save();
             }
         } else {
-            await Downtime.create({
-                instance: instance.id,
-                start: new Date()
+            let downtime = await Downtime.findOne({
+                where: {
+                    instance: instance.id,
+                    end: null
+                },
             });
+
+            if(!downtime) {
+                await Downtime.create({
+                    instance: instance.id,
+                    start: new Date()
+                });
+            }
         }
     }
 
