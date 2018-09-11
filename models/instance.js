@@ -96,8 +96,7 @@ Instance.hook('beforeSave', async (instance) => {
 
             if(!downtime) {
                 await Downtime.create({
-                    instance: instance.id,
-                    start: new Date()
+                    instance: instance.id
                 });
             }
         }
