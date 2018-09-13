@@ -1,0 +1,47 @@
+{% extends '../../layout.njk' %}
+
+{% block main %}
+    <form class="col-md-12" action="/admin/activate" method="post">
+        <h4>Account activation</h4>
+
+        <div id="signup-password">
+            <p>Please define a password to activate your account.</p>
+
+            <div class="form-group">
+                <label for="signup-inputPassword1">Password</label>
+                <input type="password" class="form-control" name="password1" id="signup-inputPassword1">
+            </div>
+
+            <div class="form-group">
+                <label for="signup-inputPassword2">Password confirmation</label>
+                <input type="password" class="form-control" name="password2" id="signup-inputPassword2">
+            </div>
+
+
+            <div class="form-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="emailConsent" id="emailConsent">
+                    <label class="form-check-label" for="emailConsent">
+                        Receive emails from instances.social about new features or requirements
+                        and important information
+                    </label>
+                </div>
+
+                <small class="text-muted">
+                    Our email notification system is not yet ready.
+                    You will receive an email when it will be if you check this
+                    and you will then be able to customize what emails you want to receive.<br>
+                    In the future, you will be able to receive an email when, for example,  you're running an outdated
+                    version of Mastodon, when your instances goes down or when it does not show up on the list or on
+                    joinmastodon.org for some reason.<br>
+                    We would really appreciate you checking that, because sometimes important information has to be
+                    sent and it's not possible without your consent.<br>
+                    <strong>We won't abuse this and your email will only be used for important information about your instance and instances.social.</strong>
+                </small>
+            </div>
+
+            <input type="hidden" name="token" value="{{ token }}">
+            <button type="submit" class="btn btn-primary">Activate</button>
+        </div>
+    </form>
+{% endblock %}

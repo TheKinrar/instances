@@ -1,5 +1,5 @@
 const express = require('express');
-const flash = require('connect-flash');
+const flash = require('express-flash-2');
 const bodyParser = require('body-parser');
 const nunjucks = require('nunjucks');
 const fs = require('fs');
@@ -24,11 +24,6 @@ ProhibitedContent.array = Object.keys(ProhibitedContent).map((code) => {
 });
 global.InstanceCategories = JSON.parse(fs.readFileSync('categories.json', 'utf8'));
 InstanceCategories.sort();
-
-global.Mailgun = require('mailgun-js')({
-    apiKey: config.mailgun.key,
-    domain: config.mailgun.domain
-});
 
 global.DB = require('monk')(config.database);
 const app = express();

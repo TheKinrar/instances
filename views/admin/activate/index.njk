@@ -1,0 +1,60 @@
+{% extends '../../layout.njk' %}
+
+{% block main %}
+
+    <h4>Account activation</h4>
+
+    <p>
+        There are two ways to activate your account: email or Mastodon DM.
+        If these don't work, please send an email to <a href="mailto:contact@thekinrar.fr">contact@thekinrar.fr</a>.<br>
+        The availability of email and DM sending depends on the "Site settings" in your Mastodon admin zone.
+        If you need to change them because wrong or no data is currently set, do it then <a href="/admin">go back</a>
+        and try signing up again.
+    </p>
+
+    <div class="row">
+        <div class="col-6">
+            <h5>Send a DM</h5>
+
+            {% if instanceInfo.contact_account %}
+                <form action="/admin/activate/dm" method="post">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" class="form-control" value="@{{ instanceInfo.contact_account.username }}@{{ instanceInfo.uri }}" required disabled>
+                        <small class="text-muted">
+                            <strong>Incorrect username?</strong> Please follow the instructions at the top of this page.
+                        </small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+            {% else %}
+                <p class="text-danger">
+                    Contact account ("Contact username" in Mastodon's "Site settings") is not set.
+                </p>
+            {% endif %}
+        </div>
+
+        <div class="col-6">
+            <h5>Send an email</h5>
+
+            {% if instanceInfo.email %}
+                <form action="/admin/activate/email" method="post">
+                    <div class="form-group">
+                        <label>Email address</label>
+                        <input type="email" class="form-control" value="{{ instanceInfo.email }}" required disabled>
+                        <small class="text-muted">
+                            <strong>Incorrect email address?</strong> Please follow the instructions at the top of this page.
+                        </small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+            {% else %}
+                <p class="text-danger">
+                    Contact email ("Business e-mail" in Mastodon's "Site settings") is not set.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

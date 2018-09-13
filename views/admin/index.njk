@@ -3,24 +3,6 @@
 {% block main %}
     <p><strong>This section concerns instance owners only.</strong></p>
 
-    {% for message in messages.info %}
-        <div class="alert alert-success" role="alert">
-            {% if message == 'adminRegistered' %}
-                <strong>Activation successful.</strong> You may now sign in using the form on the right.
-            {% endif %}
-        </div>
-    {% endfor %}
-
-    {% for message in messages.error %}
-        <div class="alert alert-danger" role="alert">
-            {% if message == 'invalidInstance' %}
-                <strong>Login failed.</strong> Invalid instance name.
-            {% elseif message == 'invalidPassword' %}
-                <strong>Login failed.</strong> Invalid password.
-            {% endif %}
-        </div>
-    {% endfor %}
-
     <div class="row">
         <div class="col-md-8">
             <h4>Sign up</h4>
@@ -29,39 +11,25 @@
                 If you own a Mastodon instance and want to make it appear on this website, sign up here.
             </p>
 
-            <form action="#">
-                <noscript><strong>Please enable JavaScript.</strong></noscript>
-                <div id="signup-name" style="display: none;">
-                    <div class="form-group">
-                        <label for="signup-inputName">Instance name</label>
-                        <input type="text" class="form-control" id="signup-inputName" aria-describedby="signup-inputNameHelp" placeholder="mastodon.social">
-                        <small id="signup-inputNameHelp" class="form-text text-muted">You'll use your instance name to login. You can't have more than one account per instance.</small>
-                    </div>
+            <form action="/admin/sign_up" method="post">
+                <div class="form-group">
+                    <label for="sign_up-inputName">Instance name</label>
+                    <input type="text" class="form-control" name="instance" id="sign_up-inputName" placeholder="mymastodoninstance.social">
                 </div>
 
-                <div id="signup-activation" style="display: none;">
-                    <p>
-                        We have sent an e-mail to <span id="signup-email"></span> to confirm you are the administrator of this instance.<br />
-                        Please click the link in this e-mail.
-                    </p>
-                    <p>
-                        <i>Bad e-mail address? E-mail not received?</i><br />
-                        Please contact <a href="https://mastodon.xyz/@TheKinrar">@TheKinrar@mastodon.xyz</a>.
-                    </p>
-                </div>
-
-                <button id="signup-btn" type="button" class="btn btn-primary" disabled>Sign up</button>
+                <button type="submit" class="btn btn-primary">Sign up</button>
             </form>
         </div>
 
         <div class="col-md-4">
             <h4>Sign in</h4>
 
-            <form action="/admin/login" method="POST">
+            <form action="/admin/login" method="post">
                 <div class="form-group">
                     <label for="signin-inputName">Instance name</label>
                     <input type="text" class="form-control" name="instance" id="signin-inputName">
                 </div>
+
                 <div class="form-group">
                     <label for="signin-inputPassword">Password</label>
                     <input type="password" class="form-control" name="password" id="signin-inputPassword">
@@ -71,37 +39,4 @@
             </form>
         </div>
     </div>
-{% endblock %}
-
-{% block scripts %}
-    {{ super() }}
-
-    <script type="text/javascript">
-        var signupBtn = $('#signup-btn');
-        var nameZone = $('#signup-name');
-
-        nameZone.show();
-        signupBtn.attr('disabled', false);
-        signupBtn.click(function() {
-            signupBtn.attr('disabled', true);
-            signupBtn.text('Loading...');
-
-            var instanceName = $('#signup-inputName').val();
-
-            $.post('/admin/sign_up', {
-                instance: instanceName
-            }, function(res) {
-                nameZone.hide();
-
-                $('#signup-email').text(res.email);
-                $('#signup-activation').show();
-                signupBtn.hide();
-            }).fail(function() {
-                signupBtn.attr('disabled', false);
-                signupBtn.text('Sign up');
-
-                alert("Something went wrong. Check the instance name is valid and a contact email is set in the site settings of Mastodon. Contact @TheKinrar@mastodon.xyz if you need help.");
-            });
-        });
-    </script>
 {% endblock %}

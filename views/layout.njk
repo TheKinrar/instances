@@ -53,8 +53,26 @@
         </nav>
 
         <div id="container-main" class="container{{ '-fluid' if fluid }}">
-          {% block main %}
-          {% endblock %}
+            {% if flash %}
+                {% if flash.success %}
+                    {% for message in flash.success %}
+                        <div class="alert alert-success" role="alert">
+                            <strong>{{ message.header }}</strong> {{ message.body }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if flash.error %}
+                    {% for message in flash.error %}
+                        <div class="alert alert-danger" role="alert">
+                            <strong>{{ message.header }}</strong> {{ message.body }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endif %}
+
+            {% block main %}
+            {% endblock %}
         </div>
 
         <footer class="footer">

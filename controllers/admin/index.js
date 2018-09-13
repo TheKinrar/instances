@@ -4,6 +4,16 @@ const passwordHash = require('password-hash');
 const Languages = require('languages');
 const pg = require('../../pg');
 const Instance = require('../../models/instance');
+const parseDomain = require('parse-domain');
+const config = require('../../config');
+const Mailgun = require('mailgun-js')({
+    apiKey: config.mailgun.key,
+    domain: config.mailgun.domain
+});
+const Mastodon = new require('mastodon')({
+    access_token: '6aa5b5804f6ae02c84d3f2ebe4d9b08028fe1f3dfbed537a4059a5d9ce61c7f3',
+    api_url: 'https://mastodon.xyz/api/v1/'
+});
 
 router.use((req, res, next) => {
     res.set('Cache-Control', 'no-cache');
@@ -12,12 +22,7 @@ router.use((req, res, next) => {
 
 router.get('/', (req, res) => {
     if(!req.user) {
-        return res.render('admin/index', {
-            messages: {
-                info: req.flash('info'),
-                error: req.flash('error')
-            }
-        });
+        return res.render('admin/index');
     }
 
     DB.get('instances').findOne({
@@ -50,15 +55,18 @@ router.get('/', (req, res) => {
             }).sort(function(a, b) {
                 return a.name.localeCompare(b.name);
             }),
-            otherProhibitedContent: instance.infos.otherProhibitedContent.join(', '),
-            messages: {
-                validationError: req.flash('validationError')
-            }
+            otherProhibitedContent: instance.infos.otherProhibitedContent.join(', ')
         });
     }).catch((e) => {
         console.error(e);
         res.sendStatus(500);
     });
+});
+
+router.get('/logout', async (req, res) => {
+    req.session.destroy();
+
+    res.redirect('/admin');
 });
 
 router.get('/statistics', async (req, res) => {
@@ -91,7 +99,11 @@ router.post('/', (req, res) => {
         return res.redirect('/admin');
 
     const error = (msg) => {
-        req.flash('validationError', msg);
+        res.flash('error', {
+            header: 'Validation failed.',
+            body: msg
+        });
+
         res.redirect('/admin');
     };
 
@@ -160,100 +172,225 @@ router.post('/', (req, res) => {
     res.redirect('/admin');
 });
 
-router.post('/sign_up', (req, res) => {
-    if(typeof req.body.instance !== 'string' || !req.body.instance)
-        return res.sendStatus(400);
+router.post('/sign_up', async (req, res) => {
+    let domain = parseDomain(req.body.instance);
+    if(domain === null) {
+        res.flash('error', {
+            header: 'Sign up failed.',
+            body: 'Invalid instance name.'
+        });
 
-    Request.get('https://' + req.body.instance + '/api/v1/instance', (err, resp, body) => {
-        if(err) {
-            return res.sendStatus(400);
+        return res.redirect('/admin');
+    }
+    let domain_str = `${domain.subdomain ? domain.subdomain + '.' : ''}${domain.domain}.${domain.tld}`;
+
+    let admin = await DB.get('admins').findOne({
+        instance: domain_str
+    });
+
+    let activation_token;
+    if(admin) {
+        if(admin.activated) {
+            res.flash('error', {
+                header: 'Sign up failed.',
+                body: 'Already registered. Use the login form on the right.'
+            });
+
+            return res.redirect('/admin');
         }
 
-        req.body.instance = req.body.instance.toLowerCase();
+        activation_token = admin.activation_token;
+    } else {
+        activation_token = randomstring.generate(64);
 
-        let instanceJson = JSON.parse(body);
+        try {
+            await DB.get('admins').insert({
+                createdAt: new Date(),
+                instance: domain_str,
+                activation_token
+            });
+        } catch(e) {
+            return res.sendStatus(500);
+        }
 
-        DB.get('admins').findOne({
-            instance: req.body.instance
-        }).then((admin) => {
-            if(admin)
-                return res.sendStatus(400);
-
-            const activation_token = randomstring.generate(64);
-
-            DB.get('instances').insert({
+        try {
+            await DB.get('instances').insert({
                 addedAt: new Date(),
-                name: req.body.instance,
+                name: domain_str,
                 downchecks: 0,
                 upchecks: 0
-            }).catch(() => {});
-
-            Instance.create({
-                name: req.body.instance,
-            }).catch(() => {});
-
-            DB.get('admins').insert({
-                createdAt: new Date(),
-                instance: req.body.instance,
-                activation_token
-            }).then(() => {
-                Mailgun.messages().send({
-                    from: 'Mastodon Instances <no-reply@mastodon.xyz>',
-                    to: instanceJson.email,
-                    subject: 'Mastodon instances list sign up',
-                    text: `You or someone else tried to sign up on https://instances.social as admin of the instance ${instanceJson.uri}.
-
-Confirm your registration here: https://instances.social/admin/activate?token=${activation_token}
-
-If you did not request this e-mail, you may just ignore it, or confirm registration anyway if you want your instance to appear in the list.`
-                }, () => {
-                    res.json({
-                        email: instanceJson.email
-                    });
-                });
-            }).catch((err) => {
-                return res.sendStatus(500);
             });
-        }).catch((err) => {
-            return res.sendStatus(500);
-        });
+        } catch (e) {}
+
+        try {
+            await Instance.create({
+                name: domain_str
+            });
+        } catch(e) {}
+    }
+
+    let instance = await Instance.findOne({
+        where: {
+            name: domain_str
+        }
     });
+
+    if(!instance)
+        return res.sendStatus(500);
+
+    let software = await instance.guessSoftware();
+
+    if(!software || software.id !== 1) {
+        res.flash('error', {
+            header: 'Sign up failed.',
+            body: 'It looks like this instance is not a Mastodon instance. ' +
+                'Other fediverse instances can show up on instances.social ' +
+                'but are not (yet) compatible with this admin space.'
+        });
+
+        return res.redirect('/admin');
+    }
+
+    let instanceInfo;
+    try {
+        instanceInfo = await instance.getMastodonInstanceInfo();
+    } catch (e) {
+        res.flash('error', {
+            header: 'Sign up failed.',
+            body: `Could not get instance info: "${e.message}".`
+        });
+
+        return res.redirect('/admin');
+    }
+
+    req.session.unactivated_user = instance.name;
+    req.session.instanceInfo = instanceInfo;
+    res.redirect('/admin/activate');
 });
 
-router.get('/activate', (req, res) => {
-    if(typeof req.query.token !== 'string' || !req.query.token)
-        return res.sendStatus(400);
+router.get('/activate', async (req, res) => {
+    if(typeof req.query.token === 'string' && req.query.token) {
+        let admin = await DB.get('admins').findOne({
+            activation_token: req.query.token,
+            activated: {
+                $ne: true
+            }
+        });
 
-    DB.get('admins').findOne({
-        activation_token: req.query.token,
-        activated: {
-            $ne: true
-        }
-    }).then((admin) => {
         if(!admin)
             return res.sendStatus(404);
 
-        res.render('admin/activate', {
+        return res.render('admin/activate/token', {
             token: admin.activation_token
         });
-    }).catch((e) => {
-        res.sendStatus(500);
+    }
+
+    if(!req.session.unactivated_user || !req.session.instanceInfo)
+        return res.sendStatus(403);
+
+    res.render('admin/activate/index', {
+        instanceInfo: req.session.instanceInfo
     });
 });
 
+router.post('/activate/dm', async (req, res) => {
+    if(!req.session.unactivated_user || !req.session.instanceInfo)
+        return res.sendStatus(403);
+
+    try {
+        let admin = await DB.get('admins').findOne({
+            instance: req.session.unactivated_user
+        });
+
+        if(admin) {
+            await Mastodon.post('statuses', {
+                status: `@${req.session.instanceInfo.contact_account.username}@${req.session.instanceInfo.uri} You or someone else tried to sign up on instances.social.
+
+Confirm your registration here: https://instances.social/admin/activate?token=${admin.activation_token}`,
+                visibility: 'direct',
+                language: 'eng'
+            });
+
+            res.flash('success', {
+                header: 'Verification DM sent.',
+                body: `Please click the link in the DM. If you don't receive it, you can ask for a new DM (or an email) by going through the sign up process below again.`
+            });
+        } else {
+            res.flash('error', {
+                header: 'Sign up failed.',
+                body: `Server error.`
+            });
+        }
+    } catch(e) {
+        res.flash('error', {
+            header: 'Sign up failed.',
+            body: `Could not send DM.`
+        });
+    }
+
+    res.redirect('/admin');
+});
+
+router.post('/activate/email', async (req, res) => {
+    if(!req.session.unactivated_user || !req.session.instanceInfo)
+        return res.sendStatus(403);
+
+    try {
+        let admin = await DB.get('admins').findOne({
+            instance: req.session.unactivated_user
+        });
+
+        if(admin) {
+            await Mailgun.messages().send({
+                from: 'instances.social <no-reply@mastodon.xyz>',
+                to: req.session.instanceInfo.email,
+                subject: 'instances.social sign up',
+                text: `You or someone else tried to sign up on https://instances.social as admin of the instance ${req.session.unactivated_user}.
+
+Confirm your registration here: https://instances.social/admin/activate?token=${admin.activation_token}
+
+If you did not request this e-mail, you may just ignore it, or confirm registration anyway if you want to customize your instance listing (and make it appear on joinmastodon.org).`
+            });
+
+            res.flash('success', {
+                header: 'Verification email sent.',
+                body: `Please click the link in the email. Check your spams. If you don't receive it, you can ask for a new email (or a DM) by going through the sign up process below again.`
+            });
+        } else {
+            res.flash('error', {
+                header: 'Sign up failed.',
+                body: `Server error.`
+            });
+        }
+    } catch(e) {
+        res.flash('error', {
+            header: 'Sign up failed.',
+            body: `Could not send email.`
+        });
+    }
+
+    res.redirect('/admin');
+});
+
 router.post('/activate', (req, res) => {
-    if(typeof req.body.token !== 'string' || !req.body.token)
-        return res.sendStatus(400);
-    if(typeof req.body.password1 !== 'string' || !req.body.password1)
-        return res.sendStatus(400);
-    if(typeof req.body.password2 !== 'string' || !req.body.password2)
-        return res.sendStatus(400);
+    if(typeof req.body.token !== 'string' || !req.body.token ||
+        typeof req.body.password1 !== 'string' || !req.body.password1 ||
+        typeof req.body.password2 !== 'string' || !req.body.password2) {
+        res.flash('error', {
+            header: 'Activation failed.',
+            body: `Invalid form data.`
+        });
+
+        return res.redirect('/admin/activate?token=' + req.body.token);
+    }
 
     if(req.body.password1 !== req.body.password2) {
-        res.render('admin/activate', {
-            token: req.body.token,
-            passwordsDismatch: true
+        res.flash('error', {
+            header: 'Activation failed.',
+            body: `Passwords do not match.`
         });
+
+        return res.redirect('/admin/activate?token=' + req.body.token);
     } else {
         DB.get('admins').findOne({
             activation_token: req.body.token,
@@ -271,20 +408,23 @@ router.post('/activate', (req, res) => {
                     activated: true,
                     password: passwordHash.generate(req.body.password1, {
                         algorithm: 'sha256'
-                    })
+                    }),
+                    emailConsent: req.body.emailConsent
                 }
             }).then(() => {
-                req.flash('info', 'adminRegistered');
-                res.redirect('/admin');
+                res.flash('success', {
+                    header: 'Activation succeeded.',
+                    body: `You may now login using the form on the right.`
+                });
+
+                return res.redirect('/admin');
             }).catch((e) => {
                 console.error(e);
                 res.sendStatus(500);
-console.error(e);
             });
         }).catch((e) => {
             console.error(e);
             res.sendStatus(500);
-console.error(e);
         });
     }
 });
@@ -299,12 +439,20 @@ router.post('/login', (req, res) => {
         instance: req.body.instance
     }).then((admin) => {
         if(!admin) {
-            req.flash('error', 'invalidInstance');
+            res.flash('error', {
+                header: 'Login failed.',
+                body: `Invalid instance.`
+            });
+
             return res.redirect('/admin');
         }
 
         if(!passwordHash.verify(req.body.password, admin.password)) {
-            req.flash('error', 'invalidPassword');
+            res.flash('error', {
+                header: 'Login failed.',
+                body: `Invalid password.`
+            });
+
             return res.redirect('/admin');
         }
 
