@@ -11,7 +11,7 @@ const Mailgun = require('mailgun-js')({
     domain: config.mailgun.domain
 });
 const Mastodon = new require('mastodon')({
-    access_token: '6aa5b5804f6ae02c84d3f2ebe4d9b08028fe1f3dfbed537a4059a5d9ce61c7f3',
+    access_token: config.bot_access_token,
     api_url: 'https://mastodon.xyz/api/v1/'
 });
 
