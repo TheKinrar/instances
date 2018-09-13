@@ -14,10 +14,15 @@ async function checkInstanceHttps(options) {
 
     instance.latest_https_check = new Date();
 
-    let res = await request({
-        url: `https://tls.imirhil.fr/https/${instance.name}.json`,
-        json: true
-    });
+    try {
+        let res = await request({
+            url: `https://tls.imirhil.fr/https/${instance.name}.json`,
+            json: true
+        });
+    } catch(e) {
+        await instance.save();
+        return;
+    }
 
     let grade = null;
     let score = 0;
