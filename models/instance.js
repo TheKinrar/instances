@@ -113,7 +113,7 @@ Instance.hook('afterSave', async (instance) => {
     if(instance.raw_version)
         version = raw_version = instance.raw_version.replace(/\.$/, '');
 
-    let version_notag = version_norc.replace(/\+[0-9A-Za-z.-]*/, '');
+    let version_notag = version.replace(/\+[0-9A-Za-z.-]*/, '');
     let version_norc = version_notag.replace(/\.?rc[0-9]/, '');
 
     if(version === 'Mastodon::Version') {
