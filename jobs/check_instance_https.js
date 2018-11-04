@@ -14,8 +14,9 @@ async function checkInstanceHttps(options) {
 
     instance.latest_https_check = new Date();
 
+    let res;
     try {
-        let res = await request({
+        res = await request({
             url: `https://tls.imirhil.fr/https/${instance.name}.json`,
             json: true
         });
