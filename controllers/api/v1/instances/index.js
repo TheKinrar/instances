@@ -281,6 +281,9 @@ router.get('/list', (req, res) => {
         q_options.sort[query.sort_by] = query.sort_order === 'asc' ? 1 : -1;
     }
 
+    if(q.$and.length === 0)
+        delete q.$and;
+
     Promise
     .all([DB.get('instances').count(q), DB.get('instances').find(q, q_options)])
     .then(values => {
