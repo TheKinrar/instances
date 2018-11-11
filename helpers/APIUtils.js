@@ -72,6 +72,16 @@ function checkQuery(template, query) {
                     if(!key_template.regex.test(key_value))
                         throw new Error(`Parameter "${key}" must match ${key_template.regex}.`);
                 }
+            } else if(key_template.type === 'array') {
+                if(!Array.isArray(key_value))
+                    key_value = query[key] = [key_value];
+
+                if(key_template.array_values) {
+                    for(let e of key_value) {
+                        if (!key_template.array_values.includes(e))
+                            throw new Error(`Parameter "${key}" array element "${e}" is not allowed.`);
+                    }
+                }
             }
         }
     }

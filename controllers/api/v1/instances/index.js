@@ -61,12 +61,17 @@ router.get('/show', (req, res) => {
  * @apiParam {String} [category] Category instances must be in to be returned. Value *general* will return instances in no category.
  * @apiParam {String} [language] Language instances must have as main language to be returned.
  *
+ * @apiParam {String[]} [prohibited_content] Content returned instances must prohibit.
+ * @apiParam {String[]} [allowed_content] Content returned instances must *not prohibit*.
+ *
  * @apiParam {String} [min_id] Minimal ID of instances to retrieve. Use this to navigate through pages. The id of the first instance from next page is accessible through pagination.next_id.
  *
  * @apiParam {String="name","uptime","https_score","obs_score","users","statuses","connections","active_users"} [sort_by] Field to sort instances by. By default, instances are not sorted and their order is not guaranteed to be consistent.
  * @apiParam {String="asc","desc"} [sort_order="asc"] Sort order, if *sort_by* is used.
  */
 router.get('/list', (req, res) => {
+    console.log(req.query);
+
     let query;
 
     try {
@@ -125,6 +130,14 @@ router.get('/list', (req, res) => {
                 type: 'language',
                 optional: true,
                 values: Languages.getAllLanguageCode()
+            }, prohibited_content: {
+                type: 'array',
+                array_values: Object.keys(ProhibitedContent),
+                optional: true
+            }, allowed_content: {
+                type: 'array',
+                array_values: Object.keys(ProhibitedContent),
+                optional: true
             }, sort_by: {
                 type: 'string',
                 optional: true,
@@ -158,7 +171,8 @@ router.get('/list', (req, res) => {
         },
         blacklisted: {
             $ne: true
-        }
+        },
+        $and: []
     };
 
     if(!query.include_dead)
@@ -224,6 +238,22 @@ router.get('/list', (req, res) => {
         }
     }
 
+    if(query.prohibited_content) {
+        q.$and.push({
+            'infos.prohibitedContent': {
+                $all: query.prohibited_content
+            }
+        });
+    }
+
+    if(query.allowed_content) {
+        q.$and.push({
+            'infos.prohibitedContent': {
+                $nin: query.allowed_content
+            }
+        });
+    }
+
     if(query.language) {
         q['infos.languages'] = query.language;
     }
@@ -250,8 +280,6 @@ router.get('/list', (req, res) => {
         q_options.sort = {};
         q_options.sort[query.sort_by] = query.sort_order === 'asc' ? 1 : -1;
     }
-
-    console.log(q);
 
     Promise
     .all([DB.get('instances').count(q), DB.get('instances').find(q, q_options)])
