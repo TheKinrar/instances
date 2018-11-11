@@ -54,6 +54,8 @@ router.get('/show', (req, res) => {
  * @apiParam {String="mstdn_custom_emojis"} [supported_features] Comma-separated list of features returned instances have to support
  * @apiParam {String} [min_version] Minimal Mastodon version returned instances must be running. Format must be "a.b.c" (".b" and ".c" can be omitted) with a, b, c being integers.
  *
+ * @apiParam {Number{0-}} [min_users] Minimal users returned instances must have.
+ * @apiParam {Number{0-}} [max_users] Maximal users returned instances must have.
  * @apiParam {Number{0-}} [min_active_users] Minimal active users per week returned instances must have. **This will filter out instances running Mastodon versions older than 2.1.2.**
  *
  * @apiParam {String} [category] Category instances must be in to be returned. Value *general* will return instances in no category.
@@ -104,6 +106,14 @@ router.get('/list', (req, res) => {
                 type: 'string',
                 optional: true,
                 regex: /^(?:[0-9]+\.){0,2}[0-9]+$/
+            }, min_users: {
+                type: 'int',
+                min: 0,
+                optional: true
+            }, max_users: {
+                type: 'int',
+                min: 0,
+                optional: true
             }, min_active_users: {
                 type: 'int',
                 min: 0,
@@ -184,6 +194,20 @@ router.get('/list', (req, res) => {
         };
     }
 
+    if(query.min_users) {
+        q.users = {
+            $gte: query.min_users
+        };
+    }
+
+    if(query.max_users) {
+        if(!q.users) {
+            q.users = {};
+        }
+
+        q.users.$lte = query.max_users;
+    }
+
     if(query.min_active_users) {
         q['activity_prevw.logins'] = {
             $gte: query.min_active_users
@@ -226,6 +250,8 @@ router.get('/list', (req, res) => {
         q_options.sort = {};
         q_options.sort[query.sort_by] = query.sort_order === 'asc' ? 1 : -1;
     }
+
+    console.log(q);
 
     Promise
     .all([DB.get('instances').count(q), DB.get('instances').find(q, q_options)])
