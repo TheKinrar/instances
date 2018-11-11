@@ -1,4 +1,4 @@
-const router = require('express').Router();
+const router = require('express-promise-router')();
 const APIUtils = require('../../../../helpers/APIUtils');
 
 // https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
@@ -69,7 +69,7 @@ router.get('/show', (req, res) => {
  * @apiParam {String="name","uptime","https_score","obs_score","users","statuses","connections","active_users"} [sort_by] Field to sort instances by. By default, instances are not sorted and their order is not guaranteed to be consistent.
  * @apiParam {String="asc","desc"} [sort_order="asc"] Sort order, if *sort_by* is used.
  */
-router.get('/list', (req, res) => {
+router.get('/list', async (req, res) => {
     console.log(req.query);
 
     let query;
@@ -258,13 +258,6 @@ router.get('/list', (req, res) => {
         q['infos.languages'] = query.language;
     }
 
-    if(query.min_id)
-        try {
-            q._id = {
-                $gte: require('monk').id(query.min_id)
-            };
-        } catch(e) {}
-
 
     let limited = query.count > 0;
 
@@ -279,6 +272,21 @@ router.get('/list', (req, res) => {
 
         q_options.sort = {};
         q_options.sort[query.sort_by] = query.sort_order === 'asc' ? 1 : -1;
+    } else {
+        query.sort_by = '_id';
+        q_options.sort = {
+            _id: 1
+        };
+    }
+
+    if(query.min_id) {
+        let i = await DB.get('instances').findOne({
+            _id: query.min_id
+        });
+
+        q[query.sort_by] = {
+            [q_options.sort[query.sort_by] === 1 ? '$gte' : '$lte']: i[query.sort_by]
+        };
     }
 
     if(q.$and.length === 0)
