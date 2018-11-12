@@ -112,6 +112,25 @@ router.get('/list.json', (req, res) => {
         };
     }
 
+    if(cq.search) {
+        let r = new RegExp(cq.search);
+        q.$or = [{
+            name: r
+        }, {
+            'infos.shortDescription': r
+        }, {
+            'infos.fullDescription': r
+        }, {
+            'infos.theme': r
+        }, {
+            'infos.categories': {
+                $elemMatch: {
+                    $regex: r
+                }
+            }
+        }];
+    }
+
     DB.get('instances').find(q).then((instances) => {
 		instances.forEach((instance) => {
 			instance.uptime_str = (instance.uptime * 100).toFixed(3);

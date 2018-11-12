@@ -106,6 +106,8 @@
 
         <div class="{% if advanced %}col-md-10{% else %}col-md-9{% endif %} mb-3">
             {% if not advanced %}
+                <input type="text" class="form-control mb-3" id="inputSearch" placeholder="Search">
+
                 <div class="card simple">
                     <ul id="list-instances" class="list-group list-group-flush"></ul>
                     <div class="card-block" id="loading-instances">
@@ -295,6 +297,10 @@
             });
 
             query.users = inputUsers.val();
+
+            if(!advancedMode) {
+                query.search = $('#inputSearch').val();
+            }
 
             let hq = {
                 lang: query.languages.join(','),
@@ -487,6 +493,21 @@
                     }
 
                     modal.find('#modalInstanceInfo-btn-go').attr('href', 'https://' + instanceName);
+                });
+
+                let inputSearch_timeout = null;
+                let inputSearch_prev = null;
+                $('#inputSearch').on('change paste keyup', () => {
+                    let search = $('#inputSearch').val();
+
+                    if(search !== inputSearch_prev) {
+                        inputSearch_prev = search;
+
+                        if(inputSearch_timeout)
+                            clearTimeout(inputSearch_timeout);
+
+                        inputSearch_timeout = setTimeout(sendQuery, 1000);
+                    }
                 });
 
                 sendQuery();
