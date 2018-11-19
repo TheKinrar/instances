@@ -1,0 +1,12 @@
+[Unit]
+Description=instances.social worker
+
+[Service]
+User=instances
+Environment=UV_THREADPOOL_SIZE=500
+ExecStart=/usr/local/n/versions/node/10.4.0/bin/node /home/instances/instances/worker
+WorkingDirectory=/home/instances/instances
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

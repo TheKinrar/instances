@@ -1,0 +1,11 @@
+[Unit]
+Description=instances.social updater
+
+[Service]
+User=instances
+ExecStart=/usr/local/n/versions/node/10.4.0/bin/node /home/instances/instances/updater
+WorkingDirectory=/home/instances/instances
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
