@@ -234,7 +234,15 @@ router.get('/list', async (req, res) => {
                 $in: [[], null]
             };
         } else {
-            q['infos.categories'] = query.category;
+            q.$and.push({
+                'infos.categories': query.category
+            });
+
+            /*q.$and.push({
+                'infos.categories.2': {
+                    $exists: false
+                }
+            });*/
         }
     }
 
