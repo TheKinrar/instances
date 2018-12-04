@@ -238,11 +238,11 @@ router.get('/list', async (req, res) => {
                 'infos.categories': query.category
             });
 
-            /*q.$and.push({
+            q.$and.push({
                 'infos.categories.2': {
                     $exists: false
                 }
-            });*/
+            });
         }
     }
 
