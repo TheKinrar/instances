@@ -2,6 +2,8 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const Instance = require('./models/instance');
 
+const checkInstance = require('./jobs/check_instance');
+
 (async () => {
     let fiveMinutesBefore = new Date();
     fiveMinutesBefore.setMinutes(fiveMinutesBefore.getMinutes() - 5);
@@ -19,11 +21,16 @@ const Instance = require('./models/instance');
     });
 
     console.log(`${instances.length} instances to check`);
+    let start = new Date();
 
-    await Promise.all(instances.map(i => {
-        console.log(i.name);
-        return i.queueCheck();
-    }));
+    while(instances.length > 0) {
+        await Promise.all(instances.splice(0, 10).map(i => {
+            return checkInstance({
+                instance: i.id
+            });
+        }));
+    }
 
+    console.log(`Done in ${(new Date().getTime() - start.getTime()) / 1000} s.`);
     process.exit(0);
 })().catch(console.error);
