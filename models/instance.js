@@ -25,8 +25,10 @@ const Instance = sequelize.define('instance', {
     latest_ap_check: Sequelize.DataTypes.DATE,
 
     up: Sequelize.DataTypes.BOOLEAN,
-    dead: Sequelize.DataTypes.BOOLEAN,
     uptime_all: Sequelize.DataTypes.REAL,
+
+    dead: Sequelize.DataTypes.BOOLEAN,
+    dead_since: Sequelize.DataTypes.DATE,
 
     first_uptime: Sequelize.DataTypes.DATE,
 
@@ -86,6 +88,9 @@ Instance.addHook('beforeSave', async (instance) => {
                 downtime.end = new Date();
                 await downtime.save();
             }
+
+            // If instance was dead and just became up, it - obviously - isn't dead anymore
+            instance.dead = false;
         } else {
             let downtime = await Downtime.findOne({
                 where: {
@@ -99,6 +104,22 @@ Instance.addHook('beforeSave', async (instance) => {
                     instance: instance.id
                 });
             }
+        }
+    } else if(!instance.up) { // Instance is still down, maybe it is dead (2 weeks downtime)
+        let downtime = await Downtime.findOne({
+            where: {
+                instance: instance.id,
+                end: null
+            },
+        });
+
+        let twoWeeksBefore = new Date();
+        twoWeeksBefore.setDate(-14);
+
+        if(downtime && downtime.start < twoWeeksBefore) {
+            // Instance is dead (won't be checked regularly anymore, won't appear in lists, etc.)
+            instance.dead = true;
+            instance.dead_since = new Date();
         }
     }
 
