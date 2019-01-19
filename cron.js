@@ -24,7 +24,7 @@ const checkInstance = require('./jobs/check_instance');
     let start = new Date();
 
     while(instances.length > 0) {
-        await Promise.all(instances.splice(0, 10).map(i => {
+        await Promise.all(instances.splice(0, 100).map(i => {
             return checkInstance({
                 instance: i.id
             });
