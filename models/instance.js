@@ -69,7 +69,7 @@ const Instance = sequelize.define('instance', {
     paranoid: true
 });
 
-Instance.hook('beforeSave', async (instance) => {
+Instance.addHook('beforeSave', async (instance) => {
     if (instance.up && !instance.first_uptime)
             instance.first_uptime = new Date();
 
@@ -105,7 +105,7 @@ Instance.hook('beforeSave', async (instance) => {
     await instance.calculateUptime();
 });
 
-Instance.hook('afterSave', async (instance) => {
+Instance.addHook('afterSave', async (instance) => {
     let version = '<1.3';
     let version_score = 0;
     let raw_version = null;
@@ -204,9 +204,9 @@ Instance.prototype.guessSoftware = async function() {
         return null;
 
     if(/(^| \(compatible; )Pleroma /.test(res_api_mastodon.version))
-        return await Software.findById(2);
+        return await Software.findByPk(2);
 
-    return await Software.findById(1);
+    return await Software.findByPk(1);
 };
 
 /**

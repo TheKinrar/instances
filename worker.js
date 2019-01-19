@@ -35,7 +35,7 @@ function process(job, n, fn) {
 async function saveInstanceHistory(options) {
     let id = options.instance;
 
-    let pg_instance = await Instance.findById(id);
+    let pg_instance = await Instance.findByPk(id);
 
     if(!pg_instance) {
         throw new Error(`Instance ${id} not found.`);
@@ -71,7 +71,7 @@ async function saveInstanceHistory(options) {
 async function fetchInstanceAP(options) {
     let id = options.instance;
 
-    let pg_instance = await Instance.findById(id);
+    let pg_instance = await Instance.findByPk(id);
 
     if(!pg_instance) {
         throw new Error(`Instance ${id} not found.`);

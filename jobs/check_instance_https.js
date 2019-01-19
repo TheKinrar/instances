@@ -4,7 +4,7 @@ const request = require('../helpers/request');
 const Instance = require('../models/instance');
 
 async function checkInstanceHttps(options) {
-    const instance = await Instance.findById(options.instance);
+    const instance = await Instance.findByPk(options.instance);
 
     if(!instance)
         throw new Error(`No instance has ID ${options.instance}.`);
