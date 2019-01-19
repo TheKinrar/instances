@@ -1,0 +1,7 @@
+[Unit]
+Description=instances.social check task
+
+[Service]
+User=instances
+ExecStart=/home/instances/n/bin/node /home/instances/instances/cron
+WorkingDirectory=/home/instances/instances
