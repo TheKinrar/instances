@@ -1,0 +1,11 @@
+[Unit]
+Description=instances.social probe
+
+[Service]
+User=instances
+ExecStart=/home/instances/n/bin/node /home/instances/instances/probe.mjs
+WorkingDirectory=/home/instances/instances
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
