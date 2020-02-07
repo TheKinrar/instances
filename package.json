@@ -10,7 +10,7 @@
     "country-language": "^0.1.7",
     "es6-promise-pool": "^2.5.0",
     "express": "^4.15.2",
-    "express-basic-auth": "^1.0.1",
+    "express-basic-auth": "^1.1.7",
     "express-flash": "0.0.2",
     "express-flash-2": "^1.0.1",
     "express-promise-router": "^2.0.0",
