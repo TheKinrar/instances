@@ -3,7 +3,7 @@ Description=instances.social probe master
 
 [Service]
 User=instances
-ExecStart=/home/instances/n/bin/node /home/instances/instances/probe_master.mjs
+ExecStart=/home/instances/n/bin/node /home/instances/instances/probe_master.js
 WorkingDirectory=/home/instances/instances
 Restart=always
 
