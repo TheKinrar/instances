@@ -30,10 +30,6 @@ function pingAll(instances) {
             results.push(event.data.result);
         });
 
-        pool.addEventListener('rejected', (event) => {
-            results.push({inst: event.data.promise.instance.id, date: new Date(), err: event.data.error.message});
-        });
-
         pool.start().then(() => {
             resolve(results);
         }).catch(reject);
@@ -41,18 +37,29 @@ function pingAll(instances) {
 }
 
 function pingOne(instance) {
-    let p = new Promise((resolve, reject) => {
+    let p = new Promise((resolve) => {
         TCPPing.ping({
             address: instance.name,
             port: 443,
             timeout: 1000
         }, (err, rs) => {
-            if(err) return reject(new Error(err.message));
+            if(err) {
+                return resolve({
+                    inst: instance.id,
+                    date: new Date(),
+                    err: new Error(err.message)
+                });
+            }
 
             let jit = 0;
             for(let e of rs.results) {
-                if(e.err)
-                    return reject(new Error(e.err.message));
+                if(e.err) {
+                    return resolve({
+                        inst: instance.id,
+                        date: new Date(),
+                        err: new Error(e.err.message)
+                    });
+                }
 
                 jit += Math.abs(rs.avg - e.time);
             }
