@@ -47,7 +47,7 @@ function pingOne(instance) {
                 return resolve({
                     inst: instance.id,
                     date: new Date(),
-                    err: new Error(err.message)
+                    err: err.message
                 });
             }
 
@@ -57,7 +57,7 @@ function pingOne(instance) {
                     return resolve({
                         inst: instance.id,
                         date: new Date(),
-                        err: new Error(e.err.message)
+                        err: e.err.message
                     });
                 }
 
