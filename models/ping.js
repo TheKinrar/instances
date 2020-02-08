@@ -16,15 +16,6 @@ const Ping = sequelize.define('ping', {
         }
     },
 
-    probe: {
-        type: Sequelize.DataTypes.INTEGER,
-
-        references: {
-            model: Probe,
-            key: 'id'
-        }
-    },
-
     success: Sequelize.DataTypes.BOOLEAN,
     error: Sequelize.DataTypes.TEXT,
 
@@ -33,5 +24,7 @@ const Ping = sequelize.define('ping', {
 }, {
     updatedAt: false
 });
+
+Ping.belongsTo(Probe);
 
 module.exports = Ping;
