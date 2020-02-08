@@ -7,6 +7,8 @@ const pg = require('../pg');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const Instance = require('../models/instance');
+const Ping = require('../models/ping');
+const Probe = require('../models/probe');
 
 router.use('/api', require('./api'));
 router.use('/admin', (req, res, next) => {
@@ -318,7 +320,7 @@ router.get('/network', (req, res) => {
 
 router.get('/instances.json', morgan.api, (req, res) => {
 	res.set('Access-Control-Allow-Origin', '*');
-	
+
 	DB.get('instances').find({
 		"uptime": {
 			"$gt": 0
@@ -406,6 +408,33 @@ router.get('/:instance', (req, res) => {
     }).catch((e) => {
         console.error(e);
         res.sendStatus(500);
+    });
+});
+
+router.get('/:instance/ping', async (req, res) => {
+    const instance = await Instance.findOne({
+        where: {
+            name: req.params.instance
+        }
+    });
+
+    if(!instance)
+        return res.sendStatus(404);
+
+    res.render('instance/ping', {
+        instance,
+        pings: await Ping.findAll({
+            where: {
+                instance: instance.id
+            },
+            order: [
+                ['createdAt', 'DESC']
+            ],
+            limit: 100,
+            include: [
+                Probe
+            ]
+        })
     });
 });
 

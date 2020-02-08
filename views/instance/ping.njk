@@ -1,0 +1,32 @@
+{% extends 'layout.njk' %}
+
+{% block main %}
+    <h3>{{ instance.name }}</h3>
+
+    <div class="row">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Ping</th>
+                    <th scope="col">Jitter</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ping in pings %}
+                <tr>
+                    <td>{{ ping.createdAt }}</td>
+                    <td>{{ ping.probe.city }}, {{ ping.probe.country.toUpperCase() }}</td>
+                    {% if ping.success %}
+                        <td>{{ ping.average }}</td>
+                        <td>{{ ping.jitter }}</td>
+                    {% else %}
+                        <td colspan="2" class="text-danger">{{ ping.error }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
