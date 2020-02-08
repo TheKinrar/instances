@@ -36,7 +36,7 @@ io.on('connection', (socket) => {
 
         Ping.bulkCreate(results.map(r => ({
             instance: r.inst,
-            probe: socket.handshake.query.probe,
+            probeId: socket.handshake.query.probe,
 
             success: !r.err,
             error: r.err,
