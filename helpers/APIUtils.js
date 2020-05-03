@@ -112,7 +112,9 @@ function createInstanceJson(instance) {
         info: null,
         thumbnail: instance.thumbnail || null,
         thumbnail_proxy: instance.thumbnail ? camo(instance.thumbnail) : null,
-        active_users: instance.activity_prevw ? instance.activity_prevw.logins || null : null
+        active_users: instance.activity_prevw ? instance.activity_prevw.logins || null : null,
+        email: instance.email || null,
+        admin: instance.admin || null
     };
 
     if(instance.infos) {
