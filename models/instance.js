@@ -47,6 +47,9 @@ const Instance = sequelize.define('instance', {
 
     open_registrations: Sequelize.DataTypes.BOOLEAN,
 
+    email: Sequelize.DataTypes.TEXT,
+    admin: Sequelize.DataTypes.TEXT,
+
     software: {
         type: Sequelize.DataTypes.INTEGER,
 
@@ -190,6 +193,9 @@ Instance.addHook('afterSave', async (instance) => {
             version,
             version_score,
             raw_version,
+
+            email: instance.email,
+            admin: instance.admin,
 
             thumbnail: instance.thumbnail,
 
