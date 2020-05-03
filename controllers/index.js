@@ -95,11 +95,15 @@ router.get('/list.json', (req, res) => {
             };
         }
 
-        if(cq.users) {
+        if(cq.min_users) {
             try {
-                q['users'] = {
-                    $lte: Number.parseInt(cq.users)
-                };
+                q.users.$gte = Number.parseInt(cq.min_users);
+            } catch(e) {}
+        }
+
+        if(cq.max_users) {
+            try {
+                q.users.$lte = Number.parseInt(cq.max_users);
             } catch(e) {}
         }
     } else {
@@ -191,11 +195,20 @@ router.get('/list.json', (req, res) => {
                     score += _score / _max;
                 }
 
-                if(cq.users) {
+                if(cq.min_users) {
                     try {
                         max += 1;
 
-                        if(instance.users <= cq.users)
+                        if(instance.users >= cq.min_users)
+                            score += 1;
+                    } catch(e) {}
+                }
+
+                if(cq.max_users) {
+                    try {
+                        max += 1;
+
+                        if(instance.users <= cq.max_users)
                             score += 1;
                     } catch(e) {}
                 }

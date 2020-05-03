@@ -55,8 +55,13 @@
                     </div>
 
                     <div class="row mb-3">
+                        <small>MIN USERS</small>
+                        <input id="filters-min-users" type="number" min="0" value="" autocomplete="off" style="width: 100%;">
+                    </div>
+
+                    <div class="row mb-3">
                         <small>MAX USERS</small>
-                        <input id="filters-users" type="number" min="0" value="" autocomplete="off" style="width: 100%;">
+                        <input id="filters-max-users" type="number" min="0" value="" autocomplete="off" style="width: 100%;">
                     </div>
 
                     <div class="row mb-1">
@@ -212,13 +217,15 @@
         let selectLanguages
           , selectAllowed
           , selectProhibited
-          , inputUsers;
+          , inputMinUsers
+          , inputMaxUsers;
 
         $(() => {
             selectLanguages = $('#filters-languages');
             selectAllowed = $('#filters-allowed');
             selectProhibited = $('#filters-prohibited');
-            inputUsers = $('#filters-users');
+            inputMinUsers = $('#filters-min-users');
+            inputMaxUsers = $('#filters-max-users');
 
             selectLanguages.select2({
                 width: 'resolve'
@@ -247,9 +254,15 @@
                             filters.allowedContent = value.split(',');
                         } else if (key === 'prohibited') {
                             filters.prohibitedContent = value.split(',');
-                        } else if (key === 'users') {
+                        } else if (key === 'min-users') {
                             try {
-                                filters.users = Number.parseInt(value);
+                                filters.minUsers = Number.parseInt(value);
+                            } catch(e) {
+                                console.error(e);
+                            }
+                        } else if (key === 'max-users') {
+                            try {
+                                filters.maxUsers = Number.parseInt(value);
                             } catch(e) {
                                 console.error(e);
                             }
@@ -273,9 +286,14 @@
                 selectProhibited.trigger('change');
             }
 
-            if(filters.users) {
-                inputUsers.val(filters.users);
-                inputUsers.trigger('change');
+            if(filters.minUsers) {
+                inputMinUsers.val(filters.minUsers);
+                inputMinUsers.trigger('change');
+            }
+
+            if(filters.maxUsers) {
+                inputMaxUsers.val(filters.maxUsers);
+                inputMaxUsers.trigger('change');
             }
         });
 
@@ -296,7 +314,8 @@
                 query.prohibited.push($(this).val());
             });
 
-            query.users = inputUsers.val();
+            query.min_users = inputMinUsers.val();
+            query.max_users = inputMaxUsers.val();
 
             if(!advancedMode) {
                 query.search = $('#inputSearch').val();
@@ -306,7 +325,8 @@
                 lang: query.languages.join(','),
                 allowed: query.allowed.join(','),
                 prohibited: query.prohibited.join(','),
-                users: query.users
+                'min-users': query.min_users,
+                'max-users': query.max_users
             };
 
             let hash = $.param(hq).replace(/%2C/g, ',');
