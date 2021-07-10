@@ -243,10 +243,10 @@ router.post('/sign_up', async (req, res) => {
 
     let software = await instance.guessSoftware();
 
-    if(!software || software.id !== 1) {
+    if(!software || (software.id !== 1 && software.id !== 2)) {
         res.flash('error', {
             header: 'Sign up failed.',
-            body: 'It looks like this instance is not a Mastodon instance. ' +
+            body: 'It looks like this instance is not a Mastodon or Pleroma instance. ' +
                 'Other fediverse instances can show up on instances.social ' +
                 'but are not (yet) compatible with this admin space.'
         });
