@@ -8,6 +8,11 @@ const queue = require('./queue');
 const request = require('./helpers/request');
 const pgFormat = require('pg-format');
 const Instance = require('./models/instance');
+const FlakeId = require('flakeid');
+
+const flake = new FlakeId({
+    timeOffset: 1608422400000
+});
 
 queue.setMaxListeners(501);
 
@@ -87,21 +92,26 @@ async function fetchInstanceAP(options) {
     pg_instance.latest_ap_check = new Date();
     await pg_instance.save();
 
-    /*try {
+    try {
         let peers = await request({
             url: `https://${instance.name}/api/v1/instance/peers`,
             json: true
         });
 
-        let newInstances = await pg.query(pgFormat('INSERT INTO instances(name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', peers.map(p => [p.toLowerCase()])));
+        let newInstances = await pg.query(pgFormat('INSERT INTO instances(id, name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', peers.map(p => [
+            flake.gen(),
+            p.toLowerCase()
+        ])));
 
         await DB.get('instances').insert(newInstances.rows.map(i => ({
             addedAt: new Date(),
             name: i.name,
             downchecks: 0,
-            upchecks: 0
+            upchecks: 0,
+            fromPeers: instance.name,
+            fromPeersPgId: pg_instance.id
         })));
-    } catch(e) {}*/
+    } catch(e) {}
 
     try {
         let activity = await request({
