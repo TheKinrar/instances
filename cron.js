@@ -5,6 +5,11 @@ const PromisePool = require('es6-promise-pool');
 
 const checkInstance = require('./jobs/check_instance');
 
+setTimeout(() => {
+    console.error('Looks like we stalled!');
+    process.exit(1);
+}, 3600_000);
+
 (async () => {
     let fiveMinutesBefore = new Date();
     fiveMinutesBefore.setMinutes(fiveMinutesBefore.getMinutes() - 5);
