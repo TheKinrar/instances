@@ -74,23 +74,7 @@ async function checkInstance(options) {
         instance.ipv6 = false;
     }
 
-    if(instance.software === 1) { // Mastodon
-        try {
-            let aboutPage = await request(`https://${instance.name}/about`);
-
-            instance.open_registrations = !/<div class='closed-registrations-message'>/.test(aboutPage);
-        } catch(e) {
-            instance.open_registrations = false;
-        }
-    } else if(instance.software === 2) { // Pleroma
-        try {
-            let statusNetConfig = await instance.getStatusNetInstanceConfig();
-
-            instance.open_registrations = statusNetConfig.closed === '0';
-        } catch(e) {
-            instance.open_registrations = false;
-        }
-    }
+    instance.open_registrations = !!instanceInfo.registrations;
 
     await instance.save();
 
