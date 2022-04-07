@@ -76,6 +76,10 @@ async function checkInstance(options) {
 
     instance.open_registrations = !!instanceInfo.registrations;
 
+    instance.title = instanceInfo.title;
+    instance.description = instanceInfo.description;
+    instance.short_description = instanceInfo.short_description;
+
     await instance.save();
 
     if(!instance.latest_https_check || instance.latest_https_check.getTime() < new Date().getTime() - 24*60*60*1000) {

@@ -18,6 +18,10 @@ const Instance = sequelize.define('instance', {
         unique: true
     },
 
+    title: Sequelize.DataTypes.TEXT,
+    description: Sequelize.DataTypes.TEXT,
+    short_description: Sequelize.DataTypes.TEXT,
+
     latest_history_save: Sequelize.DataTypes.DATE,
     latest_check: Sequelize.DataTypes.DATE,
     latest_https_check: Sequelize.DataTypes.DATE,
