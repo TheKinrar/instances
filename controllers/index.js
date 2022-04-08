@@ -334,39 +334,38 @@ router.get('/network', (req, res) => {
 router.get('/instances.json', morgan.api, (req, res) => {
 	res.set('Access-Control-Allow-Origin', '*');
 
-	DB.get('instances').find({
-		"uptime": {
-			"$gt": 0
-		},
-		"blacklisted": {
-			"$ne": true
-		},
-        "dead": {
-                "$ne": true
+    Instance.findAll({
+        where: {
+            uptime_all: {
+                [Op.gt]: 0
+            },
+            dead: false,
+            blacklisted: false
         }
-	}).then((instances) => {
-		let jsons = [];
+    }).then((instances) => {
+        let jsons = [];
 
-		instances.forEach((instance) => {
-			let json = {};
-			json.name = instance.name;
-			json.uptime = instance.uptime;
-			json.up = instance.up;
-			json.https_score = instance.https_score;
-			json.https_rank = instance.https_rank;
-			json.ipv6 = instance.ipv6;
-			json.openRegistrations = instance.openRegistrations;
-			json.users = instance.users;
-			json.statuses = instance.statuses;
-			json.connections = instance.connections;
+        instances.forEach((instance) => {
+            let json = {};
+            json.name = instance.name;
+            json.title = instance.title;
+            json.short_description = instance.short_description;
+            json.description = instance.description;
+            json.uptime = instance.uptime_all;
+            json.up = instance.up;
+            json.https_score = instance.https_score;
+            json.https_rank = instance.https_rank;
+            json.ipv6 = instance.ipv6;
+            json.openRegistrations = instance.open_registrations;
+            json.users = instance.users;
+            json.statuses = instance.statuses;
+            json.connections = instance.connections;
 
-            json.info = instance.infos;
+            jsons.push(json);
+        });
 
-			jsons.push(json);
-		});
-
-		res.json(jsons);
-	});
+        res.json(jsons);
+    });
 });
 
 router.get('/:instance', (req, res) => {
