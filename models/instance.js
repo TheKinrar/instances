@@ -31,6 +31,7 @@ const Instance = sequelize.define('instance', {
     up: Sequelize.DataTypes.BOOLEAN,
     uptime_all: Sequelize.DataTypes.REAL,
 
+    blacklisted: Sequelize.DataTypes.BOOLEAN,
     dead: Sequelize.DataTypes.BOOLEAN,
     dead_since: Sequelize.DataTypes.DATE,
 
