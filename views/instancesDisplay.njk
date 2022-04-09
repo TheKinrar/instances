@@ -26,7 +26,7 @@
             <td>{{ instance.users }}</td>
             <td>{{ instance.statuses }}</td>
             <td>{{ instance.connections }}</td>
-            {% if not instance.openRegistrations %}<td class="table-danger">No{% else %}<td class="table-success">Yes{% endif %}</td>
+            {% if not instance.open_registrations %}<td class="table-danger">No{% else %}<td class="table-success">Yes{% endif %}</td>
             {% if instance.uptime_all >= 0.99 %}
             <td class="table-success" data-value="{{ instance.uptime_all}}">
                 {% elif instance.uptime_all >= 0.97 %}
