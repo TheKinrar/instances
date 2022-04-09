@@ -17,7 +17,7 @@ async function checkInstanceHttps(options) {
     let res;
     try {
         res = await request({
-            url: `https://tls.imirhil.fr/https/${instance.name}.json`,
+            url: `https://cryptcheck.fr/https/${instance.name}.json`,
             json: true
         });
     } catch(e) {
@@ -29,12 +29,12 @@ async function checkInstanceHttps(options) {
     let score = 0;
 
     let n = 0;
-    if(res.hosts) {
-        for (let host of res.hosts) {
+    if(!res.pending && res.result) {
+        for (let host of res.result) {
             if (host.grade) {
                 n++;
 
-                switch (host.grade.rank) {
+                switch (host.grade) {
                     case 'A+':
                         score += 100;
                         break;
@@ -58,7 +58,7 @@ async function checkInstanceHttps(options) {
                         break;
                 }
 
-                grade = host.grade.rank;
+                grade = host.grade;
             }
         }
 
