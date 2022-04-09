@@ -57,7 +57,7 @@
         <td class="table-danger" data-value="{{ instance.obs_score }}">
             {% endif %}
 
-            <a href="https://observatory.mozilla.org/analyze.html?host={{ instance.name }}">{{ instance.obs_rank }}</a>
+            <a href="https://observatory.mozilla.org/analyze/{{ instance.name }}">{{ instance.obs_rank }}</a>
         {% else %}
             <td>
                 {% endif %}</td>
