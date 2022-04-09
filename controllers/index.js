@@ -1,4 +1,5 @@
 const router = require('express-promise-router')();
+const stripHtml = require('string-strip-html').stripHtml;
 const CountryLanguages = require('country-language');
 const alParser = require('accept-language-parser');
 const morgan = require('../middlewares/morgan');
@@ -368,58 +369,40 @@ router.get('/instances.json', morgan.api, (req, res) => {
     });
 });
 
-router.get('/:instance', (req, res) => {
-    DB.get('instances').findOne({
-        name: req.params.instance
-    }).then((instance) => {
-        if(!instance)
-            return res.sendStatus(404);
+router.get('/:instance', async (req, res) => {
+    let instance = await Instance.findOne({where: {name: req.params.instance}});
+    if(!instance) return res.sendStatus(404);
 
-        pg.query('SELECT id FROM instances WHERE name=$1', [instance.name]).then((pg_res) => {
-            if(pg_res.rows.length !== 1) {
-                return res.sendStatus(500);
+    let pg_res_log = await pg.query('SELECT * FROM instances_log_entries WHERE instance=$1 ORDER BY id DESC', [
+        instance.id
+    ]);
+
+    res.render('instance', {
+        instance,
+        filtered_desc: instance.description ? stripHtml(instance.description).result : null,
+        log_entries: pg_res_log.rows.map(row => {
+            let level_str;
+
+            switch(row.level) {
+                case 0:
+                    level_str = 'INFO';
+                    break;
+                case 1:
+                    level_str = 'WARNING';
+                    break;
+                case 2:
+                    level_str = 'ERROR';
+                    break;
             }
 
-            pg.query('SELECT * FROM instances_log_entries WHERE instance=$1 ORDER BY id DESC', [
-                pg_res.rows[0].id
-            ]).then((pg_res_log) => {
-                res.render('instance', {
-                    instance,
-                    log_entries: pg_res_log.rows.map(row => {
-                        let level_str;
-
-                        switch(row.level) {
-                            case 0:
-                                level_str = 'INFO';
-                                break;
-                            case 1:
-                                level_str = 'WARNING';
-                                break;
-                            case 2:
-                                level_str = 'ERROR';
-                                break;
-                        }
-
-                        return {
-                            date: row.date,
-                            date_str: row.date.toUTCString(),
-                            level: row.level,
-                            level_str,
-                            content: row.content
-                        };
-                    })
-                });
-            }).catch((err) => {
-                console.error(err);
-                res.sendStatus(500);
-            });
-        }).catch((err) => {
-            console.error(err);
-            res.sendStatus(500);
-        });
-    }).catch((e) => {
-        console.error(e);
-        res.sendStatus(500);
+            return {
+                date: row.date,
+                date_str: row.date.toUTCString(),
+                level: row.level,
+                level_str,
+                content: row.content
+            };
+        })
     });
 });
 

@@ -41,6 +41,7 @@
     "sequelize": "^5.21.3",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
+    "string-strip-html": "8.3.0",
     "tcp-ping": "^0.1.1"
   },
   "apidoc": {

@@ -3,23 +3,12 @@
 {% block main %}
     <h3>
         <a href="https://{{ instance.name }}">{{ instance.name }}</a>
-        <small class="text-muted">{{ instance.infos.theme if instance.infos and instance.infos.theme else 'Generalistic instance' }}</small>
+        {% if instance.title %}<small class="text-muted">{{ instance.title }}</small>{% endif %}
     </h3>
 
-    {% if instance.infos %}
+    {% if filtered_desc %}
         <p>
-            {{ instance.infos.fullDescription }}
-        </p>
-
-        <p>
-            Main languages: {{ instance.infos.languages | join(', ') }}<br />
-            <i>Other languages {{ 'are not' if instance.infos.noOtherLanguages else 'are' }} accepted.</i><br />
-            Prohibited content:{% set comma = joiner() %}{% for content in instance.infos.prohibitedContent %}{{ comma() }} {{ ProhibitedContent[content] }}{% endfor %}<br />
-            {#Federates with <b>{{ 'all' if instance.infos.federation else 'some' }} instances.</b>#}
-        </p>
-    {% else %}
-        <p>
-            <i>This instance owner did not give us any information on this instance.</i>
+            {{ filtered_desc }}
         </p>
     {% endif %}
 
@@ -52,9 +41,9 @@
     <div class="row">
         <div class="col-md-12">
             <p>
-                Last check: {{ instance.checkedAt }}<br>
-                Last update: {{ instance.updatedAt }}<br>
-                Last Observatory update: {{ instance.obs_date }}<br>
+                Last check: {{ instance.latest_check }}<br>
+                Last Cryptcheck update: {{ instance.latest_https_check }}<br>
+                Last Observatory update: {{ instance.latest_obs_check }}<br>
             </p>
         </div>
     </div>
