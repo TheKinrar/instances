@@ -69,21 +69,14 @@ async function saveInstanceHistory(options) {
 async function fetchInstanceAP(options) {
     let id = options.instance;
 
-    let pg_instance = await Instance.findByPk(id);
+    let instance = await Instance.findByPk(id);
 
-    if(!pg_instance) {
+    if(!instance) {
         throw new Error(`Instance ${id} not found.`);
     }
 
-    let instance = await DB.get('instances').findOne({
-        name: pg_instance.name
-    });
-
-    if(!instance)
-        throw new Error(`MongoDB instance ${pg_instance.name} not found.`);
-
-    pg_instance.latest_ap_check = new Date();
-    await pg_instance.save();
+    instance.latest_ap_check = new Date();
+    await instance.save();
 
     try {
         let peers = await request({
@@ -91,19 +84,10 @@ async function fetchInstanceAP(options) {
             json: true
         });
 
-        let newInstances = await pg.query(pgFormat('INSERT INTO instances(id, name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', peers.map(p => [
+        await pg.query(pgFormat('INSERT INTO instances(id, name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', peers.map(p => [
             flake.gen(),
             p.toLowerCase()
         ])));
-
-        await DB.get('instances').insert(newInstances.rows.map(i => ({
-            addedAt: new Date(),
-            name: i.name,
-            downchecks: 0,
-            upchecks: 0,
-            fromPeers: instance.name,
-            fromPeersPgId: pg_instance.id
-        })));
     } catch(e) {}
 
     try {
@@ -126,7 +110,7 @@ async function fetchInstanceAP(options) {
         }
 
         await DB.get('instances').update({
-            name: pg_instance.name
+            name: instance.name
         }, {
             $set: {
                 activity_prevw: {
