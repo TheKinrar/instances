@@ -6,6 +6,7 @@ const fs = require('fs');
 const Session = require('express-session');
 const Languages = global.Languages = require('languages');
 const CountryLanguages = require('country-language');
+const {Op} = require("sequelize");
 const MongoStore = require('connect-mongo')(Session);
 
 global.Request = require('request').defaults({
@@ -42,40 +43,40 @@ updateNetworkStats();
 setInterval(updateNetworkStats, 5 * 60 * 1000);
 
 function updateNetworkStats() {
-	DB.get('instances').find({
-        "uptime": {
-            "$gt": 0
-        },
-        "blacklisted": {
-            "$ne": true
-        },
-        "dead": {
-            "$ne": true
-        }
-    }).then((instances) => {
+	const Instance = require('./models/instance');
+
+	Instance.findAll({
+		where: {
+			uptime_all: {
+				[Op.gt]: 0
+			},
+			dead: false,
+			blacklisted: false
+		}
+	}).then((instances) => {
 		let users = 0,
 			statuses = 0,
 			connections = 0;
-let instancesCount = 0;
+		let instancesCount = 0;
 
-		instances.forEach((instance) => {
-		instancesCount++;
+		for(let instance of instances) {
+			instancesCount++;
 
-            if(instance.users)
-                users += instance.users;
+			if(instance.users)
+				users += instance.users;
 
-            if(instance.statuses)
-                statuses += parseInt(instance.statuses);
+			if(instance.statuses)
+				statuses += parseInt(instance.statuses);
 
-            if(instance.connections)
-                connections += instance.connections;
-		});
+			if(instance.connections)
+				connections += instance.connections;
+		}
 
 		global.networkStats = app.locals.networkStats = {
 			users,
 			statuses,
-            connections,
-	instances:instancesCount
+			connections,
+			instances:instancesCount
 		};
 	}).catch(console.error);
 }
