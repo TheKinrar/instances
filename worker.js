@@ -40,27 +40,20 @@ function process(job, n, fn) {
 async function saveInstanceHistory(options) {
     let id = options.instance;
 
-    let pg_instance = await Instance.findByPk(id);
+    let instance = await Instance.findByPk(id);
 
-    if(!pg_instance) {
+    if(!instance) {
         throw new Error(`Instance ${id} not found.`);
     }
 
-    let instance = await DB.get('instances').findOne({
-        name: pg_instance.name
-    });
-
-    if(!instance)
-        throw new Error(`MongoDB instance ${pg_instance.name} not found.`);
-
-    pg_instance.latest_history_save = new Date();
-    await pg_instance.save();
+    instance.latest_history_save = new Date();
+    await instance.save();
 
     await pg.query('INSERT INTO instances_history(instance, uptime_all, up, ipv6, https_score, obs_score, ' +
         'users, connections, statuses, open_registrations, version) ' +
         'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [
         id,
-        instance.uptime || 0,
+        instance.uptime_all || 0,
         instance.up || false,
         instance.ipv6 || false,
         instance.https_score || 0,
@@ -68,7 +61,7 @@ async function saveInstanceHistory(options) {
         instance.users || 0,
         instance.connections || 0,
         instance.statuses || 0,
-        instance.openRegistrations || false,
+        instance.open_registrations || false,
         instance.version || null
     ]);
 }
