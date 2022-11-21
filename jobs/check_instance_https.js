@@ -62,7 +62,7 @@ async function checkInstanceHttps(options) {
             }
         }
 
-        score /= n;
+        score = Math.round(score / n);
     }
 
     instance.https_score = score || null;
