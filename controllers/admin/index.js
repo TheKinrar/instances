@@ -161,9 +161,6 @@ router.post('/', (req, res) => {
         //federation
     };
 
-    console.log(req.body);
-    console.log(infos);
-
     DB.get('instances').update({
         name: req.user.instance
     }, {
