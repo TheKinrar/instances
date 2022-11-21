@@ -9,6 +9,7 @@ const request = require('./helpers/request');
 const pgFormat = require('pg-format');
 const Instance = require('./models/instance');
 const FlakeId = require('flakeid');
+const isValidDomain = require('is-valid-domain');
 
 const flake = new FlakeId({
     timeOffset: 1608422400000
@@ -84,10 +85,14 @@ async function fetchInstanceAP(options) {
             json: true
         });
 
-        await pg.query(pgFormat('INSERT INTO instances(id, name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', peers.map(p => [
-            flake.gen(),
-            p.toLowerCase()
-        ])));
+        let values = peers
+            .filter(p => isValidDomain(p, {allowUnicode: true, subdomain: true}))
+            .map(p => [
+                flake.gen(),
+                p.toLowerCase()
+            ]);
+
+        await pg.query(pgFormat('INSERT INTO instances(id, name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', values));
     } catch(e) {}
 
     try {
