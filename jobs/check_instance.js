@@ -39,6 +39,9 @@ async function checkInstance(options) {
         if(!instanceInfo) {
             throw new Error('Empty info object');
         }
+
+        if(typeof instanceInfo.uri !== 'string')
+            throw new Error('Invalid info object');
     } catch(e) {
         instance.logError(`Could not get instance info: "${e.message}".`);
         instance.up = false;

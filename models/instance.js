@@ -249,14 +249,16 @@ Instance.prototype.guessSoftware = async function() {
 Instance.prototype.getMastodonInstanceInfo = function() {
     return request({
         url: `https://${this.name}/api/v1/instance`,
-        json: true
+        json: true,
+        followRedirect: false
     });
 };
 
 Instance.prototype.getStatusNetInstanceConfig = function() {
     return request({
         url: `https://${this.name}/api/statusnet/config.json`,
-        json: true
+        json: true,
+        followRedirect: false
     });
 };
 
