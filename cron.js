@@ -11,10 +11,10 @@ setTimeout(() => {
 }, 3600_000);
 
 (async () => {
-    let fiveMinutesBefore = new Date();
-    fiveMinutesBefore.setMinutes(fiveMinutesBefore.getMinutes() - 5);
-    let oneDayBefore = new Date();
-    oneDayBefore.setDate(oneDayBefore.getDate() - 1);
+    let aliveThreshold = new Date();
+    aliveThreshold.setMinutes(aliveThreshold.getMinutes() - 15);
+    let deadThreshold = new Date();
+    deadThreshold.setDate(deadThreshold.getDate() - 7);
 
     let instances = await Instance.findAll({
         where: {
@@ -26,11 +26,11 @@ setTimeout(() => {
             }, {
                 dead: false,
                 latest_check: {
-                    [Op.lt]: fiveMinutesBefore
+                    [Op.lt]: aliveThreshold
                 }
             }, {
                 latest_check: {
-                    [Op.lt]: oneDayBefore
+                    [Op.lt]: deadThreshold
                 }
             }]
         }
