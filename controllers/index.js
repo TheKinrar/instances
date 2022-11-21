@@ -154,46 +154,48 @@ router.get('/list.json', (req, res) => {
                 let score = 0;
                 let max = 0;
 
-                if(Array.isArray(cq.languages) && cq.languages.length > 0) {
-                    max += 1;
+                if(instance.infos) {
+                    if (Array.isArray(cq.languages) && cq.languages.length > 0) {
+                        max += 1;
 
-                    let _score = 0;
-                    let _max = cq.languages.length;
-                    cq.languages.forEach((language) => {
-                        if(instance.infos.languages.includes(language)) {
-                            _score++;
-                        }
-                    });
+                        let _score = 0;
+                        let _max = cq.languages.length;
+                        cq.languages.forEach((language) => {
+                            if (instance.infos.languages.includes(language)) {
+                                _score++;
+                            }
+                        });
 
-                    score += _score / _max;
-                }
+                        score += _score / _max;
+                    }
 
-                if(Array.isArray(cq.allowed) && cq.allowed.length > 0) {
-                    max += 1;
+                    if (Array.isArray(cq.allowed) && cq.allowed.length > 0) {
+                        max += 1;
 
-                    let _score = 0;
-                    let _max = cq.allowed.length;
-                    cq.allowed.forEach((content) => {
-                        if(!instance.infos.prohibitedContent.includes(content)) {
-                            _score++;
-                        }
-                    });
+                        let _score = 0;
+                        let _max = cq.allowed.length;
+                        cq.allowed.forEach((content) => {
+                            if (!instance.infos.prohibitedContent.includes(content)) {
+                                _score++;
+                            }
+                        });
 
-                    score += _score / _max;
-                }
+                        score += _score / _max;
+                    }
 
-                if(Array.isArray(cq.prohibited) && cq.prohibited.length > 0) {
-                    max += 1;
+                    if (Array.isArray(cq.prohibited) && cq.prohibited.length > 0) {
+                        max += 1;
 
-                    let _score = 0;
-                    let _max = cq.prohibited.length;
-                    cq.prohibited.forEach((content) => {
-                        if(instance.infos.prohibitedContent.includes(content)) {
-                            _score++;
-                        }
-                    });
+                        let _score = 0;
+                        let _max = cq.prohibited.length;
+                        cq.prohibited.forEach((content) => {
+                            if (instance.infos.prohibitedContent.includes(content)) {
+                                _score++;
+                            }
+                        });
 
-                    score += _score / _max;
+                        score += _score / _max;
+                    }
                 }
 
                 if(cq.min_users) {
