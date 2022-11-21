@@ -8,7 +8,7 @@ const Downtime = sequelize.define('downtime', {
     end: Sequelize.DataTypes.DATE,
 
     instance: {
-        type: Sequelize.DataTypes.INTEGER,
+        type: Sequelize.DataTypes.BIGINT,
 
         references: {
             model: 'Instance',

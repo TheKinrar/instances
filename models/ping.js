@@ -8,7 +8,7 @@ const Probe = require('./probe.js');
 
 const Ping = sequelize.define('ping', {
     instance: {
-        type: Sequelize.DataTypes.INTEGER,
+        type: Sequelize.DataTypes.BIGINT,
 
         references: {
             model: Instance,
