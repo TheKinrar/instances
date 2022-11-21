@@ -111,6 +111,9 @@ router.get('/list.json', (req, res) => {
         q["up"] = {
             "$eq": true
         };
+        q["openRegistrations"] = {
+            "$eq": true
+        };
     }
 
     if(infoNeeded) {
