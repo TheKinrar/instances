@@ -113,7 +113,7 @@ Instance.addHook('beforeSave', async (instance) => {
                 });
             }
         }
-    } else if(!instance.up) { // Instance is still down, maybe it is dead (2 weeks downtime)
+    } else if(!instance.up && !instance.dead) { // Instance is still down, maybe it is dead (2 weeks downtime)
         let downtime = await Downtime.findOne({
             where: {
                 instance: instance.id,

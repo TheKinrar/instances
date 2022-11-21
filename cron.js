@@ -13,16 +13,25 @@ setTimeout(() => {
 (async () => {
     let fiveMinutesBefore = new Date();
     fiveMinutesBefore.setMinutes(fiveMinutesBefore.getMinutes() - 5);
+    let oneDayBefore = new Date();
+    oneDayBefore.setDate(oneDayBefore.getDate() - 1);
 
     let instances = await Instance.findAll({
         where: {
-            latest_check: {
-                [Op.or]: {
-                    [Op.lt]: fiveMinutesBefore,
+            [Op.or]: [{
+                latest_check: {
                     [Op.eq]: null
                 }
-            },
-            dead: false
+            }, {
+                dead: false,
+                latest_check: {
+                    [Op.lt]: fiveMinutesBefore
+                }
+            }, {
+                latest_check: {
+                    [Op.lt]: oneDayBefore
+                }
+            }]
         }
     });
 
