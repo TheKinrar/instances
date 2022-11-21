@@ -70,8 +70,6 @@ router.get('/show', (req, res) => {
  * @apiParam {String="asc","desc"} [sort_order="asc"] Sort order, if *sort_by* is used.
  */
 router.get('/list', async (req, res) => {
-    console.log(req.query);
-
     let query;
 
     try {
