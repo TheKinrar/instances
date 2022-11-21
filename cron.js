@@ -18,6 +18,7 @@ setTimeout(() => {
 
     let instances = await Instance.findAll({
         where: {
+            blacklisted: false,
             [Op.or]: [{
                 latest_check: {
                     [Op.eq]: null

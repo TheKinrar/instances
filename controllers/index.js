@@ -260,6 +260,7 @@ router.get('/list/old', async (req, res) => {
                 [Op.gt]: 0
             },
             dead: false,
+            blacklisted: false,
             first_uptime: {
                 [Op.ne]: null
             }

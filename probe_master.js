@@ -62,7 +62,8 @@ async function pingAll() {
 
     io.emit('ping', (await Instance.findAll({
         where: {
-            dead: false
+            dead: false,
+            blacklisted: false
         }
     })).map(i => ({id: i.id, name: i.name})));
 }
