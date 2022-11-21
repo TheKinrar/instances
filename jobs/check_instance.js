@@ -40,7 +40,7 @@ async function checkInstance(options) {
             throw new Error('Empty info object');
         }
 
-        if(typeof instanceInfo.uri !== 'string')
+        if(typeof instanceInfo.uri !== 'string' || typeof instanceInfo.version !== 'string')
             throw new Error('Invalid info object');
     } catch(e) {
         instance.logError(`Could not get instance info: "${e.message}".`);
@@ -67,7 +67,7 @@ async function checkInstance(options) {
 
     instance.thumbnail = instanceInfo.thumbnail;
     instance.raw_version = instanceInfo.version;
-    instance.version = (instanceInfo.version || '').substr(0, 7);
+    instance.version = instanceInfo.version.substr(0, 7);
 
     try {
         let addresses = await resolve6(instance.name);
