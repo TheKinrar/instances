@@ -190,6 +190,7 @@ Instance.addHook('afterSave', async (instance) => {
             openRegistrations: instance.open_registrations,
 
             dead: instance.dead,
+            blacklisted: instance.blacklisted,
 
             updatedAt: instance.latest_check,
             checkedAt: instance.latest_check,
