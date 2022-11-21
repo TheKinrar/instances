@@ -83,36 +83,21 @@ Instance.addHook('beforeSave', async (instance) => {
     if (instance.up && !instance.first_uptime)
             instance.first_uptime = new Date();
 
-    if(instance.changed('up')) {
-        if (instance.up) {
-            let downtime = await Downtime.findOne({
-                where: {
-                    instance: instance.id,
-                    end: null
-                },
-            });
+    if(instance.changed('up') && instance.up) {
+        let downtime = await Downtime.findOne({
+            where: {
+                instance: instance.id,
+                end: null
+            },
+        });
 
-            if (downtime) {
-                downtime.end = new Date();
-                await downtime.save();
-            }
-
-            // If instance was dead and just became up, it - obviously - isn't dead anymore
-            instance.dead = false;
-        } else {
-            let downtime = await Downtime.findOne({
-                where: {
-                    instance: instance.id,
-                    end: null
-                },
-            });
-
-            if(!downtime) {
-                await Downtime.create({
-                    instance: instance.id
-                });
-            }
+        if (downtime) {
+            downtime.end = new Date();
+            await downtime.save();
         }
+
+        // If instance was dead and just became up, it - obviously - isn't dead anymore
+        instance.dead = false;
     } else if(!instance.up && !instance.dead) { // Instance is still down, maybe it is dead (2 weeks downtime)
         let downtime = await Downtime.findOne({
             where: {
@@ -121,10 +106,16 @@ Instance.addHook('beforeSave', async (instance) => {
             },
         });
 
+        if(!downtime) {
+            downtime = await Downtime.create({
+                instance: instance.id
+            });
+        }
+
         let twoWeeksBefore = new Date();
         twoWeeksBefore.setDate(-14);
 
-        if(downtime && downtime.start < twoWeeksBefore) {
+        if(downtime.start < twoWeeksBefore) {
             // Instance is dead (won't be checked regularly anymore, won't appear in lists, etc.)
             instance.dead = true;
             instance.dead_since = new Date();
