@@ -21,6 +21,7 @@ const Instance = sequelize.define('instance', {
     title: Sequelize.DataTypes.TEXT,
     description: Sequelize.DataTypes.TEXT,
     short_description: Sequelize.DataTypes.TEXT,
+    advertised_uri: Sequelize.DataTypes.TEXT,
 
     latest_history_save: Sequelize.DataTypes.DATE,
     latest_check: Sequelize.DataTypes.DATE,

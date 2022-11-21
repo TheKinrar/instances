@@ -82,6 +82,7 @@ async function checkInstance(options) {
     instance.title = instanceInfo.title;
     instance.description = instanceInfo.description;
     instance.short_description = instanceInfo.short_description;
+    instance.advertised_uri = instanceInfo.uri;
 
     await instance.save();
 
