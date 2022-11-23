@@ -37,6 +37,24 @@
                     </div>
 
                     <div class="row mb-3">
+                        <small>ALLOWED CONTENT</small>
+                        <select id="filters-allowed" style="width: 100%;" multiple="multiple" autocomplete="off">
+                            {% for e in prohibitedContent.array %}
+                                <option value="{{ e.code }}">{{ e.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row mb-3">
+                        <small>PROHIBITED CONTENT</small>
+                        <select id="filters-prohibited" style="width: 100%;" multiple="multiple" autocomplete="off">
+                            {% for e in prohibitedContent.array %}
+                                <option value="{{ e.code }}">{{ e.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row mb-3">
                         <small>MIN USERS</small>
                         <input id="filters-min-users" type="number" min="0" value="" autocomplete="off" style="width: 100%;">
                     </div>
@@ -192,20 +210,32 @@
 
     <!-- COMMON -->
     <script type="text/javascript">
-        let languages = null, instancesData = {}, instancesArray = null;
+        let languages = null, prohibitedContent = null, instancesData = {}, instancesArray = null;
 
         let filters = {};
 
         let selectLanguages
+          , selectAllowed
+          , selectProhibited
           , inputMinUsers
           , inputMaxUsers;
 
         $(() => {
             selectLanguages = $('#filters-languages');
+            selectAllowed = $('#filters-allowed');
+            selectProhibited = $('#filters-prohibited');
             inputMinUsers = $('#filters-min-users');
             inputMaxUsers = $('#filters-max-users');
 
             selectLanguages.select2({
+                width: 'resolve'
+            });
+
+            selectAllowed.select2({
+                width: 'resolve'
+            });
+
+            selectProhibited.select2({
                 width: 'resolve'
             });
 
@@ -220,6 +250,10 @@
                     if(value) {
                         if (key === 'lang') {
                             filters.languages = value.split(',');
+                        } else if (key === 'allowed') {
+                            filters.allowedContent = value.split(',');
+                        } else if (key === 'prohibited') {
+                            filters.prohibitedContent = value.split(',');
                         } else if (key === 'min-users') {
                             try {
                                 filters.minUsers = Number.parseInt(value);
@@ -242,6 +276,16 @@
                 selectLanguages.trigger('change');
             }
 
+            if(filters.allowedContent) {
+                selectAllowed.val(filters.allowedContent);
+                selectAllowed.trigger('change');
+            }
+
+            if(filters.prohibitedContent) {
+                selectProhibited.val(filters.prohibitedContent);
+                selectProhibited.trigger('change');
+            }
+
             if(filters.minUsers) {
                 inputMinUsers.val(filters.minUsers);
                 inputMinUsers.trigger('change');
@@ -261,6 +305,15 @@
                 query.languages.push($(this).val());
             });
 
+            query.allowed = [];
+            query.prohibited = [];
+            selectAllowed.find(":selected").each(function() {
+                query.allowed.push($(this).val());
+            });
+            selectProhibited.find(":selected").each(function() {
+                query.prohibited.push($(this).val());
+            });
+
             query.min_users = inputMinUsers.val();
             query.max_users = inputMaxUsers.val();
 
@@ -270,6 +323,8 @@
 
             let hq = {
                 lang: query.languages.join(','),
+                allowed: query.allowed.join(','),
+                prohibited: query.prohibited.join(','),
                 'min-users': query.min_users,
                 'max-users': query.max_users
             };
@@ -300,7 +355,6 @@
 
             $(() => {
                 const advTable = $('#table-advanced').DataTable({
-                    order: [[0, 'DESC']],
                     'ajax': {
                         'dataType': 'json',
                         'contentType': 'application/json; charset=utf-8',
