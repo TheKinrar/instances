@@ -124,7 +124,7 @@ router.post('/', (req, res) => {
         categories = [];
 
     if(categories.length > 2)
-        return error('You cannot select more than two categories. Select none if your instance is generalist.');
+        return error('You cannot select more than two categories. Select none if your instance is general.');
 
     let languages = stringOrArrayToArray(req.body.languages);
     if(!languages)
