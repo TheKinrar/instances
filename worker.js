@@ -80,19 +80,24 @@ async function fetchInstanceAP(options) {
     await instance.save();
 
     try {
-        let peers = await request({
+        let peers = (await request({
             url: `https://${instance.name}/api/v1/instance/peers`,
             json: true
-        });
+        })).filter(p => isValidDomain(p, {allowUnicode: true, subdomain: true}))
+            .map(p => p.toLowerCase());
 
-        let values = peers
-            .filter(p => isValidDomain(p, {allowUnicode: true, subdomain: true}))
+        let existing = await pg.query(pgFormat('SELECT lower(name) AS name FROM instances WHERE lower(name) IN (%L)', peers));
+        let missing = peers.filter(p => !existing.rows.some(r => r.name === p));
+
+        let values = missing
             .map(p => [
                 flake.gen(),
-                p.toLowerCase()
+                p
             ]);
 
-        await pg.query(pgFormat('INSERT INTO instances(id, name) VALUES %L ON CONFLICT DO NOTHING RETURNING id,name', values));
+        if(values.length !== 0) {
+            await pg.query(pgFormat('INSERT INTO instances(id, name) VALUES %L', values));
+        }
     } catch(e) {}
 
     try {
