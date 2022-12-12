@@ -1,4 +1,5 @@
 const pg = require('../pg');
+const pgFormat = require('pg-format');
 
 module.exports = {
     log,
@@ -15,6 +16,12 @@ async function log(instance, level, content) {
             level,
             content
     ]);
+
+    let old_log_entries = await pg.query('SELECT id FROM instances_log_entries WHERE instance=$1 ORDER BY id DESC OFFSET 100 ROWS', [
+        instance
+    ]);
+
+    await pg.query(pgFormat('DELETE FROM instances_log_entries WHERE id IN (%L)'), old_log_entries.rows.map(e => e.id));
 }
 
 async function info(instance, content) {
