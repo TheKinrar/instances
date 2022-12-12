@@ -76,8 +76,7 @@ const Instance = sequelize.define('instance', {
     first_user_created_at: Sequelize.DataTypes.DATE
 }, {
     createdAt: 'created_at',
-    updatedAt: false,
-    paranoid: true
+    updatedAt: false
 });
 
 Instance.addHook('beforeSave', async (instance) => {
