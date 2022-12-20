@@ -202,13 +202,26 @@ Instance.addHook('afterSave', async (instance) => {
 });
 
 Instance.prototype.calculateUptime = async function() {
-    let downtimes_sum = await sequelize.query(`SELECT extract(epoch from sum((CASE WHEN "end" IS NULL THEN now() ELSE "end" END) - "start")) AS total_downtime
+    if(!this.first_uptime)
+        return;
+
+    let downtimes_sum = await sequelize.query(`SELECT extract(epoch from sum(
+                CASE WHEN "end" IS NULL THEN now() ELSE "end" END
+                - greatest("start", now() - interval '3 month'))) AS total_downtime
             FROM downtimes 
-            WHERE instance=${this.id};`, {
+            WHERE instance=2
+            AND ("end" is null or "end" > now() - interval '3 month')`, {
         type: sequelize.QueryTypes.SELECT
     });
 
-    this.uptime_all = 1 - ((downtimes_sum[0].total_downtime * 1000) / (new Date() - this.first_uptime));
+    let firstUptime = this.first_uptime;
+    let threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    if(firstUptime < threeMonthsAgo)
+        firstUptime = threeMonthsAgo;
+
+    this.uptime_all = 1 - ((downtimes_sum[0].total_downtime * 1000) / (new Date() - firstUptime));
 };
 
 /**
