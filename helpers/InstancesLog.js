@@ -21,7 +21,8 @@ async function log(instance, level, content) {
         instance
     ]);
 
-    await pg.query(pgFormat('DELETE FROM instances_log_entries WHERE id IN (%L)'), old_log_entries.rows.map(e => e.id));
+    if(old_log_entries.rows.length !== 0)
+        await pg.query(pgFormat('DELETE FROM instances_log_entries WHERE id IN (%L)'), old_log_entries.rows.map(e => e.id));
 }
 
 async function info(instance, content) {
