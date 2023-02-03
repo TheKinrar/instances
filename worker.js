@@ -10,6 +10,12 @@ const pgFormat = require('pg-format');
 const Instance = require('./models/instance');
 const FlakeId = require('flakeid');
 const isValidDomain = require('is-valid-domain');
+const fs = require('fs');
+
+let domain_blacklist = [];
+if(fs.existsSync(__dirname + '/domain_blacklist')) {
+    domain_blacklist = fs.readFileSync(__dirname + '/domain_blacklist', 'utf8').split('\n');
+}
 
 const flake = new FlakeId({
     timeOffset: 1608422400000
@@ -84,7 +90,8 @@ async function fetchInstanceAP(options) {
             url: `https://${instance.name}/api/v1/instance/peers`,
             json: true
         })).filter(p => isValidDomain(p, {allowUnicode: true, subdomain: true}))
-            .map(p => p.toLowerCase());
+            .map(p => p.toLowerCase())
+            .filter(p => !domain_blacklist.includes(p));
 
         let existing = await pg.query(pgFormat('SELECT lower(name) AS name FROM instances WHERE lower(name) IN (%L)', peers));
         let missing = peers.filter(p => !existing.rows.some(r => r.name === p));
