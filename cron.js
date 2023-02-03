@@ -12,7 +12,7 @@ setTimeout(() => {
 
 (async () => {
     let aliveThreshold = new Date();
-    aliveThreshold.setMinutes(aliveThreshold.getMinutes() - 15);
+    aliveThreshold.setMinutes(aliveThreshold.getMinutes() - 60);
     let deadThreshold = new Date();
     deadThreshold.setDate(deadThreshold.getDate() - 7);
 
