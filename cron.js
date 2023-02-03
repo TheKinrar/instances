@@ -33,7 +33,8 @@ setTimeout(() => {
                     [Op.lt]: deadThreshold
                 }
             }]
-        }
+        },
+        limit: 10000
     });
 
     console.log(`${instances.length} instances to check`);
