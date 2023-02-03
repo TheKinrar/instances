@@ -100,11 +100,12 @@ async function fetchInstanceAP(options) {
         let values = missing
             .map(p => [
                 flake.gen(),
-                p
+                p,
+                instance.id
             ]);
 
         if(values.length !== 0) {
-            await pg.query(pgFormat('INSERT INTO instances(id, name) VALUES %L', values));
+            await pg.query(pgFormat('INSERT INTO instances(id, name, discovered_from) VALUES %L', values));
         }
     } catch(e) {}
 
