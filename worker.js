@@ -91,7 +91,7 @@ async function fetchInstanceAP(options) {
             json: true
         })).filter(p => isValidDomain(p, {allowUnicode: true, subdomain: true}))
             .map(p => p.toLowerCase())
-            .filter(p => !domain_blacklist.includes(p));
+            .filter(p => !domain_blacklist.some(d => p.endsWith(d)));
 
         let existing = await pg.query(pgFormat('SELECT lower(name) AS name FROM instances WHERE lower(name) IN (%L)', peers));
         let missing = peers.filter(p => !existing.rows.some(r => r.name === p));
