@@ -35,6 +35,9 @@ async function checkInstance(options) {
     let instanceInfo;
     try {
         instanceInfo = await instance.getMastodonInstanceInfo();
+        try {
+            instanceInfo.description = (await instance.getMastodonInstanceExtendedDescription()).content;
+        } catch(e) {}
 
         if(!instanceInfo) {
             throw new Error('Empty info object');

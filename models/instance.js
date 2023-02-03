@@ -259,6 +259,27 @@ Instance.prototype.getMastodonInstanceInfo = function() {
     });
 };
 
+/**
+ * Fetches and returns data from the /api/v2/instance endpoint of the Mastodon API.
+ * Pleroma does not implement this endpoint.
+ * @returns {Promise<Object>} Instance info fetched from the API
+ */
+Instance.prototype.getMastodonInstanceInfoV2 = function() {
+    return request({
+        url: `https://${this.name}/api/v2/instance`,
+        json: true,
+        followRedirect: false
+    });
+};
+
+Instance.prototype.getMastodonInstanceExtendedDescription = function() {
+    return request({
+        url: `https://${this.name}/api/v1/instance/extended_description`,
+        json: true,
+        followRedirect: false
+    });
+};
+
 Instance.prototype.getStatusNetInstanceConfig = function() {
     return request({
         url: `https://${this.name}/api/statusnet/config.json`,
