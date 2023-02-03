@@ -14,7 +14,8 @@ const fs = require('fs');
 
 let domain_blacklist = [];
 if(fs.existsSync(__dirname + '/domain_blacklist')) {
-    domain_blacklist = fs.readFileSync(__dirname + '/domain_blacklist', 'utf8').split('\n');
+    domain_blacklist = fs.readFileSync(__dirname + '/domain_blacklist', 'utf8')
+        .split('\n').filter(Boolean);
 }
 
 const flake = new FlakeId({
