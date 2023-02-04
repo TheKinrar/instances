@@ -129,6 +129,22 @@ router.post('/sign_up', async (req, res) => {
     }
     let domain_str = `${domain.subdomain ? domain.subdomain + '.' : ''}${domain.domain}.${domain.tld}`;
 
+    let instance = await Instance.findOne({
+        where: {
+            name: domain_str
+        }
+    });
+
+    if(!instance) {
+        res.flash('error', {
+            header: 'Sign up failed.',
+            body: 'Instance not found. If it was just created, make sure it is reachable from other instances then wait ' +
+                'for 24 hours. If it still does not work, please open an issue on GitHub (see footer).'
+        });
+
+        return res.redirect('/admin');
+    }
+
     let admin = await DB.get('admins').findOne({
         instance: domain_str
     });
@@ -157,31 +173,7 @@ router.post('/sign_up', async (req, res) => {
         } catch(e) {
             return res.sendStatus(500);
         }
-
-        try {
-            await DB.get('instances').insert({
-                addedAt: new Date(),
-                name: domain_str,
-                downchecks: 0,
-                upchecks: 0
-            });
-        } catch (e) {}
-
-        try {
-            await Instance.create({
-                name: domain_str
-            });
-        } catch(e) {}
     }
-
-    let instance = await Instance.findOne({
-        where: {
-            name: domain_str
-        }
-    });
-
-    if(!instance)
-        return res.sendStatus(500);
 
     let software = await instance.guessSoftware();
 
