@@ -34,6 +34,7 @@ setTimeout(() => {
                 }
             }]
         },
+        order: [['latest_check', 'ASC']],
         limit: 10000
     });
 
