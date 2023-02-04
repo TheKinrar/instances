@@ -151,6 +151,7 @@ Instance.addHook('afterSave', async (instance) => {
         name: instance.name
     });
 
+    let mongo_infos;
     if(!instance_mongo) {
         await DB.get('instances').insert({
             addedAt: new Date(),
@@ -158,9 +159,25 @@ Instance.addHook('afterSave', async (instance) => {
             downchecks: 0,
             upchecks: 0
         }).catch(() => {});
+
+        mongo_infos = {
+            shortDescription: '',
+            fullDescription: '',
+            theme: '',
+            categories: [],
+            languages: [],
+            noOtherLanguages: false,
+            prohibitedContent: [],
+            otherProhibitedContent: [],
+            federation: 'all',
+            bots: 'yes',
+            brands: 'yes',
+            optOut: false
+        };
+    } else {
+        mongo_infos = instance_mongo.infos || {};
     }
 
-    let mongo_infos = instance_mongo.infos || {};
     mongo_infos.fullDescription = instance.description || '';
     mongo_infos.shortDescription = instance.short_description || '';
     mongo_infos.theme = instance.title || '';

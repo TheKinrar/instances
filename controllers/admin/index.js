@@ -28,24 +28,6 @@ router.get('/', (req, res) => {
     DB.get('instances').findOne({
         name: req.user.instance
     }).then((instance) => {
-        if(!instance.infos) {
-            instance.infos = {
-              shortDescription: '',
-              fullDescription: '',
-              theme: '',
-              categories: [],
-              languages: [],
-              noOtherLanguages: false,
-              prohibitedContent:
-               [],
-              otherProhibitedContent: [],
-              federation: 'all',
-              bots: 'yes',
-              brands: 'yes',
-              optOut: false
-            };
-        }
-
         res.render('admin/dashboard', {
             instance,
             langs: Languages.getAllLanguageCode().map(function(e) {
