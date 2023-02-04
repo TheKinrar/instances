@@ -213,7 +213,7 @@ Instance.prototype.calculateUptime = async function() {
                 CASE WHEN "end" IS NULL THEN now() ELSE "end" END
                 - greatest("start", now() - interval '3 month'))) AS total_downtime
             FROM downtimes 
-            WHERE instance=2
+            WHERE instance=${this.id}
             AND ("end" is null or "end" > now() - interval '3 month')`, {
         type: sequelize.QueryTypes.SELECT
     });
