@@ -69,31 +69,6 @@ router.get('/logout', async (req, res) => {
     res.redirect('/admin');
 });
 
-router.get('/statistics', async (req, res) => {
-    if(!req.user) {
-        return res.render('admin/index');
-    }
-
-    let pgc = await pg.connect();
-
-    let token = await pgc.query('SELECT stats_token FROM instances WHERE name=$1', [
-        req.user.instance
-    ]);
-
-    if(!token.rows[0].stats_token) {
-        token = await pgc.query('UPDATE instances SET stats_token=$1 WHERE name=$2 RETURNING stats_token', [
-            randomstring.generate(64),
-            req.user.instance
-        ]);
-    }
-
-    res.render('admin/dashboard/statistics', {
-        token: token.rows[0].stats_token
-    });
-
-    await pgc.release();
-});
-
 router.post('/', (req, res) => {
     if(!req.user)
         return res.redirect('/admin');
@@ -126,10 +101,6 @@ router.post('/', (req, res) => {
     let otherProhibitedContent = commaListToArray(req.body.otherProhibitedContent);
     if(!otherProhibitedContent)
         otherProhibitedContent = [];
-
-    /*let federation = req.body.federation;
-    if(!isNonEmptyString(federation) || !['all', 'some'].includes(federation))
-        return error('Missing federation policy.');*/
 
     DB.get('instances').update({
         name: req.user.instance

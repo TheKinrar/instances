@@ -2,8 +2,7 @@
 
 {% block main %}
     <p>
-        Define here the informations about your instance, which will be shown on this website and will help users to choose an instance which best suits their needs.<br />
-        Informations are not currently shown but will be in the next days. Instances with no information set won't be shown.
+        Define here the information about your instance, which will be shown on this website and will help users choose an instance which best suits their needs.
     </p>
 
     {% if messages.validationError.length > 0 %}
@@ -16,7 +15,7 @@
       <div class="form-check">
         <label class="form-check-label">
           <input type="checkbox" class="form-check-input" name="optOut"{{ ' checked' if instance.infos.optOut }}>
-          Hide this instance from instance pickers (e.g. wizard, simple list and joinmastodon.org)
+          Hide this instance from the instance picker
         </label>
       </div>
 
@@ -52,22 +51,6 @@
         <input type="text" class="form-control" name="otherProhibitedContent" value="{{ otherProhibitedContent }}">
         <small class="form-text text-muted">Please use a comma-separated list.</small>
       </div>
-
-      {#<fieldset class="form-group">
-        <legend>Federation</legend>
-        <div class="form-check">
-          <label class="form-check-label">
-            <input type="radio" class="form-check-input" name="federation" value="all"{{ ' checked' if instance.infos.federation === 'all' }}>
-            Federates with all instances
-          </label>
-        </div>
-        <div class="form-check">
-          <label class="form-check-label">
-            <input type="radio" class="form-check-input" name="federation" value="some"{{ ' checked' if instance.infos.federation === 'some' }}>
-            Federates with some instances
-          </label>
-        </div>
-      </fieldset>#}
 
         <button type="submit" class="btn btn-primary">Submit</button>
         <a class="btn btn-danger" href="/admin/logout">Log out</a>
