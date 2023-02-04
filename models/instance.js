@@ -160,6 +160,11 @@ Instance.addHook('afterSave', async (instance) => {
         }).catch(() => {});
     }
 
+    let mongo_infos = instance_mongo.infos || {};
+    mongo_infos.fullDescription = instance.description || '';
+    mongo_infos.shortDescription = instance.short_description || '';
+    mongo_infos.theme = instance.title || '';
+
     await DB.get('instances').update({
         name: instance.name
     }, {
@@ -198,9 +203,7 @@ Instance.addHook('afterSave', async (instance) => {
 
             mastodon: instance.software === 1,
 
-            'infos.fullDescription': instance.description || '',
-            'infos.shortDescription': instance.short_description || '',
-            'infos.theme': instance.title || '',
+            infos: mongo_infos,
         }
     });
 });
