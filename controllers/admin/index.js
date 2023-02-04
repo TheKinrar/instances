@@ -109,23 +109,6 @@ router.post('/', (req, res) => {
 
     let optOut = req.body.optOut === 'on';
 
-    if(!isNonEmptyString(req.body.shortDescription))
-        return error('Missing short description.');
-
-    if(!isNonEmptyString(req.body.fullDescription))
-        return error('Missing full description.');
-
-    let theme = req.body.theme;
-    if(!isNonEmptyString(theme))
-        theme = null;
-
-    let categories = stringOrArrayToArray(req.body.categories);
-    if(!categories)
-        categories = [];
-
-    if(categories.length > 2)
-        return error('You cannot select more than two categories. Select none if your instance is general.');
-
     let languages = stringOrArrayToArray(req.body.languages);
     if(!languages)
         languages = [];
@@ -148,24 +131,15 @@ router.post('/', (req, res) => {
     if(!isNonEmptyString(federation) || !['all', 'some'].includes(federation))
         return error('Missing federation policy.');*/
 
-    let infos = {
-        optOut,
-        shortDescription: req.body.shortDescription,
-        fullDescription: req.body.fullDescription,
-        theme,
-        categories,
-        languages,
-        noOtherLanguages,
-        prohibitedContent,
-        otherProhibitedContent,
-        //federation
-    };
-
     DB.get('instances').update({
         name: req.user.instance
     }, {
         $set: {
-            infos
+            'infos.optOut': optOut,
+            'infos.languages': languages,
+            'infos.noOtherLanguages': noOtherLanguages,
+            'infos.prohibitedContent': prohibitedContent,
+            'infos.otherProhibitedContent': otherProhibitedContent,
         }
     });
 

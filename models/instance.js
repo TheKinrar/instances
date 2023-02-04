@@ -196,7 +196,11 @@ Instance.addHook('afterSave', async (instance) => {
 
             thumbnail: instance.thumbnail,
 
-            mastodon: instance.software === 1
+            mastodon: instance.software === 1,
+
+            'infos.fullDescription': instance.description || '',
+            'infos.shortDescription': instance.short_description || '',
+            'infos.theme': instance.title || '',
         }
     });
 });

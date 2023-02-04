@@ -21,35 +21,6 @@
       </div>
 
       <div class="form-group">
-        <label for="inputShortdesc">Short description</label>
-        <textarea class="form-control" name="shortDescription" rows="2" maxlength="150" required>{{ instance.infos.shortDescription }}</textarea>
-        <small class="form-text text-muted">At most 150 characters. This will be shown with your instance name. Use it to briefly describe the specificities of your instance, if any.</small>
-      </div>
-
-      <div class="form-group">
-        <label for="inputFulldesc">Full description</label>
-        <textarea class="form-control" name="fullDescription" rows="5" required>{{ instance.infos.fullDescription }}</textarea>
-        <small class="form-text text-muted">This is the extended description of your instance, like what's shown on the <i>/about/more</i> page of your instance.</small>
-      </div>
-
-      <div class="form-group">
-        <label for="inputTheme">Topic</label>
-        <input type="text" class="form-control" id="inputTheme" name="theme" value="{{ instance.infos.theme }}">
-        <small class="form-text text-muted">Leave empty for a general instance.</small>
-      </div>
-
-      <div class="form-group">
-        <label for="selectCategories">Categories</label>
-        <select multiple class="form-control" id="selectCategories" name="categories" style="height: 300px;">
-            {% for category in InstanceCategories %}
-              <option value="{{ category }}"{{ ' selected="selected"' if instance.infos.categories and instance.infos.categories.includes(category) }}>{{ category }}</option>
-            {% endfor %}
-        </select>
-        <small class="form-text text-muted">Use Control key to select multiple at once and to unselect items.</small>
-        <small class="form-text text-muted">Select none for a general instance.</small>
-      </div>
-
-      <div class="form-group">
         <label for="selectLanguages">Main languages</label>
         <select multiple class="form-control" id="selectLanguages" name="languages" style="height: 300px;">
           {% for lang in langs %}
