@@ -275,7 +275,7 @@ Instance.prototype.guessSoftware = async function() {
 
 Instance.prototype.requestMastodonInstanceInfo = function () {
     return got({
-        url: `https://mastodon.xyz/api/v1/instance`,
+        url: `https://${this.name}/api/v1/instance`,
         responseType: 'json'
     });
 }
