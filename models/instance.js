@@ -10,7 +10,7 @@ const Downtime = require('./downtime');
 
 const config = require('../config');
 const DB = require('monk')(config.database, {
-    connectTimeoutMS: 1000
+    connectTimeoutMS: 3000
 });
 
 const Instance = sequelize.define('instance', {

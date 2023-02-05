@@ -7,7 +7,7 @@ const pool = new Pool({
     database: config.postgresql.database,
     user: config.postgresql.username,
     password: config.postgresql.password,
-    connectionTimeoutMillis: 1000
+    connectionTimeoutMillis: 3000
 });
 
 module.exports = pool;

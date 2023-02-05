@@ -3,7 +3,7 @@ tls.DEFAULT_ECDH_CURVE = 'auto'; // Fix that should not be needed but is because
 
 const config = require('./config.json');
 const DB = require('monk')(config.database, {
-    connectTimeoutMS: 1000
+    connectTimeoutMS: 3000
 });
 const pg = require('./pg');
 const queue = require('./queue');
