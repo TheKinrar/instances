@@ -157,7 +157,7 @@ router.get('/list.json', (req, res) => {
                 let score = 0;
                 let max = 0;
 
-                if(instance.infos) {
+                if(instance.infos && instance.infos.prohibitedContent) {
                     if (Array.isArray(cq.languages) && cq.languages.length > 0) {
                         max += 1;
 
