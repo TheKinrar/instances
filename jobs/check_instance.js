@@ -38,6 +38,11 @@ async function checkInstance(options) {
         try {
             instanceInfo.description = (await instance.getMastodonInstanceExtendedDescription()).content;
         } catch(e) {}
+        try {
+            let infoV2 = await instance.getMastodonInstanceInfoV2();
+            if(infoV2.usage && infoV2.usage.users && typeof infoV2.usage.users.active_month === 'number')
+                instance.active_users_month = infoV2.usage.users.active_month;
+        } catch(e) {}
 
         if(!instanceInfo) {
             throw new Error('Empty info object');

@@ -50,6 +50,7 @@ const Instance = sequelize.define('instance', {
     users: Sequelize.DataTypes.INTEGER,
     connections: Sequelize.DataTypes.INTEGER,
     statuses: Sequelize.DataTypes.BIGINT,
+    active_users_month: Sequelize.DataTypes.INTEGER,
 
     thumbnail: Sequelize.DataTypes.TEXT,
 

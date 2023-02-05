@@ -60,8 +60,8 @@ async function saveInstanceHistory(options) {
     await instance.save();
 
     await pg.query('INSERT INTO instances_history(instance, uptime_all, up, ipv6, https_score, obs_score, ' +
-        'users, connections, statuses, open_registrations, version) ' +
-        'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [
+        'users, connections, statuses, open_registrations, version, active_users_month) ' +
+        'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)', [
         id,
         instance.uptime_all || 0,
         instance.up || false,
@@ -72,7 +72,8 @@ async function saveInstanceHistory(options) {
         instance.connections || 0,
         instance.statuses || 0,
         instance.open_registrations || false,
-        instance.version || null
+        instance.version || null,
+        instance.active_users_month || 0,
     ]);
 }
 
