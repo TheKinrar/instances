@@ -24,7 +24,9 @@ ProhibitedContent.array = Object.keys(ProhibitedContent).map((code) => {
 	};
 });
 
-global.DB = require('monk')(config.database);
+global.DB = require('monk')(config.database, {
+	connectTimeoutMS: 1000
+});
 const app = express();
 
 app.locals.ProhibitedContent = ProhibitedContent;

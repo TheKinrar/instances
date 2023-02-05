@@ -2,7 +2,9 @@ const tls = require('tls');
 tls.DEFAULT_ECDH_CURVE = 'auto'; // Fix that should not be needed but is because Node is stupid
 
 const config = require('./config.json');
-const DB = require('monk')(config.database);
+const DB = require('monk')(config.database, {
+    connectTimeoutMS: 1000
+});
 const pg = require('./pg');
 const queue = require('./queue');
 const request = require('./helpers/request');

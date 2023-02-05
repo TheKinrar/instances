@@ -9,7 +9,9 @@ const InstancesLog = require('../helpers/InstancesLog');
 const Downtime = require('./downtime');
 
 const config = require('../config');
-const DB = require('monk')(config.database);
+const DB = require('monk')(config.database, {
+    connectTimeoutMS: 1000
+});
 
 const Instance = sequelize.define('instance', {
     name: {
