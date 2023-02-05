@@ -10,5 +10,6 @@ module.exports = require('got').extend({
     headers: {
         'User-Agent': 'MastodonInstances (https://instances.social)'
     },
-    followRedirect: false
+    followRedirect: false,
+    retry: {limit: 0}
 });
