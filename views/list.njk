@@ -134,6 +134,7 @@
                                 <th>Connections</th>
                                 <th>Registrations</th>
                                 <th>Version</th>
+                                <th>IPv6</th>
                                 <th>Uptime</th>
                                 <th>HTTPS</th>
                                 <th>Obs</th>
@@ -148,6 +149,7 @@
                                 <th>Connections</th>
                                 <th>Registrations</th>
                                 <th>Version</th>
+                                <th>IPv6</th>
                                 <th>Uptime</th>
                                 <th>HTTPS</th>
                                 <th>Obs</th>
@@ -398,6 +400,10 @@
 
                                 return data;
                             }
+                        },
+                        {
+                            'data': 'ipv6',
+                            'render': b => b ? 'Yes' : 'No'
                         },
                         {
                             'data': 'uptime_str',
