@@ -7,7 +7,7 @@ const Session = require('express-session');
 const Languages = global.Languages = require('languages');
 const CountryLanguages = require('country-language');
 const {Op} = require("sequelize");
-const MongoStore = require('connect-mongo')(Session);
+const MongoStore = require('connect-mongo');
 
 global.Request = require('request').defaults({
     headers: {
@@ -92,8 +92,8 @@ const session = Session({
 	secret: config.session_secret,
 	resave: false,
 	saveUninitialized: false,
-	store: new MongoStore({
-		url: 'mongodb://' + config.database
+	store: MongoStore.create({
+		mongoUrl: 'mongodb://' + config.database
 	})
 });
 app.use(session);

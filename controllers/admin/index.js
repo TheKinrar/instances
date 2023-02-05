@@ -4,7 +4,6 @@ const passwordHash = require('password-hash');
 const Languages = require('languages');
 const pg = require('../../pg');
 const Instance = require('../../models/instance');
-const parseDomain = require('parse-domain');
 const config = require('../../config');
 const Mailgun = require('mailgun-js')({
     apiKey: config.mailgun.key,
@@ -100,20 +99,9 @@ router.post('/', (req, res) => {
 });
 
 router.post('/sign_up', async (req, res) => {
-    let domain = parseDomain(req.body.instance);
-    if(domain === null) {
-        res.flash('error', {
-            header: 'Sign up failed.',
-            body: 'Invalid instance name.'
-        });
-
-        return res.redirect('/admin');
-    }
-    let domain_str = `${domain.subdomain ? domain.subdomain + '.' : ''}${domain.domain}.${domain.tld}`;
-
     let instance = await Instance.findOne({
         where: {
-            name: domain_str
+            name: req.body.instance
         }
     });
 
@@ -128,7 +116,7 @@ router.post('/sign_up', async (req, res) => {
     }
 
     let admin = await DB.get('admins').findOne({
-        instance: domain_str
+        instance: instance.name
     });
 
     let activation_token;
@@ -149,7 +137,7 @@ router.post('/sign_up', async (req, res) => {
         try {
             await DB.get('admins').insert({
                 createdAt: new Date(),
-                instance: domain_str,
+                instance: instance.name,
                 activation_token
             });
         } catch(e) {
