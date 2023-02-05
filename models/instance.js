@@ -4,6 +4,7 @@ const Sequelize = require('sequelize');
 const sequelize = require('.');
 const queue = require('../queue');
 const request = require('../helpers/request');
+const got = require('../helpers/got');
 const Software = require('./software');
 const InstancesLog = require('../helpers/InstancesLog');
 const Downtime = require('./downtime');
@@ -272,6 +273,13 @@ Instance.prototype.guessSoftware = async function() {
 
     return await Software.findByPk(1);
 };
+
+Instance.prototype.requestMastodonInstanceInfo = function () {
+    return got({
+        url: `https://mastodon.xyz/api/v1/instance`,
+        responseType: 'json'
+    });
+}
 
 /**
  * Fetches and returns data from the /api/v1/instance endpoint of the Mastodon API.

@@ -17,6 +17,7 @@
     "express-session": "^1.15.2",
     "flakeid": "^1.0.0",
     "gini": "^1.1.7",
+    "got": "v11",
     "http-auth": "^3.1.3",
     "is-valid-domain": "^0.1.6",
     "kue": "^0.11.6",

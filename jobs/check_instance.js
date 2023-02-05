@@ -1,9 +1,5 @@
 'use strict';
 
-const util = require('util');
-const dns = require('dns');
-const resolve6 = util.promisify(dns.resolve6);
-const request = require('../helpers/request');
 const Instance = require('../models/instance');
 
 async function checkInstance(options) {
@@ -34,7 +30,9 @@ async function checkInstance(options) {
     // Now that we know instance is Mastodon or Pleroma (or looks like), we can check if it is up and gather some stats.
     let instanceInfo;
     try {
-        instanceInfo = await instance.getMastodonInstanceInfo();
+        let instanceInfoRes = await instance.requestMastodonInstanceInfo();
+        instance.ipv6 = instanceInfoRes.socket.remoteFamily === 'IPv6';
+        instanceInfo = instanceInfoRes.body;
         try {
             instanceInfo.description = (await instance.getMastodonInstanceExtendedDescription()).content;
         } catch(e) {}
@@ -76,14 +74,6 @@ async function checkInstance(options) {
     instance.thumbnail = instanceInfo.thumbnail;
     instance.raw_version = instanceInfo.version;
     instance.version = instanceInfo.version.substr(0, 7);
-
-    try {
-        let addresses = await resolve6(instance.name);
-
-        instance.ipv6 = addresses.length > 0;
-    } catch(e) {
-        instance.ipv6 = false;
-    }
 
     instance.open_registrations = !!instanceInfo.registrations;
 
