@@ -508,12 +508,14 @@
                         modal.find('#modalInstanceInfo-description').html(markdown.makeHtml(escapeHtml(instance.infos.fullDescription)));
 
                         let textL = '';
-                        instance.infos.languages.forEach((language) => {
-                            if(textL.length > 0)
-                                textL += ', ';
+                        if(instance.infos.languages) {
+                            instance.infos.languages.forEach((language) => {
+                                if (textL.length > 0)
+                                    textL += ', ';
 
-                            textL += getLanguage(languages, language).name[0];
-                        });
+                                textL += getLanguage(languages, language).name[0];
+                            });
+                        }
                         modal.find('#modalInstanceInfo-languages').html(textL);
                     } else {
                         $('.modalInstanceInfo-extraInfo').hide();
