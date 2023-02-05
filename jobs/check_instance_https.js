@@ -1,6 +1,6 @@
 'use strict';
 
-const request = require('../helpers/request');
+const got = require('../helpers/got');
 const Instance = require('../models/instance');
 
 async function checkInstanceHttps(options) {
@@ -16,10 +16,7 @@ async function checkInstanceHttps(options) {
 
     let res;
     try {
-        res = await request({
-            url: `https://cryptcheck.fr/https/${instance.name}.json`,
-            json: true
-        });
+        res = await got(`https://cryptcheck.fr/https/${instance.name}.json`).json();
     } catch(e) {
         await instance.save();
         return;

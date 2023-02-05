@@ -1,6 +1,6 @@
 'use strict';
 
-const request = require('../helpers/request');
+const got = require('../helpers/got');
 const querystring = require('querystring');
 const Instance = require('../models/instance');
 
@@ -15,12 +15,11 @@ async function checkInstanceObs(options) {
 
     instance.latest_obs_check = new Date();
 
-    let res = await request.post({
+    let res = await got.post({
         url: 'https://http-observatory.security.mozilla.org/api/v1/analyze?'+ querystring.stringify({
             host: instance.name
-        }),
-        json: true
-    });
+        })
+    }).json();
 
     if(res.state === 'FINISHED') {
         instance.obs_rank = res.grade;

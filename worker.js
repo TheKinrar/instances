@@ -7,7 +7,7 @@ const DB = require('monk')(config.database, {
 });
 const pg = require('./pg');
 const queue = require('./queue');
-const request = require('./helpers/request');
+const got = require('./helpers/got');
 const pgFormat = require('pg-format');
 const Instance = require('./models/instance');
 const FlakeId = require('flakeid');
@@ -90,10 +90,8 @@ async function fetchInstanceAP(options) {
     await instance.save();
 
     try {
-        let peers = (await request({
-            url: `https://${instance.name}/api/v1/instance/peers`,
-            json: true
-        })).filter(p => isValidDomain(p, {allowUnicode: true, subdomain: true}))
+        let peers = (await got(`https://${instance.name}/api/v1/instance/peers`).json())
+            .filter(p => isValidDomain(p, {allowUnicode: true, subdomain: true}))
             .map(p => p.toLowerCase())
             .filter(p => !domain_blacklist.some(d => p.endsWith(d)));
 
@@ -113,10 +111,7 @@ async function fetchInstanceAP(options) {
     } catch(e) {}
 
     try {
-        let activity = await request({
-            url: `https://${instance.name}/api/v1/instance/activity`,
-            json: true
-        });
+        let activity = await got(`https://${instance.name}/api/v1/instance/activity`).json();
 
         for(let activity_w of activity) {
             await pg.query('INSERT INTO instances_activity(instance, week, statuses, logins, registrations) ' +

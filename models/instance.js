@@ -3,7 +3,6 @@
 const Sequelize = require('sequelize');
 const sequelize = require('.');
 const queue = require('../queue');
-const request = require('../helpers/request');
 const got = require('../helpers/got');
 const Software = require('./software');
 const InstancesLog = require('../helpers/InstancesLog');
@@ -287,11 +286,7 @@ Instance.prototype.requestMastodonInstanceInfo = function () {
  * @returns {Promise<Object>} Instance info fetched from the API
  */
 Instance.prototype.getMastodonInstanceInfo = function() {
-    return request({
-        url: `https://${this.name}/api/v1/instance`,
-        json: true,
-        followRedirect: false
-    });
+    return got(`https://${this.name}/api/v1/instance`).json();
 };
 
 /**
@@ -300,27 +295,15 @@ Instance.prototype.getMastodonInstanceInfo = function() {
  * @returns {Promise<Object>} Instance info fetched from the API
  */
 Instance.prototype.getMastodonInstanceInfoV2 = function() {
-    return request({
-        url: `https://${this.name}/api/v2/instance`,
-        json: true,
-        followRedirect: false
-    });
+    return got(`https://${this.name}/api/v2/instance`).json();
 };
 
 Instance.prototype.getMastodonInstanceExtendedDescription = function() {
-    return request({
-        url: `https://${this.name}/api/v1/instance/extended_description`,
-        json: true,
-        followRedirect: false
-    });
+    return got(`https://${this.name}/api/v1/instance/extended_description`).json();
 };
 
 Instance.prototype.getStatusNetInstanceConfig = function() {
-    return request({
-        url: `https://${this.name}/api/statusnet/config.json`,
-        json: true,
-        followRedirect: false
-    });
+    return got(`https://${this.name}/api/statusnet/config.json`).json();
 };
 
 Instance.prototype.queueHistorySaving = function() {

@@ -1,10 +1,10 @@
+const got = require('../helpers/got');
+
 module.exports = () => {
     const db_instances = DB.get('instances');
     const db_versions = DB.get('versions');
 
-    Request.get('https://api.github.com/repos/tootsuite/mastodon/releases', (err, res) => {
-        if(err) return console.error(err);
-
+    got('https://api.github.com/repos/tootsuite/mastodon/releases').then(res => {
         db_instances.count({up:true}).then((total) => {
             let version_names = [];
 
@@ -94,5 +94,5 @@ module.exports = () => {
                 }).catch(console.error);
             }).catch(console.error);
         }).catch(console.error);
-    });
+    }).catch(console.error);
 };

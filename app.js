@@ -9,12 +9,6 @@ const CountryLanguages = require('country-language');
 const {Op} = require("sequelize");
 const MongoStore = require('connect-mongo');
 
-global.Request = require('request').defaults({
-    headers: {
-        'User-Agent': 'MastodonInstances/1.0.0 (https://instances.mastodon.xyz)'
-    }
-});
-
 global.config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 global.ProhibitedContent = JSON.parse(fs.readFileSync('prohibitedContent.json', 'utf8'));
 ProhibitedContent.array = Object.keys(ProhibitedContent).map((code) => {
