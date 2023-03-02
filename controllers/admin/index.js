@@ -5,9 +5,12 @@ const Languages = require('languages');
 const pg = require('../../pg');
 const Instance = require('../../models/instance');
 const config = require('../../config');
-const Mailgun = require('mailgun-js')({
-    apiKey: config.mailgun.key,
-    domain: config.mailgun.domain
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const mailgun = new Mailgun(formData);
+const mg = mailgun.client({
+    username: 'api',
+    key: config.mailgun.key
 });
 const Mastodon = new require('mastodon')({
     access_token: config.bot_access_token,
@@ -248,7 +251,7 @@ router.post('/activate/email', async (req, res) => {
         });
 
         if(admin) {
-            await Mailgun.messages().send({
+            await mg.messages.create(config.mailgun.domain, {
                 from: 'instances.social <no-reply@mastodon.xyz>',
                 to: req.session.instanceInfo.email,
                 subject: 'instances.social sign up',
