@@ -23,7 +23,7 @@
         <label for="selectLanguages">Main languages</label>
         <select multiple class="form-control" id="selectLanguages" name="languages" style="height: 300px;">
           {% for lang in langs %}
-            <option value="{{ lang.code }}"{{ ' selected="selected"' if instance.infos.languages.includes(lang.code) }}>{{ lang.name }} ({{ lang.nativeName }})</option>
+            <option value="{{ lang.code }}"{{ ' selected="selected"' if instance.infos.languages and instance.infos.languages.includes(lang.code) }}>{{ lang.name }} ({{ lang.nativeName }})</option>
           {% endfor %}
         </select>
         <small class="form-text text-muted">Use Control key to select multiple at once and to unselect items.</small>
@@ -40,7 +40,7 @@
         <label for="selectContent">Prohibited content</label>
         <select multiple class="form-control" name="prohibitedContent" style="height: 300px;">
           {% for content in ProhibitedContent.array %}
-            <option value="{{ content.code }}"{{ ' selected="selected"' if instance.infos.prohibitedContent.includes(content.code) }}>{{ content.name }}</option>
+            <option value="{{ content.code }}"{{ ' selected="selected"' if instance.infos.prohibitedContent and instance.infos.prohibitedContent.includes(content.code) }}>{{ content.name }}</option>
           {% endfor %}
         </select>
         <small class="form-text text-muted">Use Control key to select multiple at once and to unselect items.</small>

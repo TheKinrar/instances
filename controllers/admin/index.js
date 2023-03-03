@@ -39,7 +39,7 @@ router.get('/', (req, res) => {
             }).sort(function(a, b) {
                 return a.name.localeCompare(b.name);
             }),
-            otherProhibitedContent: instance.infos.otherProhibitedContent.join(', ')
+            otherProhibitedContent: (instance.infos.otherProhibitedContent || []).join(', ')
         });
     }).catch((e) => {
         console.error(e);
