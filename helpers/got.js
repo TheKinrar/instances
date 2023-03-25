@@ -17,8 +17,8 @@ const instance = module.exports = got.extend({
 
 const resolver = new Resolver();
 resolver.setServers([
-    '2606:4700:4700::1111',
-    '2606:4700:4700::1001',
+    '[2606:4700:4700::1111]',
+    '[2606:4700:4700::1001]',
     '1.1.1.1',
     '1.0.0.1'
 ]);
