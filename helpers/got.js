@@ -5,7 +5,7 @@ const got = require('got');
 const instance = module.exports = got.extend({
     mutableDefaults: true,
     timeout: {
-        lookup: 100, // 0.1s for DNS lookup
+        lookup: 1000, // 1s for DNS lookup
         connect: 5000, // 5s for initial connection
         socket: 5000, // 5s without receiving any data
         request: 30000 // 30s for the full request
