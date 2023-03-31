@@ -49,6 +49,10 @@ async function checkInstance(options) {
 
         if(typeof instanceInfo.uri !== 'string' || typeof instanceInfo.version !== 'string')
             throw new Error('Invalid info object');
+
+        if(instanceInfo.version.includes('Calckey')) {
+            throw new Error('Calckey is not supported because its implementation of the Mastodon API is broken');
+        }
     } catch(e) {
         if(e.code === 'ETIMEDOUT' && e.event === 'lookup') {
             // Lookup timeouts are on us, ignore them
