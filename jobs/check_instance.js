@@ -31,7 +31,8 @@ async function checkInstance(options) {
     let instanceInfo;
     try {
         let instanceInfoRes = await instance.requestMastodonInstanceInfo();
-        instance.ipv6 = instanceInfoRes.socket.remoteFamily === 'IPv6';
+        instance.ipv6 = instanceInfoRes.socket.remoteFamily === 'IPv6' &&
+            !instanceInfoRes.socket.remoteAddress.startsWith('::ffff:');
         instanceInfo = instanceInfoRes.body;
         try {
             instanceInfo.description = (await instance.getMastodonInstanceExtendedDescription()).content;
@@ -49,8 +50,14 @@ async function checkInstance(options) {
         if(typeof instanceInfo.uri !== 'string' || typeof instanceInfo.version !== 'string')
             throw new Error('Invalid info object');
     } catch(e) {
-        instance.logError(`Could not get instance info: "${e.message}".`);
-        instance.up = false;
+        if(e.code === 'ETIMEDOUT' && e.event === 'lookup') {
+            // Lookup timeouts are on us, ignore them
+            instance.logWarning(`(ignored) Could not get instance info: "${e.message}".`);
+        } else {
+            instance.logError(`Could not get instance info: "${e.message}".`);
+            instance.up = false;
+        }
+
         await instance.save();
 
         return;
