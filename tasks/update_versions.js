@@ -4,7 +4,7 @@ module.exports = () => {
     const db_instances = DB.get('instances');
     const db_versions = DB.get('versions');
 
-    got('https://api.github.com/repos/tootsuite/mastodon/releases').then(res => {
+    got('https://api.github.com/repositories/52281283/releases').then(res => {
         db_instances.count({up:true}).then((total) => {
             let version_names = [];
 
