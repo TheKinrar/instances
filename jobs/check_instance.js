@@ -47,7 +47,7 @@ async function checkInstance(options) {
             throw new Error('Empty info object');
         }
 
-        if(typeof instanceInfo.uri !== 'string' || typeof instanceInfo.version !== 'string')
+        if(typeof instanceInfo.uri !== 'string' || typeof instanceInfo.version !== 'string' || typeof instanceInfo.thumbnail === 'object')
             throw new Error('Invalid info object');
 
         if(instanceInfo.version.includes('Calckey')) {
