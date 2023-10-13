@@ -53,6 +53,10 @@ async function checkInstance(options) {
         if(instanceInfo.version.includes('Calckey')) {
             throw new Error('Calckey is not supported because its implementation of the Mastodon API is broken');
         }
+
+        if(instanceInfo.version.includes('Firefish')) {
+            throw new Error('Firefish is not supported because its implementation of the Mastodon API is broken');
+        }
     } catch(e) {
         if(e.code === 'ETIMEDOUT' && e.event === 'lookup') {
             // Lookup timeouts are on us, ignore them
